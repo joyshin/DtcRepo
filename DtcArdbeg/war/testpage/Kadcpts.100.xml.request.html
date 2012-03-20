@@ -1,0 +1,190 @@
+
+
+
+
+<html>
+<head>
+    <title></title>
+    <META HTTP-EQUIV=Content-Type CONTENT=text/html; charset=euc-kr>
+    <script type='text/javascript'>
+
+        var sIP_TYPE = '2';
+        var sIP_DATA = '';
+        sIP_DATA += '<table border="0" width="100%" celladding="0" cellspacing="0"><tr>';
+        sIP_DATA += '<td><input type="text" name="ip_text" id="ip_text" value="" style="width:226px;display:none;" disabled>';
+        sIP_DATA += '<select name="ip_select" id="ip_select" style="width:226px; font-size:10pt">';
+
+        sIP_DATA += '<option value="10.141.112.12">10.141.112.12 - vadsearch(LB)</option>';
+
+        sIP_DATA += '<option value="10.141.114.101">10.141.114.101 - adschidx1</option>';
+
+        sIP_DATA += '<option value="10.141.114.102">10.141.114.102 - adschidx2</option>';
+
+        sIP_DATA += '<option value="10.141.114.61">10.141.114.61 - adsearch1</option>';
+
+        sIP_DATA += '<option value="10.141.114.62">10.141.114.62 - adsearch2</option>';
+
+        sIP_DATA += '<option value="10.141.114.63">10.141.114.63 - adsearch3</option>';
+
+        sIP_DATA += '<option value="10.141.114.64">10.141.114.64 - adsearch4</option>';
+
+        sIP_DATA += '<option value="10.141.114.65">10.141.114.65 - adsearch5</option>';
+
+        sIP_DATA += '<option value="10.141.114.66">10.141.114.66 - adsearch6</option>';
+
+        sIP_DATA += '<option value="10.141.15.250">10.141.15.250 - xcschtest20</option>';
+
+        sIP_DATA += '<option value="10.141.2.68">10.141.2.68 - xtotsems08</option>';
+
+        sIP_DATA += '</select></td>';
+        sIP_DATA += '<td><input type="button" value="↔" onclick="javascript:fnCHANGE_IP();"></td>';
+        sIP_DATA += '</table>';
+
+        function fnCHANGE_IP() {
+            var oHIDDEN, oBLOCK;
+            switch(sIP_TYPE) {
+            case '1':
+                oHIDDEN = document.getElementById('ip_text');
+                oBLOCK = document.getElementById('ip_select');
+                sIP_TYPE = '2';
+                break;
+            case '2':
+                oBLOCK = document.getElementById('ip_text');
+                oHIDDEN = document.getElementById('ip_select');
+                sIP_TYPE = '1';
+                break;
+            }
+            oBLOCK.style.display = 'block';
+            oBLOCK.disabled = false;
+            oHIDDEN.style.display = 'none';
+            oHIDDEN.disabled = true;
+        }
+        function fnRESIZE(obj) {
+            switch(obj.value) {
+            case "▼":
+                obj.value = "▲";
+                if (navigator.appName.indexOf("Microsoft")!=-1) {
+                    parent.frame.rows=document.getElementById('tblREQUEST').offsetHeight + 10 + ',*';
+                } else {
+                    parent.document.getElementById('frame').rows=document.getElementById('tblREQUEST').clientHeight + 10 + ',*';
+                }
+                document.location.href='#start';
+                break;
+            case "▲":
+                obj.value = "▼";
+                parent.document.getElementById('frame').rows='30,*';
+                document.location.href='#query';
+                break;
+            }
+            fnRESIZE_EVENT();
+        }
+    </script>
+    <style>
+        a:hover { TEXT-DECORATION:underline; color:"#BF0000"}
+        td {font-size:9pt; LINE-HEIGHT:130%; font-family:Gulim;color:"#000";}
+        textarea {border-width:1;border-color=000000;border-style:solid; font-size:9pt; font-family:"1<82"}
+        select {font-size:9pt; font-family:Gulim}
+        button {font-size:9pt; font-family:Gulim}
+    </style>
+</head>
+<body style="margin-top:0;margin-left:0;" onresize="fnRESIZE_EVENT();" onload="fnRESIZE_EVENT();">
+<form name=frmMain action="response.html" target="response" method="post">
+<table border=0 width=100% height=100%>
+<input type=hidden name=c value="kadcpts/100.xml.ini">
+<input type=hidden name=process value=1>
+<tr><td><a name="start">
+    <table border=1 id=tblREQUEST style="width:350px">
+<tr>
+            <td align=right>Version</td>
+            <td align=left><input type="text" style="" name="REQUEST1" value="100" size=36  title="API 버전" onfocus="select();" onkeydown="javascript:if (event.keyCode == 13) { this.form.submit();this.select(); }"></td>
+        </tr>
+<tr>
+            <td align=right><a name="query">Query</td>
+            <td align=left><input type="text" style="background-color:rgb(255,255,204)" name="REQUEST2" value="꽃배달" size=36  title="검색 문자열 <#QUERY>" onfocus="select();" onkeydown="javascript:if (event.keyCode == 13) { this.form.submit();this.select(); }"></td>
+        </tr>
+<tr>
+            <td align=right>ResultStartPos</td>
+            <td align=left><input type="text" style="" name="REQUEST3" value="1" size=36  title="검색 결과 시작 위치 (base=1) <#STARTCNT1>" onfocus="select();" onkeydown="javascript:if (event.keyCode == 13) { this.form.submit();this.select(); }"></td>
+        </tr>
+<tr>
+            <td align=right>ResultCount</td>
+            <td align=left><input type="text" style="" name="REQUEST4" value="20" size=36  title="검색 결과 요청 개수 <#REQCNT1>" onfocus="select();" onkeydown="javascript:if (event.keyCode == 13) { this.form.submit();this.select(); }"></td>
+        </tr>
+<tr>
+            <td align=right>ClientCode</td>
+            <td align=left><input type="text" style="" name="REQUEST5" value="SA1" size=36  title="검색을 요청한 Client 구분코드" onfocus="select();" onkeydown="javascript:if (event.keyCode == 13) { this.form.submit();this.select(); }"></td>
+        </tr>
+<tr>
+            <td align=right>Referer</td>
+            <td align=left><input type="text" style="" name="REQUEST6" value="DTC" size=36  title="Referer" onfocus="select();" onkeydown="javascript:if (event.keyCode == 13) { this.form.submit();this.select(); }"></td>
+        </tr>
+<tr>
+            <td align=right>QrySrc</td>
+            <td align=left><input type="text" style="" name="REQUEST7" value="sbus" size=36  title="쿼리 출처. box-in, 링크 쿼리 등 구분값." onfocus="select();" onkeydown="javascript:if (event.keyCode == 13) { this.form.submit();this.select(); }"></td>
+        </tr>
+<tr>
+            <td align=right>IsSpam</td>
+            <td align=left><input type="text" style="" name="REQUEST8" value="0" size=36  title="스팸여부" onfocus="select();" onkeydown="javascript:if (event.keyCode == 13) { this.form.submit();this.select(); }"></td>
+        </tr>
+<tr>
+            <td align=right>Adult</td>
+            <td align=left><input type="text" style="" name="REQUEST9" value="0" size=36  title="성인여부 (0=비성인, 1=성인, default=0)" onfocus="select();" onkeydown="javascript:if (event.keyCode == 13) { this.form.submit();this.select(); }"></td>
+        </tr>
+<tr>
+            <td align=right>Seed</td>
+            <td align=left><input type="text" style="" name="REQUEST10" value="0" size=36  title="광고 롤링을 위한 seed값." onfocus="select();" onkeydown="javascript:if (event.keyCode == 13) { this.form.submit();this.select(); }"></td>
+        </tr>
+<tr>
+            <td align=right>SiteCode</td>
+            <td align=left><input type="text" style="" name="REQUEST11" value="T" size=36  title="site구분(출처)" onfocus="select();" onkeydown="javascript:if (event.keyCode == 13) { this.form.submit();this.select(); }"></td>
+        </tr>
+<tr>
+            <td align=right>ASPCode</td>
+            <td align=left><input type="text" style="" name="REQUEST12" value="" size=36  title="asp 업체 코드 ex)a3" onfocus="select();" onkeydown="javascript:if (event.keyCode == 13) { this.form.submit();this.select(); }"></td>
+        </tr>
+<tr>
+            <td align=right>AffiliateCode</td>
+            <td align=left><input type="text" style="" name="REQUEST13" value="" size=36  title="asp affiliate 코드 ex)A300000009" onfocus="select();" onkeydown="javascript:if (event.keyCode == 13) { this.form.submit();this.select(); }"></td>
+        </tr>
+<tr>
+            <td align=right>UserIP</td>
+            <td align=left><input type="text" style="" name="REQUEST14" value="127.0.0.1" size=36  title="사용자 IP" onfocus="select();" onkeydown="javascript:if (event.keyCode == 13) { this.form.submit();this.select(); }"></td>
+        </tr>
+
+    <tr>
+        <td align=right>IP</td>
+        <td align=left><span id="span_ip"></span></td>
+    </tr>
+    <tr>
+        <td align=right>Port</td>
+        <td>
+
+            <input type="text" name="port" value="8091" style="width:250px">
+
+        </td>
+    </tr>
+    </table>
+</td>
+</tr>
+<div id=div_search style="position:absolute"><input type="button" value="검색" style="width:40px;height:30px" onclick="javascript:this.form.submit();"></div>
+<div id=div_btn style="position:absolute;width:100px;">
+    <input type=button value="▲" onclick="fnRESIZE(this);return false;" style="width:40px;height:30px">
+</div>
+</table>
+</form>
+</body>
+
+<script type="text/javascript">
+    parent.document.getElementById('frame').rows=document.getElementById('tblREQUEST').offsetHeight + 3 + ',*';
+    function fnRESIZE_EVENT() {
+        document.getElementById('div_search').style.left=document.getElementById('tblREQUEST').clientWidth + 10;
+        document.getElementById('div_search').style.top=((document.body.clientHeight - 30)/2) + document.body.scrollTop ;   
+
+        document.getElementById('div_btn').style.left=document.body.clientWidth - 50;
+        document.getElementById('div_btn').style.top=((document.body.clientHeight - 30)/2) + document.body.scrollTop ;
+    }
+    document.getElementById('span_ip').innerHTML = sIP_DATA;
+    //document.getElementById('ip_text').disabled = true;
+</script>
+</html>
+

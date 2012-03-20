@@ -1,7 +1,12 @@
 package net.skcomms.dtc.client;
 
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.IFrameElement;
+import com.google.gwt.dom.client.NodeList;
+import com.google.gwt.event.dom.client.LoadEvent;
+import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Window;
@@ -12,38 +17,44 @@ import com.google.gwt.user.client.ui.RootPanel;
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class DtcArdbeg implements EntryPoint {
-    /**
-     * The message displayed to the user when the server cannot be reached or
-     * returns an error.
-     */
-    private static final String SERVER_ERROR = "An error occurred while "
-            + "attempting to contact the server. Please check your network "
-            + "connection and try again.";
 
-    /**
-     * Create a remote service proxy to talk to the server-side Greeting
-     * service.
-     */
-    private final GreetingServiceAsync greetingService = GWT.create(GreetingService.class);
+	private final static String DTC_HOME_URL = "http://127.0.0.1:8888/testpage/DtcList.html";
 
-    /**
-     * This is the entry point method.
-     */
-    @Override
-    public void onModuleLoad() {
-        final Frame frame = new Frame();
-        frame.setPixelSize(Window.getClientWidth() - 30, Window.getClientHeight() - 200);
-        frame.setUrl("http://dtc.skcomms.net");
-        RootPanel.get("dtcContainer").add(frame);
+	@Override
+	public void onModuleLoad() {
+		final Frame frame = new Frame();
+		frame.setPixelSize(Window.getClientWidth() - 30,
+				Window.getClientHeight() - 120);
+		frame.setUrl(DtcArdbeg.DTC_HOME_URL);
+		frame.addLoadHandler(new LoadHandler() {
+			@Override
+			public void onLoad(LoadEvent event) {
+				Document doc = IFrameElement.as(frame.getElement())
+						.getContentDocument();
 
-        Window.addResizeHandler(new ResizeHandler() {
+				if (doc.getURL().equals(DtcArdbeg.DTC_HOME_URL)) {
+					DtcArdbeg.removeComaparePageAnchor(doc);
+				}
+			}
 
-            @Override
-            public void onResize(ResizeEvent event) {
-                frame.setPixelSize(Window.getClientWidth() - 30, Window.getClientHeight() - 200);
-            }
+		});
 
-        });
+		RootPanel.get("dtcContainer").add(frame);
 
-    }
+		Window.addResizeHandler(new ResizeHandler() {
+			@Override
+			public void onResize(ResizeEvent event) {
+				frame.setPixelSize(Window.getClientWidth() - 30,
+						Window.getClientHeight() - 200);
+			}
+		});
+
+	}
+
+	private static void removeComaparePageAnchor(Document doc) {
+		NodeList<Element> nodes = doc.getElementsByTagName("a");
+		Element anchor = nodes.getItem(0);
+		anchor.getParentElement().removeChild(anchor);
+	}
+
 }
