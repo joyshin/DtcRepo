@@ -5,11 +5,14 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.IFrameElement;
 import com.google.gwt.dom.client.NodeList;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.RootPanel;
 
@@ -19,36 +22,55 @@ import com.google.gwt.user.client.ui.RootPanel;
 public class DtcArdbeg implements EntryPoint {
 
 	private final static String DTC_HOME_URL = "http://127.0.0.1:8888/testpage/DtcList.html";
+	private final Frame frame = new Frame();
 
 	@Override
 	public void onModuleLoad() {
-		final Frame frame = new Frame();
-		frame.setPixelSize(Window.getClientWidth() - 30,
+		this.initializeDtcFrame();
+
+		this.initializeNavigationBar();
+
+	}
+
+	private void initializeNavigationBar() {
+		Anchor navi = new Anchor("Home");
+
+		navi.getElement().addClassName("navi-bar");
+
+		navi.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				DtcArdbeg.this.frame.setUrl(DtcArdbeg.DTC_HOME_URL);
+			}
+		});
+		RootPanel.get("naviBarContainer").add(navi);
+	}
+
+	private void initializeDtcFrame() {
+		this.frame.setPixelSize(Window.getClientWidth() - 30,
 				Window.getClientHeight() - 120);
-		frame.setUrl(DtcArdbeg.DTC_HOME_URL);
-		frame.addLoadHandler(new LoadHandler() {
+		this.frame.setUrl(DtcArdbeg.DTC_HOME_URL);
+		this.frame.addLoadHandler(new LoadHandler() {
 			@Override
 			public void onLoad(LoadEvent event) {
-				Document doc = IFrameElement.as(frame.getElement())
-						.getContentDocument();
+				Document doc = IFrameElement.as(
+						DtcArdbeg.this.frame.getElement()).getContentDocument();
 
 				if (doc.getURL().equals(DtcArdbeg.DTC_HOME_URL)) {
 					DtcArdbeg.removeComaparePageAnchor(doc);
 				}
 			}
-
 		});
 
-		RootPanel.get("dtcContainer").add(frame);
+		RootPanel.get("dtcContainer").add(this.frame);
 
 		Window.addResizeHandler(new ResizeHandler() {
 			@Override
 			public void onResize(ResizeEvent event) {
-				frame.setPixelSize(Window.getClientWidth() - 30,
+				DtcArdbeg.this.frame.setPixelSize(Window.getClientWidth() - 30,
 						Window.getClientHeight() - 200);
 			}
 		});
-
 	}
 
 	private static void removeComaparePageAnchor(Document doc) {

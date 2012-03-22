@@ -31,6 +31,11 @@ h1 {
 	margin: 15px 6px 6px;
 }
 
+a.navi-bar {
+	font-size: 16px;
+	height: 200px;
+}
+
 div#dtcContainer iframe {
 	/* 영화 "인터뷰" 포스터 */
 	background-image:url('http://cfs3.tistory.com/upload_control/download.blog?fhandle=YmxvZzEwNjk0NEBmczMudGlzdG9yeS5jb206L2F0dGFjaC8wLzAuanBn');
