@@ -17,6 +17,7 @@ import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Frame;
@@ -32,6 +33,7 @@ public class DtcArdbeg implements EntryPoint {
 	// private final static String DTC_HOME_URL =
 	// "http://127.0.0.1:8888/testpage/DtcList.html";
 	private final static String DTC_HOME_URL = "http://dtc.skcomms.net/";
+
 	private final Frame frame = new Frame();
 
 	@Override
@@ -40,6 +42,21 @@ public class DtcArdbeg implements EntryPoint {
 
 		this.initializeNavigationBar();
 
+	}
+
+	/**
+	 * 
+	 */
+	private void loadCookies() {
+		String cookieValue = Cookies.getCookie("visit");
+		int visitCount = 0;
+		if (cookieValue == null) {
+			visitCount = 1;
+		} else {
+			visitCount = Integer.parseInt(cookieValue) + 1;
+		}
+		Cookies.setCookie("visit", Integer.toString(visitCount));
+		Window.alert("You visit here " + visitCount + " times.");
 	}
 
 	private void initializeNavigationBar() {
@@ -86,6 +103,7 @@ public class DtcArdbeg implements EntryPoint {
 
 					DtcArdbeg.this.sortServices();
 				}
+
 			}
 		});
 
