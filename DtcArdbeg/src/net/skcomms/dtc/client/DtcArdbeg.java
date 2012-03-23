@@ -175,7 +175,9 @@ public class DtcArdbeg implements EntryPoint {
 			}
 		});
 
-		sortedBody.appendChild(tbody.getFirstChild().cloneNode(true));
+		if (!rows.isEmpty() && rows.get(0).key > 0) {
+			sortedBody.appendChild(tbody.getFirstChild().cloneNode(true));
+		}
 
 		int prevScore = 1;
 		for (Pair<Integer, Node> pair : rows) {
@@ -190,9 +192,11 @@ public class DtcArdbeg implements EntryPoint {
 	}
 
 	private static void removeComaparePageAnchor(Document doc) {
-		NodeList<Element> nodes = doc.getElementsByTagName("a");
-		Element anchor = nodes.getItem(0);
-		anchor.getParentElement().removeChild(anchor);
+		Node anchor = doc.getBody().getChild(0);
+		doc.getBody().removeChild(anchor);
+
+		Node br = doc.getBody().getChild(0);
+		doc.getBody().removeChild(br);
 	}
 
 }
