@@ -17,7 +17,6 @@ import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
-import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Frame;
@@ -41,22 +40,6 @@ public class DtcArdbeg implements EntryPoint {
     this.initializeDtcFrame();
 
     this.initializeNavigationBar();
-
-  }
-
-  /**
-	 * 
-	 */
-  private void loadCookies() {
-    String cookieValue = Cookies.getCookie("visit");
-    int visitCount = 0;
-    if (cookieValue == null) {
-      visitCount = 1;
-    } else {
-      visitCount = Integer.parseInt(cookieValue) + 1;
-    }
-    Cookies.setCookie("visit", Integer.toString(visitCount));
-    Window.alert("You visit here " + visitCount + " times.");
   }
 
   private void initializeNavigationBar() {
@@ -150,21 +133,33 @@ public class DtcArdbeg implements EntryPoint {
     }
 
     List<Pair<Integer, Node>> rows = new ArrayList<Pair<Integer, Node>>();
-    for (int i = 2; i < tbody.getChildCount(); i += 2) {
-      Node node = tbody.getChild(i);
-      String name;
-      if (node.getChild(1).getChild(0).getNodeType() == Node.TEXT_NODE) {
-        name = node.getChild(1).getChild(1).getChild(0).getNodeValue();
-      } else {
-        name = node.getChild(1).getChild(0).getChild(0).getNodeValue();
+    for (int i = 1; i < tbody.getChildCount(); i++) {
+      Node row = tbody.getChild(i);
+
+      // 브라우저에 따라 white space로 구성된 텍스트 노드가 반환되는 경우가 있음.
+      if (row.getChildCount() == 0) {
+        continue;
       }
+
+      String name;
+      if (row.getChild(0).getNodeType() == Node.ELEMENT_NODE) { // IE8, 7
+        name = row.getChild(0).getChild(0).getChild(0).getNodeValue();
+      } else {
+        if (row.getChild(1).getChild(0).getNodeType() == Node.ELEMENT_NODE) { // dtc.ini
+          name = row.getChild(1).getChild(0).getChild(0).getNodeValue();
+        }
+        else {
+          name = row.getChild(1).getChild(1).getChild(0).getNodeValue();
+        }
+      }
+
       Integer score = DtcArdbeg.serviceDao.getVisitCount(name);
       if (score == 0) {
-        Element.as(node).setAttribute("style", "color:gray;");
+        Element.as(row).setAttribute("style", "color:gray;");
       } else {
-        Element.as(node).setAttribute("style", "font-weight:bold;");
+        Element.as(row).setAttribute("style", "font-weight:bold;");
       }
-      rows.add(new Pair<Integer, Node>(score, node));
+      rows.add(new Pair<Integer, Node>(score, row));
     }
 
     Collections.sort(rows, new Comparator<Pair<Integer, Node>>() {
