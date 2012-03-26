@@ -10,38 +10,38 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
  */
 @SuppressWarnings("serial")
 public class GreetingServiceImpl extends RemoteServiceServlet implements
-		GreetingService {
+    GreetingService {
 
-	@Override
-	public String greetServer(String input) throws IllegalArgumentException {
-		if (!FieldVerifier.isValidName(input)) {
-			throw new IllegalArgumentException(
-					"Name must be at least 4 characters long");
-		}
+  @Override
+  public String greetServer(String input) throws IllegalArgumentException {
+    if (!FieldVerifier.isValidName(input)) {
+      throw new IllegalArgumentException(
+          "Name must be at least 4 characters long");
+    }
 
-		String serverInfo = this.getServletContext().getServerInfo();
-		String userAgent = this.getThreadLocalRequest().getHeader("User-Agent");
+    String serverInfo = this.getServletContext().getServerInfo();
+    String userAgent = this.getThreadLocalRequest().getHeader("User-Agent");
 
-		input = this.escapeHtml(input);
-		userAgent = this.escapeHtml(userAgent);
+    input = this.escapeHtml(input);
+    userAgent = this.escapeHtml(userAgent);
 
-		return "Hello, " + input + "!<br><br>I am running " + serverInfo
-				+ ".<br><br>It looks like you are using:<br>" + userAgent;
-	}
+    return "Hello, " + input + "!<br><br>I am running " + serverInfo
+        + ".<br><br>It looks like you are using:<br>" + userAgent;
+  }
 
-	/**
-	 * Escape an html string. Escaping data received from the client helps to
-	 * prevent cross-site script vulnerabilities.
-	 * 
-	 * @param html
-	 *            the html string to escape
-	 * @return the escaped string
-	 */
-	private String escapeHtml(String html) {
-		if (html == null) {
-			return null;
-		}
-		return html.replaceAll("&", "&amp;").replaceAll("<", "&lt;")
-				.replaceAll(">", "&gt;");
-	}
+  /**
+   * Escape an html string. Escaping data received from the client helps to
+   * prevent cross-site script vulnerabilities.
+   * 
+   * @param html
+   *          the html string to escape
+   * @return the escaped string
+   */
+  private String escapeHtml(String html) {
+    if (html == null) {
+      return null;
+    }
+    return html.replaceAll("&", "&amp;").replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
+  }
 }

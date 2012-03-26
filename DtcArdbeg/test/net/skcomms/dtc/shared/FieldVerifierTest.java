@@ -12,10 +12,10 @@ import org.junit.Test;
  */
 public class FieldVerifierTest {
 
-    @Test
-    public void test() {
-        Assert.assertFalse(FieldVerifier.isValidName("kim"));
-        Assert.assertTrue(FieldVerifier.isValidName("sccu"));
-    }
+  @Test
+  public void test() {
+    Assert.assertFalse(FieldVerifier.isValidName("kim"));
+    Assert.assertTrue(FieldVerifier.isValidName("sccu"));
+  }
 
 }
