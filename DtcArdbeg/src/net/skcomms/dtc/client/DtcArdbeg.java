@@ -10,7 +10,6 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.IFrameElement;
 import com.google.gwt.dom.client.Node;
-import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.LoadEvent;
@@ -109,8 +108,6 @@ public class DtcArdbeg implements EntryPoint {
         .getContentDocument();
     Element tbody = doc.getElementsByTagName("tbody").getItem(0);
     Element sortedBody = doc.createElement("tbody");
-    NodeList<Node> children = tbody.getChildNodes();
-    Node header = children.getItem(2);
 
     // 单捞磐 青 立辟规过
     // Window.alert(header.getChild(1).getChild(0).getChild(0).getNodeValue());
@@ -120,9 +117,6 @@ public class DtcArdbeg implements EntryPoint {
        * @param name
        * @param node
        */
-      public Pair() {
-      }
-
       public Pair(K key, V value) {
         this.key = key;
         this.value = value;
@@ -156,8 +150,6 @@ public class DtcArdbeg implements EntryPoint {
       Integer score = DtcArdbeg.serviceDao.getVisitCount(name);
       if (score == 0) {
         Element.as(row).setAttribute("style", "color:gray;");
-      } else {
-        Element.as(row).setAttribute("style", "font-weight:bold;");
       }
       rows.add(new Pair<Integer, Node>(score, row));
     }
