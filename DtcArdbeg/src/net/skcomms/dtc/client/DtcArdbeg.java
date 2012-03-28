@@ -78,8 +78,10 @@ public class DtcArdbeg implements EntryPoint {
 	protected void addPathToNavigationBar(String[] pathArray,
 			String currentUrl) {
 		// TODO Auto-generated method stub
-		int valueStartIndex = currentUrl.lastIndexOf("?");
-		String addressSource = currentUrl.substring(0,valueStartIndex+1);
+		//int valueStartIndex = currentUrl.lastIndexOf("?");
+		//String addressSource = currentUrl.substring(0,valueStartIndex+1);
+		String addressSource = new String(DTC_HOME_URL);
+		addressSource = addressSource.concat("?");
 
 		navPanel.clear();
 		addCurrentAnchorToNavigationBar("Home",DTC_HOME_URL);
