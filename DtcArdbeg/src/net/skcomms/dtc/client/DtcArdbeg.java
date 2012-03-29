@@ -11,14 +11,11 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.IFrameElement;
 import com.google.gwt.dom.client.LinkElement;
 import com.google.gwt.dom.client.Node;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.RootPanel;
 
@@ -41,31 +38,18 @@ public class DtcArdbeg implements EntryPoint {
     V value;
   }
 
-  private final static String DTC_HOME_URL = "http://127.0.0.1:8888/testpage/DtcList.html";
-  // private final static String DTC_HOME_URL = "http://dtc.skcomms.net/";
-
+  private final static String DTC_HOME_URL = "http://dtc.skcomms.net/";
+  // private final static String DTC_HOME_URL =
+  // "http://127.0.0.1:8888/testpage/DtcList.html";
   private final static ServiceDao serviceDao = new ServiceDao();
 
-  private final static Frame dtcFrame = new Frame();
+  final static Frame dtcFrame = new Frame();
+  private DtcNavigationBar navigationBar = new DtcNavigationBar(DtcArdbeg.DTC_HOME_URL);
 
   @Override
   public void onModuleLoad() {
     this.initializeDtcFrame();
-    this.initializeNavigationBar();
-  }
-
-  private void initializeNavigationBar() {
-    Anchor navi = new Anchor("Home");
-
-    navi.getElement().addClassName("navi-bar");
-
-    navi.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        DtcArdbeg.dtcFrame.setUrl(DtcArdbeg.DTC_HOME_URL);
-      }
-    });
-    RootPanel.get("naviBarContainer").add(navi);
+    this.navigationBar.initialize();
   }
 
   private void initializeDtcFrame() {
@@ -83,8 +67,10 @@ public class DtcArdbeg implements EntryPoint {
           return;
         }
 
+        DtcArdbeg.this.onLoadDtcFrame(doc);
+
         if (doc.getURL().equals(DtcArdbeg.DTC_HOME_URL)) {
-          DtcArdbeg.onLoadDtcHomePage(doc);
+          DtcArdbeg.this.onLoadDtcHomePage(doc);
         }
 
         int index = doc.getURL().indexOf("?b=");
@@ -93,7 +79,6 @@ public class DtcArdbeg implements EntryPoint {
               .replaceAll("/", "");
           DtcArdbeg.onLoadDtcServiceDirectoryPage(doc, serviceName);
         }
-
       }
     });
 
@@ -106,6 +91,17 @@ public class DtcArdbeg implements EntryPoint {
             Window.getClientHeight() - 200);
       }
     });
+  }
+
+  /**
+   * @param doc
+   */
+  private void onLoadDtcFrame(Document doc) {
+    this.updateNavigationBar(doc);
+  }
+
+  private void updateNavigationBar(Document doc) {
+    this.navigationBar.addPath(doc.getURL());
   }
 
   /**
@@ -123,46 +119,46 @@ public class DtcArdbeg implements EntryPoint {
    * @param doc
    * 
    */
-  protected static void onLoadDtcHomePage(Document doc) {
-    DtcArdbeg.addCssIntoDtcFrame(doc);
+  void onLoadDtcHomePage(Document doc) {
+    this.addCssIntoDtcFrame(doc);
 
-    DtcArdbeg.removeComaparePageAnchor(doc);
+    this.removeComaparePageAnchor(doc);
 
-    DtcArdbeg.sortServices();
+    this.sortServices();
 
   }
 
   /**
    * @param doc
    */
-  protected static void addCssIntoDtcFrame(Document doc) {
+  void addCssIntoDtcFrame(Document doc) {
     LinkElement link = doc.createLinkElement();
     link.setType("text/css");
     link.setAttribute("rel", "stylesheet");
-    link.setAttribute("href", "/DtcFrame.css");
+    link.setAttribute("href", Document.get().getURL() + "DtcFrame.css");
     doc.getBody().appendChild(link);
   }
 
   /**
 	 * 
 	 */
-  private static void sortServices() {
+  void sortServices() {
     Document doc = IFrameElement.as(DtcArdbeg.dtcFrame.getElement()).getContentDocument();
     Element oldTableBody = doc.getElementsByTagName("tbody").getItem(0);
 
     List<Pair<Integer, Node>> rows = DtcArdbeg.extractServiceList(oldTableBody);
     DtcArdbeg.sortServicesByVisitCount(rows);
-    DtcArdbeg.applyStylesToServiceRows(rows);
-    Element sortedBody = DtcArdbeg.createSortedTableBody(doc, rows);
+    this.applyStylesToServiceRows(rows);
+    Element sortedBody = this.createSortedTableBody(doc, rows);
 
     oldTableBody.getParentNode().replaceChild(sortedBody, oldTableBody);
   }
 
-  private static Element createSortedTableBody(Document doc, List<Pair<Integer, Node>> rows) {
+  private Element createSortedTableBody(Document doc, List<Pair<Integer, Node>> rows) {
     Element newTableBody = doc.createElement("tbody");
     Element oldTableBody = doc.getElementsByTagName("tbody").getItem(0);
 
-    if (DtcArdbeg.hasVisitedService(rows)) {
+    if (this.hasVisitedService(rows)) {
       newTableBody.appendChild(oldTableBody.getFirstChild().cloneNode(true));
     }
 
@@ -215,7 +211,7 @@ public class DtcArdbeg implements EntryPoint {
     return rows;
   }
 
-  private static void applyStylesToServiceRows(List<Pair<Integer, Node>> rows) {
+  private void applyStylesToServiceRows(List<Pair<Integer, Node>> rows) {
     for (Pair<Integer, Node> pair : rows) {
       if (pair.key == 0) {
         Element.as(pair.value).setAttribute("style", "color:gray; ");
@@ -223,11 +219,11 @@ public class DtcArdbeg implements EntryPoint {
     }
   }
 
-  private static boolean hasVisitedService(List<Pair<Integer, Node>> rows) {
+  private boolean hasVisitedService(List<Pair<Integer, Node>> rows) {
     return !rows.isEmpty() && rows.get(0).key > 0;
   }
 
-  private static void removeComaparePageAnchor(Document doc) {
+  private void removeComaparePageAnchor(Document doc) {
     Node anchor = doc.getBody().getChild(0);
     doc.getBody().removeChild(anchor);
 
