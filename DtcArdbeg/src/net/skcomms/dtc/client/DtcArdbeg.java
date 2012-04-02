@@ -38,9 +38,8 @@ public class DtcArdbeg implements EntryPoint {
     V value;
   }
 
-  private final static String DTC_HOME_URL = "http://dtc.skcomms.net/";
-  // private final static String DTC_HOME_URL =
-  // "http://127.0.0.1:8888/testpage/DtcList.html";
+  // private final static String DTC_HOME_URL = "http://dtc.skcomms.net/";
+  private final static String DTC_HOME_URL = "http://127.0.0.1:8888/dtcproxy/";
   private final static ServiceDao serviceDao = new ServiceDao();
 
   final static Frame dtcFrame = new Frame();
@@ -54,7 +53,7 @@ public class DtcArdbeg implements EntryPoint {
 
   private void initializeDtcFrame() {
     DtcArdbeg.dtcFrame.setPixelSize(Window.getClientWidth() - 30,
-        Window.getClientHeight() - 125);
+        Window.getClientHeight() - 135);
     DtcArdbeg.dtcFrame.setUrl(DtcArdbeg.DTC_HOME_URL);
 
     DtcArdbeg.dtcFrame.addLoadHandler(new LoadHandler() {
@@ -124,7 +123,7 @@ public class DtcArdbeg implements EntryPoint {
 
     this.removeComaparePageAnchor(doc);
 
-    this.sortServices();
+    // this.sortServices();
 
   }
 
