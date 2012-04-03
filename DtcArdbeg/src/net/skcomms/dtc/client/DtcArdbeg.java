@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.IFrameElement;
@@ -55,7 +57,13 @@ public class DtcArdbeg implements EntryPoint {
   private void initializeDtcFrame() {
     DtcArdbeg.dtcFrame.setPixelSize(Window.getClientWidth() - 30,
         Window.getClientHeight() - 125);
-    DtcArdbeg.dtcFrame.setUrl(DtcArdbeg.DTC_HOME_URL);
+
+    // param 값을 보내기
+    // setPrameter(Map<String, List<String>)
+    String dtcUrl = createNewDtcUrl();
+    DtcArdbeg.dtcFrame.setUrl(dtcUrl);
+
+    GWT.log("url => " + dtcUrl);
 
     DtcArdbeg.dtcFrame.addLoadHandler(new LoadHandler() {
       @Override
@@ -91,6 +99,26 @@ public class DtcArdbeg implements EntryPoint {
             Window.getClientHeight() - 200);
       }
     });
+  }
+
+  private static String createNewDtcUrl() {
+    String newUrl = "";
+    List<String> value = null;
+
+    Map<String, List<String>> param = Window.Location.getParameterMap();
+    if ((value = param.get("b")) != null) {
+      newUrl = DtcArdbeg.DTC_HOME_URL + "?b=" + value.get(0);
+      // value.remove(0);
+      // param.remove("b");
+    } else if ((value = param.get("c")) != null) {
+      newUrl = DtcArdbeg.DTC_HOME_URL + "?c=" + value.get(0);
+      // value.remove(0);
+      // param.remove("c");
+    } else {
+      newUrl = DtcArdbeg.DTC_HOME_URL;
+    }
+
+    return newUrl;
   }
 
   /**
