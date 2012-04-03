@@ -101,6 +101,13 @@ public class DtcArdbeg implements EntryPoint {
     });
   }
 
+  /*
+   * http://dtc.skcomms.net/shin/?c=kbook2s/old/100h.ini&Query=²É reqDoc =
+   * document
+   * .getElementsByTagName("iframe")[1].contentDocument.getElementsByTagName
+   * ("frame")[0].contentDocument query = reqDoc.forms[0].REQUEST2.value = ²É
+   */
+
   private static String createNewDtcUrl() {
     String newUrl = "";
     List<String> value = null;
