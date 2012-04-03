@@ -22,12 +22,15 @@
 			<param-name>hello</param-name>
 			<param-value>jsp</param-value>
 		</init-param>
+		<init-param>
+            <param-name>trimSpaces</param-name>
+            <param-value>true</param-value>
+        </init-param>        
 	</servlet>
 
 	<servlet-mapping>
 		<servlet-name>dtcProxyServlet</servlet-name>
 		<url-pattern>/dtcproxy/*</url-pattern>
-        <url-pattern>/dtcproxy/response_xml.html</url-pattern>
 	</servlet-mapping>
 
 	<!-- Default page to serve -->

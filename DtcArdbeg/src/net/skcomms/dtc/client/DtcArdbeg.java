@@ -38,29 +38,30 @@ public class DtcArdbeg implements EntryPoint {
     V value;
   }
 
-  // private final static String DTC_HOME_URL = "http://dtc.skcomms.net/";
-  private final static String DTC_HOME_URL = "http://127.0.0.1:8888/dtcproxy/";
+  private final static String DTC_HOME_URL = "http://dtc.skcomms.net/";
+  // private final static String DTC_HOME_URL =
+  // "http://127.0.0.1:8888/dtcproxy/";
   private final static ServiceDao serviceDao = new ServiceDao();
 
-  final static Frame dtcFrame = new Frame();
+  final Frame dtcFrame = new Frame();
   private DtcNavigationBar navigationBar = new DtcNavigationBar(DtcArdbeg.DTC_HOME_URL);
 
   @Override
   public void onModuleLoad() {
     this.initializeDtcFrame();
-    this.navigationBar.initialize();
+    this.navigationBar.initialize(this);
   }
 
   private void initializeDtcFrame() {
-    DtcArdbeg.dtcFrame.setPixelSize(Window.getClientWidth() - 30,
+    this.dtcFrame.setPixelSize(Window.getClientWidth() - 30,
         Window.getClientHeight() - 135);
-    DtcArdbeg.dtcFrame.setUrl(DtcArdbeg.DTC_HOME_URL);
+    this.dtcFrame.setUrl(DtcArdbeg.DTC_HOME_URL);
 
-    DtcArdbeg.dtcFrame.addLoadHandler(new LoadHandler() {
+    this.dtcFrame.addLoadHandler(new LoadHandler() {
       @Override
       public void onLoad(LoadEvent event) {
         Document doc = IFrameElement.as(
-            DtcArdbeg.dtcFrame.getElement()).getContentDocument();
+            DtcArdbeg.this.dtcFrame.getElement()).getContentDocument();
 
         if (doc == null) {
           return;
@@ -76,17 +77,17 @@ public class DtcArdbeg implements EntryPoint {
         if (index != -1) {
           String serviceName = doc.getURL().substring(index + 3)
               .replaceAll("/", "");
-          DtcArdbeg.onLoadDtcServiceDirectoryPage(doc, serviceName);
+          DtcArdbeg.this.onLoadDtcServiceDirectoryPage(doc, serviceName);
         }
       }
     });
 
-    RootPanel.get("dtcContainer").add(DtcArdbeg.dtcFrame);
+    RootPanel.get("dtcContainer").add(this.dtcFrame);
 
     Window.addResizeHandler(new ResizeHandler() {
       @Override
       public void onResize(ResizeEvent event) {
-        DtcArdbeg.dtcFrame.setPixelSize(Window.getClientWidth() - 30,
+        DtcArdbeg.this.dtcFrame.setPixelSize(Window.getClientWidth() - 30,
             Window.getClientHeight() - 200);
       }
     });
@@ -107,7 +108,7 @@ public class DtcArdbeg implements EntryPoint {
    * @param doc
    * @param serviceName
    */
-  protected static void onLoadDtcServiceDirectoryPage(Document doc, String serviceName) {
+  private void onLoadDtcServiceDirectoryPage(Document doc, String serviceName) {
     // TODO 서비스 선택 판정을 링크 클릭으로 변경해야 함.
     if (doc.getReferrer().equals(DtcArdbeg.DTC_HOME_URL)) {
       DtcArdbeg.serviceDao.addVisitCount(serviceName);
@@ -120,11 +121,8 @@ public class DtcArdbeg implements EntryPoint {
    */
   void onLoadDtcHomePage(Document doc) {
     this.addCssIntoDtcFrame(doc);
-
     this.removeComaparePageAnchor(doc);
-
-    // this.sortServices();
-
+    this.sortServices();
   }
 
   /**
@@ -134,7 +132,10 @@ public class DtcArdbeg implements EntryPoint {
     LinkElement link = doc.createLinkElement();
     link.setType("text/css");
     link.setAttribute("rel", "stylesheet");
-    link.setAttribute("href", Document.get().getURL() + "DtcFrame.css");
+
+    int index = Document.get().getURL().lastIndexOf('/');
+    String path = Document.get().getURL().substring(0, index + 1);
+    link.setAttribute("href", path + "DtcFrame.css");
     doc.getBody().appendChild(link);
   }
 
@@ -142,7 +143,7 @@ public class DtcArdbeg implements EntryPoint {
 	 * 
 	 */
   void sortServices() {
-    Document doc = IFrameElement.as(DtcArdbeg.dtcFrame.getElement()).getContentDocument();
+    Document doc = IFrameElement.as(this.dtcFrame.getElement()).getContentDocument();
     Element oldTableBody = doc.getElementsByTagName("tbody").getItem(0);
 
     List<Pair<Integer, Node>> rows = DtcArdbeg.extractServiceList(oldTableBody);
@@ -228,6 +229,19 @@ public class DtcArdbeg implements EntryPoint {
 
     Node br = doc.getBody().getChild(0);
     doc.getBody().removeChild(br);
+
+    Node currentDirectoryMessage = doc.getBody().getChild(0);
+    doc.getBody().removeChild(currentDirectoryMessage);
+
+    br = doc.getBody().getChild(0);
+    doc.getBody().removeChild(br);
+  }
+
+  /**
+   * @param href
+   */
+  public void setDtcFrameUrl(String href) {
+    this.dtcFrame.setUrl(href);
   }
 
 }
