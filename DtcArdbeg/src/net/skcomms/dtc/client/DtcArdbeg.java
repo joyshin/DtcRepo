@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.IFrameElement;
@@ -40,7 +41,14 @@ public class DtcArdbeg implements EntryPoint {
 
   private final static String BASE_URL;
   static {
-    int index = Document.get().getURL().lastIndexOf('/');
+    int queryStringStart = Document.get().getURL().lastIndexOf('?');
+    int index;
+    if (queryStringStart == -1) {
+      index = Document.get().getURL().lastIndexOf('/');
+    }
+    else {
+      index = Document.get().getURL().lastIndexOf('/', queryStringStart);
+    }
     BASE_URL = Document.get().getURL().substring(0, index + 1);
   }
   private final static String DTC_HOME_URL = DtcArdbeg.BASE_URL + "_dtcproxy_/";
@@ -48,7 +56,7 @@ public class DtcArdbeg implements EntryPoint {
   private static ServiceDao serviceDao = new ServiceDao();
 
   private final Frame dtcFrame = new Frame();
-  private DtcNavigationBar navigationBar = new DtcNavigationBar(DtcArdbeg.DTC_HOME_URL);
+  private final DtcNavigationBar navigationBar = new DtcNavigationBar(DtcArdbeg.DTC_HOME_URL);
 
   public static String getBaseUrl() {
     return DtcArdbeg.BASE_URL;
@@ -61,9 +69,11 @@ public class DtcArdbeg implements EntryPoint {
   }
 
   private void initializeDtcFrame() {
-    this.dtcFrame.setPixelSize(Window.getClientWidth() - 30,
-        Window.getClientHeight() - 135);
-    this.dtcFrame.setUrl(DtcArdbeg.DTC_HOME_URL);
+    this.dtcFrame.setPixelSize(Window.getClientWidth() - 30, Window.getClientHeight() - 135);
+
+    String dtcUrl = DtcArdbeg.createNewDtcUrl();
+    this.dtcFrame.setUrl(dtcUrl);
+    GWT.log("url => " + dtcUrl);
 
     this.dtcFrame.addLoadHandler(new LoadHandler() {
       @Override
@@ -87,6 +97,12 @@ public class DtcArdbeg implements EntryPoint {
               .replaceAll("/", "");
           DtcArdbeg.this.onLoadDtcServiceDirectoryPage(doc, serviceName);
         }
+
+        index = doc.getURL().indexOf("?c=");
+        if (index != -1) {
+          DtcArdbeg.this.onLoadDtcTestPage();
+        }
+
       }
     });
 
@@ -99,6 +115,31 @@ public class DtcArdbeg implements EntryPoint {
             Window.getClientHeight() - 200);
       }
     });
+  }
+
+  /*
+   * http://dtc.skcomms.net/shin/?c=kbook2s/old/100h.ini&Query=꽃 reqDoc =
+   * document
+   * .getElementsByTagName("iframe")[1].contentDocument.getElementsByTagName
+   * ("frame")[0].contentDocument query = reqDoc.forms[0].REQUEST2.value = 꽃
+   */
+
+  protected void onLoadDtcTestPage() {
+    RequestParameterSetter.execute();
+  }
+
+  private static String createNewDtcUrl() {
+    String newUrl = "";
+
+    if (Window.Location.getParameter("b") != null) {
+      newUrl = DtcArdbeg.DTC_HOME_URL + "?b=" + Window.Location.getParameter("b");
+    } else if (Window.Location.getParameter("c") != null) {
+      newUrl = DtcArdbeg.DTC_HOME_URL + "?c=" + Window.Location.getParameter("c");
+    } else {
+      newUrl = DtcArdbeg.DTC_HOME_URL;
+    }
+
+    return newUrl;
   }
 
   /**
@@ -117,7 +158,6 @@ public class DtcArdbeg implements EntryPoint {
    * @param serviceName
    */
   private void onLoadDtcServiceDirectoryPage(Document doc, String serviceName) {
-    // TODO 서비스 선택 판정을 링크 클릭으로 변경해야 함.
     if (doc.getReferrer().equals(DtcArdbeg.DTC_HOME_URL)) {
       DtcArdbeg.serviceDao.addVisitCount(serviceName);
     }
