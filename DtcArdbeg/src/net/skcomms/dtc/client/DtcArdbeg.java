@@ -48,37 +48,49 @@ public class DtcArdbeg implements EntryPoint {
     V value;
   }
 
-  // private final static String DTC_HOME_URL = "http://dtc.skcomms.net/";
-  private final static String DTC_HOME_URL =
-      "http://127.0.0.1:8888/testpage/DtcList.html";
-  private final static ServiceDao serviceDao = new ServiceDao();
+  // <<<<<<< HEAD
+  // // private final static String DTC_HOME_URL = "http://dtc.skcomms.net/";
+  // private final static String DTC_HOME_URL =
+  // "http://127.0.0.1:8888/testpage/DtcList.html";
+  // private final static ServiceDao serviceDao = new ServiceDao();
+  // =======
+  private final static String BASE_URL;
+  static {
+    int index = Document.get().getURL().lastIndexOf('/');
+    BASE_URL = Document.get().getURL().substring(0, index + 1);
+  }
+  private final static String DTC_HOME_URL = DtcArdbeg.BASE_URL + "_dtcproxy_/";
+  // >>>>>>> refs/remotes/origin_clone/master
 
-  final static Frame dtcFrame = new Frame();
-  private DtcNavigationBar navigationBar = new DtcNavigationBar(DtcArdbeg.DTC_HOME_URL);
+  private static ServiceDao serviceDao = new ServiceDao();
+
+  private final Frame dtcFrame = new Frame();
+  private final DtcNavigationBar navigationBar = new DtcNavigationBar(DtcArdbeg.DTC_HOME_URL);
+
+  public static String getBaseUrl() {
+    return DtcArdbeg.BASE_URL;
+  }
 
   @Override
   public void onModuleLoad() {
     this.initializeDtcFrame();
-    this.navigationBar.initialize();
+    this.navigationBar.initialize(this);
   }
 
   private void initializeDtcFrame() {
-    DtcArdbeg.dtcFrame.setPixelSize(Window.getClientWidth() - 30,
-        Window.getClientHeight() - 125);
 
-    // param 값을 보내기
-    // setPrameter(Map<String, List<String>)
+    this.dtcFrame.setPixelSize(Window.getClientWidth() - 30, Window.getClientHeight() - 135);
+
     String dtcUrl = createNewDtcUrl();
-    // DtcArdbeg.dtcFrame.setUrl(dtcUrl);
-    DtcArdbeg.dtcFrame.setUrl(DTC_HOME_URL);
-
+    this.dtcFrame.setUrl(dtcUrl);
+    // DtcArdbeg.dtcFrame.setUrl(DTC_HOME_URL);
     GWT.log("url => " + dtcUrl);
 
-    DtcArdbeg.dtcFrame.addLoadHandler(new LoadHandler() {
+    this.dtcFrame.addLoadHandler(new LoadHandler() {
       @Override
       public void onLoad(LoadEvent event) {
         Document doc = IFrameElement.as(
-            DtcArdbeg.dtcFrame.getElement()).getContentDocument();
+            DtcArdbeg.this.dtcFrame.getElement()).getContentDocument();
 
         if (doc == null) {
           return;
@@ -94,23 +106,23 @@ public class DtcArdbeg implements EntryPoint {
         if (index != -1) {
           String serviceName = doc.getURL().substring(index + 3)
               .replaceAll("/", "");
-          DtcArdbeg.onLoadDtcServiceDirectoryPage(doc, serviceName);
+          DtcArdbeg.this.onLoadDtcServiceDirectoryPage(doc, serviceName);
         }
 
         index = doc.getURL().indexOf("?c=");
         if (index != -1) {
-          DtcArdbeg.onLoadDtcTestPage();
+          DtcArdbeg.this.onLoadDtcTestPage();
         }
 
       }
     });
 
-    RootPanel.get("dtcContainer").add(DtcArdbeg.dtcFrame);
+    RootPanel.get("dtcContainer").add(this.dtcFrame);
 
     Window.addResizeHandler(new ResizeHandler() {
       @Override
       public void onResize(ResizeEvent event) {
-        DtcArdbeg.dtcFrame.setPixelSize(Window.getClientWidth() - 30,
+        DtcArdbeg.this.dtcFrame.setPixelSize(Window.getClientWidth() - 30,
             Window.getClientHeight() - 200);
       }
     });
@@ -123,22 +135,22 @@ public class DtcArdbeg implements EntryPoint {
    * ("frame")[0].contentDocument query = reqDoc.forms[0].REQUEST2.value = 꽃
    */
 
-  protected static void onLoadDtcTestPage() {
-    DtcArdbeg.setDtcRequestParameters();
+  protected void onLoadDtcTestPage() {
+    this.setDtcRequestParameters();
 
   }
 
-  private static void setDtcRequestParameters() {
+  private void setDtcRequestParameters() {
     Map<String, List<String>> paramValues = Window.Location.getParameterMap();
 
     Set<Entry<String, List<String>>> entries = paramValues.entrySet();
     for (Entry<String, List<String>> entry : entries) {
-      setDtcRequestParameter(entry.getKey(), entry.getValue().get(0));
+      this.setDtcRequestParameter(entry.getKey(), entry.getValue().get(0));
     }
   }
 
-  private static void setDtcRequestParameter(String name, String value) {
-    Document doc = IFrameElement.as(DtcArdbeg.dtcFrame.getElement()).getContentDocument();
+  private void setDtcRequestParameter(String name, String value) {
+    Document doc = IFrameElement.as(this.dtcFrame.getElement()).getContentDocument();
     Element requestFrame = doc.getElementsByTagName("frame").getItem(0);
     Document requestFrameDoc = FrameElement.as(requestFrame).getContentDocument();
     Element requestTableElement = requestFrameDoc.getElementById("tblREQUEST");
@@ -201,8 +213,7 @@ public class DtcArdbeg implements EntryPoint {
    * @param doc
    * @param serviceName
    */
-  protected static void onLoadDtcServiceDirectoryPage(Document doc, String serviceName) {
-    // TODO 서비스 선택 판정을 링크 클릭으로 변경해야 함.
+  private void onLoadDtcServiceDirectoryPage(Document doc, String serviceName) {
     if (doc.getReferrer().equals(DtcArdbeg.DTC_HOME_URL)) {
       DtcArdbeg.serviceDao.addVisitCount(serviceName);
     }
@@ -214,11 +225,8 @@ public class DtcArdbeg implements EntryPoint {
    */
   void onLoadDtcHomePage(Document doc) {
     this.addCssIntoDtcFrame(doc);
-
     this.removeComaparePageAnchor(doc);
-
     this.sortServices();
-
   }
 
   /**
@@ -228,7 +236,10 @@ public class DtcArdbeg implements EntryPoint {
     LinkElement link = doc.createLinkElement();
     link.setType("text/css");
     link.setAttribute("rel", "stylesheet");
-    link.setAttribute("href", Document.get().getURL() + "DtcFrame.css");
+
+    int index = Document.get().getURL().lastIndexOf('/');
+    String path = Document.get().getURL().substring(0, index + 1);
+    link.setAttribute("href", path + "DtcFrame.css");
     doc.getBody().appendChild(link);
   }
 
@@ -236,7 +247,7 @@ public class DtcArdbeg implements EntryPoint {
 	 * 
 	 */
   void sortServices() {
-    Document doc = IFrameElement.as(DtcArdbeg.dtcFrame.getElement()).getContentDocument();
+    Document doc = IFrameElement.as(this.dtcFrame.getElement()).getContentDocument();
     Element oldTableBody = doc.getElementsByTagName("tbody").getItem(0);
 
     List<Pair<Integer, Node>> rows = DtcArdbeg.extractServiceList(oldTableBody);
@@ -322,6 +333,19 @@ public class DtcArdbeg implements EntryPoint {
 
     Node br = doc.getBody().getChild(0);
     doc.getBody().removeChild(br);
+
+    Node currentDirectoryMessage = doc.getBody().getChild(0);
+    doc.getBody().removeChild(currentDirectoryMessage);
+
+    br = doc.getBody().getChild(0);
+    doc.getBody().removeChild(br);
+  }
+
+  /**
+   * @param href
+   */
+  public void setDtcFrameUrl(String href) {
+    this.dtcFrame.setUrl(href);
   }
 
 }

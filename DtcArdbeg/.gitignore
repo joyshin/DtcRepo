@@ -1,5 +1,6 @@
 /gwt-unitCache
 /.settings
+/deployToSccu.bat
 /.gwt
 /.metadata
 /upload_new.bat

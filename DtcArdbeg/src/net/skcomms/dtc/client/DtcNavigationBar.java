@@ -20,6 +20,7 @@ public class DtcNavigationBar {
   private final static String NAVIGATION_DELIMITER = "/";
 
   private final String baseUrl;
+  private DtcArdbeg owner;
 
   public DtcNavigationBar(String baseUrl) {
     this.baseUrl = baseUrl;
@@ -65,7 +66,7 @@ public class DtcNavigationBar {
       @Override
       public void onClick(ClickEvent event) {
         event.stopPropagation();
-        DtcArdbeg.dtcFrame.setUrl(href);
+        DtcNavigationBar.this.owner.setDtcFrameUrl(href);
       }
     });
 
@@ -77,8 +78,11 @@ public class DtcNavigationBar {
     this.naviPanel.add(label);
   }
 
-  public void initialize() {
+  public void initialize(DtcArdbeg dtcArdbeg) {
     this.naviPanel.clear();
+    this.naviPanel.setSpacing(3);
+    this.owner = dtcArdbeg;
+
     this.addAnchor("Home", this.baseUrl);
     RootPanel.get("naviBarContainer").add(this.naviPanel);
   }
