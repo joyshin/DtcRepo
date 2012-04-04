@@ -38,13 +38,21 @@ public class DtcArdbeg implements EntryPoint {
     V value;
   }
 
-  private final static String DTC_HOME_URL = "http://dtc.skcomms.net/";
-  // private final static String DTC_HOME_URL =
-  // "http://127.0.0.1:8888/dtcproxy/";
-  private final static ServiceDao serviceDao = new ServiceDao();
+  private final static String BASE_URL;
+  static {
+    int index = Document.get().getURL().lastIndexOf('/');
+    BASE_URL = Document.get().getURL().substring(0, index + 1);
+  }
+  private final static String DTC_HOME_URL = DtcArdbeg.BASE_URL + "_dtcproxy_/";
 
-  final Frame dtcFrame = new Frame();
+  private static ServiceDao serviceDao = new ServiceDao();
+
+  private final Frame dtcFrame = new Frame();
   private DtcNavigationBar navigationBar = new DtcNavigationBar(DtcArdbeg.DTC_HOME_URL);
+
+  public static String getBaseUrl() {
+    return DtcArdbeg.BASE_URL;
+  }
 
   @Override
   public void onModuleLoad() {

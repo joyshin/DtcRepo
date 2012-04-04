@@ -1,13 +1,18 @@
-<%@page language="java" contentType="text/html; charset=windows-949"  pageEncoding="windows-949"%>
+<%@page language="java" contentType="text/html; charset=EUC-KR"  pageEncoding="EUC-KR"%>
 <%@page import="java.net.*" %>
 <%@page import="java.io.*" %>
 <%@page import="java.util.*" %>
 <%@page import="java.lang.*" %>
 <%
-request.setCharacterEncoding("EUC-KR");
+final String CHARSET = "EUC-KR";
+request.setCharacterEncoding(CHARSET);
+response.setCharacterEncoding(CHARSET);
 
-final String DTC_URL = "http://dtc.skcomms.net/";
-final String PROXY_URL = "http://127.0.0.1:8888/dtcproxy/";
+int index = request.getRequestURL().toString().indexOf("/_dtcproxy_/");
+String baseUrl = request.getRequestURL().toString().substring(0, index+12);
+
+final String DTC_URL = "http://10.141.6.198/";
+final String PROXY_URL = baseUrl;
 
 if (request.getMethod().equals("GET")) {
 	
@@ -54,14 +59,14 @@ else if (request.getMethod().equals("POST")) {  // POST
     String name = (String) names.nextElement();
     sb.append(name);
     sb.append('=');
-    sb.append(URLEncoder.encode(request.getParameter(name)));
+    sb.append(URLEncoder.encode(request.getParameter(name), CHARSET));
   }
   while (names.hasMoreElements()) {
     String name = (String) names.nextElement();
     sb.append('&');
     sb.append(name);
     sb.append('=');
-    sb.append(URLEncoder.encode(request.getParameter(name)));
+    sb.append(URLEncoder.encode(request.getParameter(name), CHARSET));
   }
   String params = sb.toString();
 
@@ -70,7 +75,7 @@ else if (request.getMethod().equals("POST")) {  // POST
   conn.setDoOutput(true);
   
   OutputStream os = new DataOutputStream(conn.getOutputStream());
-  os.write(params.getBytes("UTF-8"));
+  os.write(params.getBytes());
   os.flush();
   os.close();
   

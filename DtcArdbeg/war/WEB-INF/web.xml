@@ -30,7 +30,7 @@
 
 	<servlet-mapping>
 		<servlet-name>dtcProxyServlet</servlet-name>
-		<url-pattern>/dtcproxy/*</url-pattern>
+		<url-pattern>/_dtcproxy_/*</url-pattern>
 	</servlet-mapping>
 
 	<!-- Default page to serve -->
