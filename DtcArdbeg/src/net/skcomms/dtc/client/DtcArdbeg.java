@@ -4,23 +4,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.FrameElement;
 import com.google.gwt.dom.client.IFrameElement;
-import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.dom.client.LinkElement;
 import com.google.gwt.dom.client.Node;
-import com.google.gwt.dom.client.NodeList;
-import com.google.gwt.dom.client.TableCellElement;
-import com.google.gwt.dom.client.TableElement;
-import com.google.gwt.dom.client.TableRowElement;
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
@@ -56,12 +47,17 @@ public class DtcArdbeg implements EntryPoint {
   // =======
   private final static String BASE_URL;
   static {
-    int index = Document.get().getURL().lastIndexOf('/');
+    int queryStringStart = Document.get().getURL().lastIndexOf('?');
+    int index;
+    if (queryStringStart == -1) {
+      index = Document.get().getURL().lastIndexOf('/');
+    }
+    else {
+      index = Document.get().getURL().lastIndexOf('/', queryStringStart);
+    }
     BASE_URL = Document.get().getURL().substring(0, index + 1);
   }
   private final static String DTC_HOME_URL = DtcArdbeg.BASE_URL + "_dtcproxy_/";
-  // >>>>>>> refs/remotes/origin_clone/master
-
   private static ServiceDao serviceDao = new ServiceDao();
 
   private final Frame dtcFrame = new Frame();
@@ -136,52 +132,7 @@ public class DtcArdbeg implements EntryPoint {
    */
 
   protected void onLoadDtcTestPage() {
-    this.setDtcRequestParameters();
-
-  }
-
-  private void setDtcRequestParameters() {
-    Map<String, List<String>> paramValues = Window.Location.getParameterMap();
-
-    Set<Entry<String, List<String>>> entries = paramValues.entrySet();
-    for (Entry<String, List<String>> entry : entries) {
-      this.setDtcRequestParameter(entry.getKey(), entry.getValue().get(0));
-    }
-  }
-
-  private void setDtcRequestParameter(String name, String value) {
-    Document doc = IFrameElement.as(this.dtcFrame.getElement()).getContentDocument();
-    Element requestFrame = doc.getElementsByTagName("frame").getItem(0);
-    Document requestFrameDoc = FrameElement.as(requestFrame).getContentDocument();
-    Element requestTableElement = requestFrameDoc.getElementById("tblREQUEST");
-    NodeList<TableRowElement> tableRowElements = TableElement.as(requestTableElement).getRows();
-
-    // row Å½»ö
-    TableRowElement row = null;
-    for (int i = 0; i < tableRowElements.getLength(); i++) {
-      TableRowElement currentRow = tableRowElements.getItem(i);
-      // Window.alert("[" + name + "]" + "[" + currentRow.getInnerText() + "]");
-      if (currentRow.getInnerText().trim().equals(name)) {
-        row = currentRow;
-        break;
-      }
-    }
-
-    if (row == null) {
-      return;
-    }
-
-    NodeList<TableCellElement> cells = row.getCells();
-    for (int i = 0; i < cells.getItem(1).getChildCount(); i++) {
-      if (cells.getItem(1).getChild(i).getNodeType() == Node.ELEMENT_NODE) {
-        InputElement inputElement = InputElement.as(Element.as(cells.getItem(1).getChild(i)));
-        inputElement.setValue(value);
-
-        // todo check ip value
-        Window.alert(inputElement.getValue());
-        break;
-      }
-    }
+    RequestParameterSetter.execute();
   }
 
   private static String createNewDtcUrl() {
