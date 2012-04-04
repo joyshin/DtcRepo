@@ -6,7 +6,6 @@
 <%!final String CHARSET = "EUC-KR";
   final String DTC_URL = "http://10.141.6.198/";%>
 <%!public String getForwardedUrl(HttpServletRequest request) {
-
     int index = request.getRequestURL().toString().indexOf("/_dtcproxy_/");
     String baseUrl = request.getRequestURL().toString().substring(0, index + 12);
 
