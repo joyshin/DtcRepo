@@ -6,16 +6,23 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.FrameElement;
 import com.google.gwt.dom.client.IFrameElement;
 import com.google.gwt.dom.client.LinkElement;
 import com.google.gwt.dom.client.Node;
+import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
+import com.google.gwt.user.client.ui.FormSubmitCompleteEvent;
+import com.google.gwt.user.client.ui.FormSubmitEvent;
 import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.RootPanel;
 
@@ -38,9 +45,10 @@ public class DtcArdbeg implements EntryPoint {
     V value;
   }
 
-  private final static String DTC_HOME_URL = "http://dtc.skcomms.net/";
+  //private final static String DTC_HOME_URL = "http://dtc.skcomms.net/";
+  private final static String DTC_HOME_URL = "http://127.0.0.1:8888/testpage/DtcList.html";
   // private final static String DTC_HOME_URL =
-  // "http://127.0.0.1:8888/testpage/DtcList.html";
+  // http://dtc.skcomms.net/ "http://127.0.0.1:8888/testpage/DtcList.html";
   private final static ServiceDao serviceDao = new ServiceDao();
 
   final static Frame dtcFrame = new Frame();
@@ -78,7 +86,40 @@ public class DtcArdbeg implements EntryPoint {
           String serviceName = doc.getURL().substring(index + 3)
               .replaceAll("/", "");
           DtcArdbeg.onLoadDtcServiceDirectoryPage(doc, serviceName);
+        } 
+        index = doc.getURL().indexOf("?c=");
+        if (index != -1) {
+//          Document iframeDocument = IFrameElement.as(doc.getElementsByTagName("iframe").getItem(1)).getContentDocument();
+          
+          Document frameDocument = FrameElement.as(doc.getElementsByTagName("frame").getItem(0)).getContentDocument();
+          
+          NodeList<Element> listElement =  frameDocument.getElementsByTagName("form");
+          
+          for (int i = 0; i < listElement.getLength(); i++) {
+            GWT.log(listElement.getItem(i).getString());
+          }
+          
+          Element formElement = frameDocument.getElementsByTagName("Form").getItem(0);
+          GWT.log(formElement.getString());
+          
+          FormPanel formPanel = FormPanel.wrap(formElement, true);
+          
+          /*
+          Element formElement = frameDocument.getElementsByTagName("Form").getItem(0);
+          GWT.log(Integer.toString(formElement.getElementsByTagName("Form").getLength()));
+          
+          
+          FormPanel formPanel = FormPanel.wrap(formElement);
+          
+          formPanel.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {          
+            public void onSubmitComplete(SubmitCompleteEvent event) {
+              Window.alert(event.getResults());
+            }
+          }); 
+          */         
+          
         }
+        
       }
     });
 
