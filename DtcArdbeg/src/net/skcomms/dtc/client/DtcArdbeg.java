@@ -117,13 +117,6 @@ public class DtcArdbeg implements EntryPoint {
     });
   }
 
-  /*
-   * http://dtc.skcomms.net/shin/?c=kbook2s/old/100h.ini&Query=²É reqDoc =
-   * document
-   * .getElementsByTagName("iframe")[1].contentDocument.getElementsByTagName
-   * ("frame")[0].contentDocument query = reqDoc.forms[0].REQUEST2.value = ²É
-   */
-
   protected void onLoadDtcTestPage() {
     RequestParameterSetter.execute();
   }
@@ -158,6 +151,7 @@ public class DtcArdbeg implements EntryPoint {
    * @param serviceName
    */
   private void onLoadDtcServiceDirectoryPage(Document doc, String serviceName) {
+    this.addCssIntoDtcFrame(doc);
     if (doc.getReferrer().equals(DtcArdbeg.DTC_HOME_URL)) {
       DtcArdbeg.serviceDao.addVisitCount(serviceName);
     }
