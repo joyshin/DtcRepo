@@ -85,6 +85,8 @@ public class DtcArdbeg implements EntryPoint {
           return;
         }
 
+        DtcArdbeg.addDtcFrameScrollEventHandler(DtcArdbeg.this);
+
         DtcArdbeg.this.onLoadDtcFrame(doc);
 
         if (doc.getURL().equals(DtcArdbeg.DTC_HOME_URL)) {
@@ -102,8 +104,8 @@ public class DtcArdbeg implements EntryPoint {
         if (index != -1) {
           DtcArdbeg.this.onLoadDtcTestPage();
         }
-
       }
+
     });
 
     RootPanel.get("dtcContainer").add(this.dtcFrame);
@@ -115,6 +117,28 @@ public class DtcArdbeg implements EntryPoint {
             Window.getClientHeight() - 200);
       }
     });
+  }
+
+  private static native void addDtcFrameScrollEventHandler(DtcArdbeg ardbeg) /*-{
+		if ($doc.cssInserted == null) {
+			$doc.cssInserted = 0;
+			$doc.styleSheets[0]
+					.insertRule(
+							"div#dtcContainer iframe { background-position: 0px 0px; }",
+							0);
+		}
+		dtc = $doc.getElementsByTagName("iframe")[1];
+		$doc.styleSheets[0].cssRules[0].style.backgroundPositionY = "-100px";
+		dtc.contentWindow.onscroll = function() {
+			$doc.styleSheets[0].cssRules[0].style.backgroundPositionY = "-"
+					+ parseInt((dtc.contentWindow.pageYOffset * 0.02 + 100))
+					+ "px";
+			ardbeg.@net.skcomms.dtc.client.DtcArdbeg::onScrollDtcFrame()();
+		};
+
+  }-*/;
+
+  private void onScrollDtcFrame() {
   }
 
   protected void onLoadDtcTestPage() {
@@ -161,7 +185,7 @@ public class DtcArdbeg implements EntryPoint {
    * @param doc
    * 
    */
-  void onLoadDtcHomePage(Document doc) {
+  private void onLoadDtcHomePage(Document doc) {
     this.addCssIntoDtcFrame(doc);
     this.removeComaparePageAnchor(doc);
     this.sortServices();
@@ -170,14 +194,11 @@ public class DtcArdbeg implements EntryPoint {
   /**
    * @param doc
    */
-  void addCssIntoDtcFrame(Document doc) {
+  private void addCssIntoDtcFrame(Document doc) {
     LinkElement link = doc.createLinkElement();
     link.setType("text/css");
     link.setAttribute("rel", "stylesheet");
-
-    int index = Document.get().getURL().lastIndexOf('/');
-    String path = Document.get().getURL().substring(0, index + 1);
-    link.setAttribute("href", path + "DtcFrame.css");
+    link.setAttribute("href", DtcArdbeg.BASE_URL + "DtcFrame.css");
     doc.getBody().appendChild(link);
   }
 
