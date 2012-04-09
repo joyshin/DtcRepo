@@ -26,15 +26,26 @@ import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Frame;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SelectionModel;
+import com.google.gwt.view.client.SingleSelectionModel;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class DtcArdbeg implements EntryPoint {
+
+  public class DtcFrameSrcProvider {
+    public String get() {
+      return getDtcFrameSrc();
+    }
+  }
 
   private static class Pair<K, V> {
     K key;
@@ -43,12 +54,6 @@ public class DtcArdbeg implements EntryPoint {
     public Pair(K key, V value) {
       this.key = key;
       this.value = value;
-    }
-  }
-  
-  public class DtcFrameSrcProvider {
-    public String get() {
-      return getDtcFrameSrc();
     }
   }
 
@@ -99,6 +104,20 @@ public class DtcArdbeg implements EntryPoint {
     }
   }
 
+  private static String createNewDtcUrl() {
+    String newUrl = "";
+
+    if (Window.Location.getParameter("b") != null) {
+      newUrl = DtcArdbeg.DTC_PROXY_URL + "?b=" + Window.Location.getParameter("b");
+    } else if (Window.Location.getParameter("c") != null) {
+      newUrl = DtcArdbeg.DTC_PROXY_URL + "?c=" + Window.Location.getParameter("c");
+    } else {
+      newUrl = DtcArdbeg.DTC_PROXY_URL;
+    }
+
+    return newUrl;
+  }
+
   public static String getBaseUrl() {
     return DtcArdbeg.BASE_URL;
   }
@@ -119,6 +138,29 @@ public class DtcArdbeg implements EntryPoint {
   private final DtcRequestFormAccessor dtcRequestFormAccesser = new DtcRequestFormAccessor();
 
   private final DtcUrlCopyHelper urlCopyHelper = new DtcUrlCopyHelper();
+
+  static List<DtcNodeInfo> daemonList = new ArrayList<DtcNodeInfo>();
+  private static final CellList<DtcNodeInfo> cellList = new CellList<DtcNodeInfo>(
+      DtcNodeInfoCell.getInstance());
+  
+  private static final SelectionModel<DtcNodeInfo> SELECTION_MODEL =
+  new SingleSelectionModel<DtcNodeInfo>();
+  
+  private static final HTMLPanel panel = new HTMLPanel(""); 
+  
+  /**
+   * @param doc
+   */
+  void addCssIntoDtcFrame(Document doc) {
+    LinkElement link = doc.createLinkElement();
+    link.setType("text/css");
+    link.setAttribute("rel", "stylesheet");
+
+    int index = Document.get().getURL().lastIndexOf('/');
+    String path = Document.get().getURL().substring(0, index + 1);
+    link.setAttribute("href", path + "DtcFrame.css");
+    doc.getBody().appendChild(link);
+  }
 
   private void addCssLinkIntoDtcFrame(Document doc) {
     LinkElement link = doc.createLinkElement();
@@ -294,14 +336,35 @@ public class DtcArdbeg implements EntryPoint {
     this.dtcFrame.setUrl(DtcArdbeg.calculateInitialDtcUrl());
   }
 
-  /**
-   * @param doc
-   */
+
+  private void initializeDtcPanel() {
+    // TODO Auto-generated method stub
+    SELECTION_MODEL.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+      @Override
+      public void onSelectionChange(SelectionChangeEvent event) {
+        DtcNodeInfo selected = ((SingleSelectionModel<DtcNodeInfo>) SELECTION_MODEL)
+            .getSelectedObject();
+        moveToPage(selected.getPath());
+      }
+    });
+    
+    panel.add(this.dtcFrame);
+    RootPanel.get("dtcContainer").add(panel);
+  }
+  
+  private void moveToPage(String path) {
+    this.dtcFrame.setUrl(path);
+    panel.clear();
+    panel.add(dtcFrame);
+    this.refreshServiceList();
+
+    panel.add(cellList);  
+  }
+  
   private void onLoadDtcFrame(Document doc) {
     this.updateNavigationBar(doc);
     this.dtcRequestFormAccesser.update();
-  }
-
+  }  
   /**
    * @param doc
    * 
@@ -337,9 +400,42 @@ public class DtcArdbeg implements EntryPoint {
     this.navigationBar.initialize(this);
     this.urlCopyHelper.initialize(this);
     this.initializeDtcFrame();
+    this.initializeDtcPanel();
   }
 
   private void onScrollDtcFrame() {
+  }
+  
+  private void refreshServiceList() {
+    
+//    Document doc = IFrameElement.as(this.dtcFrame.getElement()).getContentDocument();
+//    Element oldTableBody = doc.getElementsByTagName("tbody").getItem(0);
+//    List<Pair<Integer, Node>> rows = DtcArdbeg.extractServiceList(oldTableBody);
+//  
+//    for (Pair<Integer, Node> pair : rows) {
+//      // TR
+//      Node currentNode = pair.value;
+//      NodeList<Node> nodeList = currentNode.getChildNodes(); 
+//      // TDs
+//      Node firstNode = nodeList.getItem(0);
+//      Element anchorElement = Element.as(firstNode.getChild(0));
+//      String name = firstNode.getChild(0).getChild(0).getNodeValue();
+//      String anchor = anchorElement.getAttribute("href");
+//      Node secondNode = nodeList.getItem(1);
+//      String description = secondNode.getChild(0).getNodeValue();
+//      Node thirdNode = nodeList.getItem(2);
+//      String updateTime = thirdNode.getChild(0).getNodeValue();
+//     
+//      DtcNodeInfo dtcNodeInfo = new DtcNodeInfo();
+//      dtcNodeInfo.setName(name);
+//      dtcNodeInfo.setDescription(description);
+//      dtcNodeInfo.setPath(anchor);
+//      dtcNodeInfo.setUpdateTime(updateTime);
+//      daemonList.add(dtcNodeInfo);
+//    }
+    cellList.setSelectionModel(SELECTION_MODEL);
+    cellList.setRowCount(daemonList.size(), true);
+    cellList.setRowData(0, daemonList);      
   }
 
   private void removeComaparePageAnchor(Document doc) {
@@ -355,6 +451,7 @@ public class DtcArdbeg implements EntryPoint {
     br = doc.getBody().getChild(0);
     doc.getBody().removeChild(br);
   }
+
 
   public void setDtcFrameUrl(String href) {
     this.dtcFrame.setUrl(href);
@@ -393,5 +490,4 @@ public class DtcArdbeg implements EntryPoint {
   private void updateNavigationBar(Document doc) {
     this.navigationBar.addPath(doc.getURL());
   }
-
 }
