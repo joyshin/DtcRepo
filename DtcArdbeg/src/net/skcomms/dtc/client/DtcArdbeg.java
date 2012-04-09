@@ -3,22 +3,27 @@ package net.skcomms.dtc.client;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.FormElement;
 import com.google.gwt.dom.client.FrameElement;
 import com.google.gwt.dom.client.IFrameElement;
 import com.google.gwt.dom.client.LinkElement;
 import com.google.gwt.dom.client.Node;
+import com.google.gwt.dom.client.NodeCollection;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormSubmitCompleteEvent;
@@ -45,32 +50,63 @@ public class DtcArdbeg implements EntryPoint {
     V value;
   }
 
-  //private final static String DTC_HOME_URL = "http://dtc.skcomms.net/";
-  private final static String DTC_HOME_URL = "http://127.0.0.1:8888/testpage/DtcList.html";
-  // private final static String DTC_HOME_URL =
-  // http://dtc.skcomms.net/ "http://127.0.0.1:8888/testpage/DtcList.html";
-  private final static ServiceDao serviceDao = new ServiceDao();
 
-  final static Frame dtcFrame = new Frame();
-  private DtcNavigationBar navigationBar = new DtcNavigationBar(DtcArdbeg.DTC_HOME_URL);
+  private final static String BASE_URL;
+  private final static char FORM_VALUE_DELIMETER = 0x0b;
+  private final static char FORM_FIELD_DELIMETER = 0x0C;
+  private final HashMap<String,String> formValueMap = new HashMap<String,String>();
 
+  static {
+    int queryStringStart = Document.get().getURL().lastIndexOf('?');
+    int index;
+    if (queryStringStart == -1) {
+      index = Document.get().getURL().lastIndexOf('/');
+    }
+    else {
+      index = Document.get().getURL().lastIndexOf('/', queryStringStart);
+    }
+    BASE_URL = Document.get().getURL().substring(0, index + 1);
+  }
+  private final static String DTC_HOME_URL = DtcArdbeg.BASE_URL + "_dtcproxy_/";
+  private static ServiceDao serviceDao = new ServiceDao();
+
+  private final Frame dtcFrame = new Frame();
+  private final DtcNavigationBar navigationBar = new DtcNavigationBar(DtcArdbeg.DTC_HOME_URL);
+
+  public static String getBaseUrl() {
+    return DtcArdbeg.BASE_URL;
+  }
+
+  public native static void addLoadEvent(Document doc) /*-{
+    var responseIframe = doc.getElementsByTagName("frame")[1];
+     responseIframe.onload =  function() {
+       $wnd.alert("response onload called");
+       
+       //write cookie...
+     };
+     //@net.skcomms.dtc.client.DtcArdbeg::logKim(Ljava/lang/String;)("print " + msg);
+   }-*/;
+  
   @Override
   public void onModuleLoad() {
     this.initializeDtcFrame();
-    this.navigationBar.initialize();
+    this.navigationBar.initialize(this);
   }
 
   private void initializeDtcFrame() {
-    DtcArdbeg.dtcFrame.setPixelSize(Window.getClientWidth() - 30,
-        Window.getClientHeight() - 125);
-    DtcArdbeg.dtcFrame.setUrl(DtcArdbeg.DTC_HOME_URL);
+    this.dtcFrame.setPixelSize(Window.getClientWidth() - 30, Window.getClientHeight() - 135);
 
-    DtcArdbeg.dtcFrame.addLoadHandler(new LoadHandler() {
+    String dtcUrl = DtcArdbeg.createNewDtcUrl();
+    this.dtcFrame.setUrl(dtcUrl);
+    GWT.log("url => " + dtcUrl);
+
+    this.dtcFrame.addLoadHandler(new LoadHandler() {
       @Override
       public void onLoad(LoadEvent event) {
         Document doc = IFrameElement.as(
-            DtcArdbeg.dtcFrame.getElement()).getContentDocument();
+            DtcArdbeg.this.dtcFrame.getElement()).getContentDocument();
 
+        GWT.log("ONLOAD");
         if (doc == null) {
           return;
         }
@@ -85,53 +121,149 @@ public class DtcArdbeg implements EntryPoint {
         if (index != -1) {
           String serviceName = doc.getURL().substring(index + 3)
               .replaceAll("/", "");
-          DtcArdbeg.onLoadDtcServiceDirectoryPage(doc, serviceName);
+
+          DtcArdbeg.this.onLoadDtcServiceDirectoryPage(doc, serviceName);
         } 
+        
         index = doc.getURL().indexOf("?c=");
         if (index != -1) {
 //          Document iframeDocument = IFrameElement.as(doc.getElementsByTagName("iframe").getItem(1)).getContentDocument();
           
-          Document frameDocument = FrameElement.as(doc.getElementsByTagName("frame").getItem(0)).getContentDocument();
+          addLoadEvent(doc);
+          NodeList<Element> frameElements = doc.getElementsByTagName("frame");
           
-          NodeList<Element> listElement =  frameDocument.getElementsByTagName("form");
+          String frameAttr;
+          FormElement formElement = null;
           
-          for (int i = 0; i < listElement.getLength(); i++) {
-            GWT.log(listElement.getItem(i).getString());
+          
+          Document requestDocument = null;
+                    
+          
+          for(int i=0; i < frameElements.getLength(); i++) {
+            frameAttr = frameElements.getItem(i).getAttribute("name");
+                        
+            if (frameAttr.equals("request")) {
+              requestDocument = FrameElement.as(frameElements.getItem(i)).getContentDocument();
+             
+              NodeList<Element> formList = requestDocument.getElementsByTagName("Form");
+              Element element;
+              
+              
+              for (int j=0; j < formList.getLength(); j++ ) {
+                element = formList.getItem(j);
+              
+                if (element.getAttribute("name").equals("frmMain")) {                           
+                  formElement = FormElement.as(element);                  
+                }
+              }
+            }
+            
           }
           
-          Element formElement = frameDocument.getElementsByTagName("Form").getItem(0);
-          GWT.log(formElement.getString());
-          
-          FormPanel formPanel = FormPanel.wrap(formElement, true);
-          
-          /*
-          Element formElement = frameDocument.getElementsByTagName("Form").getItem(0);
-          GWT.log(Integer.toString(formElement.getElementsByTagName("Form").getLength()));
-          
-          
-          FormPanel formPanel = FormPanel.wrap(formElement);
-          
-          formPanel.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {          
-            public void onSubmitComplete(SubmitCompleteEvent event) {
-              Window.alert(event.getResults());
-            }
-          }); 
-          */         
-          
+          DtcArdbeg.this.onLoadDtcTestPage();
+
         }
-        
+
       }
     });
 
-    RootPanel.get("dtcContainer").add(DtcArdbeg.dtcFrame);
+    RootPanel.get("dtcContainer").add(this.dtcFrame);
 
     Window.addResizeHandler(new ResizeHandler() {
       @Override
       public void onResize(ResizeEvent event) {
-        DtcArdbeg.dtcFrame.setPixelSize(Window.getClientWidth() - 30,
+        DtcArdbeg.this.dtcFrame.setPixelSize(Window.getClientWidth() - 30,
             Window.getClientHeight() - 200);
       }
     });
+  }
+
+  /*
+   * http://dtc.skcomms.net/shin/?c=kbook2s/old/100h.ini&Query=꽃 reqDoc =
+   * document
+   * .getElementsByTagName("iframe")[1].contentDocument.getElementsByTagName
+   * ("frame")[0].contentDocument query = reqDoc.forms[0].REQUEST2.value = 꽃
+   */
+
+  public static void writeCookie(FormElement formElement) {
+    
+    GWT.log("xmlResult != null");
+    NodeCollection<Element> nodeCollection = formElement.getElements();
+    if (nodeCollection == null ) 
+      return;
+    
+    String formAttrName;
+    String formAttrValue;
+    String cookie = "";
+    String cookieKey ="";
+    
+    for (int i=0; i<nodeCollection.getLength(); i++) {
+      formAttrName = nodeCollection.getItem(i).getAttribute("name");
+      if (formAttrName.equals("c")) {
+        cookieKey = nodeCollection.getItem(i).getAttribute("value");
+      }                   
+      if (formAttrName.matches("REQUEST[0-9]+")) {
+        formAttrValue = nodeCollection.getItem(i).getAttribute("value");
+        cookie = cookie + formAttrName + Character.toString(FORM_VALUE_DELIMETER) + formAttrValue + Character.toString(FORM_FIELD_DELIMETER);
+     //   formValueMap.put(formAttrName, formAttrValue);
+      }
+    }
+    Cookies.setCookie(cookieKey, cookie);
+    GWT.log("setCookie: " + cookieKey + " : " + cookie);
+  }
+  
+  public static void readCookie(FormElement formElement, HashMap<String,String> formValueMap) {
+    String cookie = "";
+    String cookieKey ="";
+    
+    cookie = Cookies.getCookie(cookieKey);    
+    GWT.log("getCookie: " + cookieKey + " : " + cookie);
+    
+    if (cookie == null) {
+      return;
+    }
+    
+    String[] formFieldArray = cookie.split(Character.toString(FORM_FIELD_DELIMETER));    
+    String[] formValueArray;
+    if (formFieldArray == null)
+      return;
+    
+    for(int i=0; i < formFieldArray.length; i++) {
+      formValueArray = formFieldArray[i].split(Character.toString(FORM_VALUE_DELIMETER));
+      if (formValueArray == null) 
+        continue;                  
+      formValueMap.put(formValueArray[0], formValueArray[1]);
+     
+    }
+    
+    NodeCollection<Element> nodeCollection = formElement.getElements();
+
+    for (int k=0; k<nodeCollection.getLength(); k++) {
+      if (nodeCollection.getItem(k).getAttribute("name").matches("REQUEST[0-9]+")) {
+        nodeCollection.getItem(k).setAttribute(nodeCollection.getItem(k).getAttribute("name"),
+            formValueMap.get(nodeCollection.getItem(k).getAttribute("name"))) ;
+      }
+    }
+  }
+  
+  
+  
+  protected void onLoadDtcTestPage() {
+    RequestParameterSetter.execute();
+  }
+
+  private static String createNewDtcUrl() {
+    String newUrl = "";
+
+    if (Window.Location.getParameter("b") != null) {
+      newUrl = DtcArdbeg.DTC_HOME_URL + "?b=" + Window.Location.getParameter("b");
+    } else if (Window.Location.getParameter("c") != null) {
+      newUrl = DtcArdbeg.DTC_HOME_URL + "?c=" + Window.Location.getParameter("c");
+    } else {
+      newUrl = DtcArdbeg.DTC_HOME_URL;
+    }
+
+    return newUrl;
   }
 
   /**
@@ -149,8 +281,7 @@ public class DtcArdbeg implements EntryPoint {
    * @param doc
    * @param serviceName
    */
-  protected static void onLoadDtcServiceDirectoryPage(Document doc, String serviceName) {
-    // TODO 서비스 선택 판정을 링크 클릭으로 변경해야 함.
+  private void onLoadDtcServiceDirectoryPage(Document doc, String serviceName) {
     if (doc.getReferrer().equals(DtcArdbeg.DTC_HOME_URL)) {
       DtcArdbeg.serviceDao.addVisitCount(serviceName);
     }
@@ -162,11 +293,8 @@ public class DtcArdbeg implements EntryPoint {
    */
   void onLoadDtcHomePage(Document doc) {
     this.addCssIntoDtcFrame(doc);
-
     this.removeComaparePageAnchor(doc);
-
     this.sortServices();
-
   }
 
   /**
@@ -176,7 +304,10 @@ public class DtcArdbeg implements EntryPoint {
     LinkElement link = doc.createLinkElement();
     link.setType("text/css");
     link.setAttribute("rel", "stylesheet");
-    link.setAttribute("href", Document.get().getURL() + "DtcFrame.css");
+
+    int index = Document.get().getURL().lastIndexOf('/');
+    String path = Document.get().getURL().substring(0, index + 1);
+    link.setAttribute("href", path + "DtcFrame.css");
     doc.getBody().appendChild(link);
   }
 
@@ -184,7 +315,7 @@ public class DtcArdbeg implements EntryPoint {
 	 * 
 	 */
   void sortServices() {
-    Document doc = IFrameElement.as(DtcArdbeg.dtcFrame.getElement()).getContentDocument();
+    Document doc = IFrameElement.as(this.dtcFrame.getElement()).getContentDocument();
     Element oldTableBody = doc.getElementsByTagName("tbody").getItem(0);
 
     List<Pair<Integer, Node>> rows = DtcArdbeg.extractServiceList(oldTableBody);
@@ -270,6 +401,19 @@ public class DtcArdbeg implements EntryPoint {
 
     Node br = doc.getBody().getChild(0);
     doc.getBody().removeChild(br);
+
+    Node currentDirectoryMessage = doc.getBody().getChild(0);
+    doc.getBody().removeChild(currentDirectoryMessage);
+
+    br = doc.getBody().getChild(0);
+    doc.getBody().removeChild(br);
+  }
+
+  /**
+   * @param href
+   */
+  public void setDtcFrameUrl(String href) {
+    this.dtcFrame.setUrl(href);
   }
 
 }
