@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import net.skcomms.dtc.shared.Item;
+
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
@@ -17,6 +19,7 @@ import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.RootPanel;
 
@@ -85,6 +88,22 @@ public class DtcArdbeg implements EntryPoint {
           return;
         }
 
+        DtcService.Util.getInstance().getDir("kshop2s/", new AsyncCallback<List<Item>>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            caught.printStackTrace();
+            GWT.log(caught.getMessage());
+          }
+
+          @Override
+          public void onSuccess(List<Item> result) {
+            for (Item item : result) {
+              GWT.log("[" + item.getName() + ":" + item.getDescription() + ":"
+                  + item.getDate() + "]");
+            }
+          }
+        });
+
         DtcArdbeg.addDtcFrameScrollEventHandler(DtcArdbeg.this);
 
         DtcArdbeg.this.onLoadDtcFrame(doc);
@@ -120,21 +139,18 @@ public class DtcArdbeg implements EntryPoint {
   }
 
   private static native void addDtcFrameScrollEventHandler(DtcArdbeg ardbeg) /*-{
-		if ($doc.cssInserted == null) {
-			$doc.cssInserted = 0;
-			$doc.styleSheets[0]
-					.insertRule(
-							"div#dtcContainer iframe { background-position: 0px 0px; }",
-							0);
-		}
-		dtc = $doc.getElementsByTagName("iframe")[1];
-		$doc.styleSheets[0].cssRules[0].style.backgroundPositionY = "-100px";
-		dtc.contentWindow.onscroll = function() {
-			$doc.styleSheets[0].cssRules[0].style.backgroundPositionY = "-"
-					+ parseInt((dtc.contentWindow.pageYOffset * 0.02 + 100))
-					+ "px";
-			ardbeg.@net.skcomms.dtc.client.DtcArdbeg::onScrollDtcFrame()();
-		};
+    if ($doc.cssInserted == null) {
+      $doc.cssInserted = 0;
+      $doc.styleSheets[0]
+          .insertRule("div#dtcContainer iframe { background-position: 0px 0px; }", 0);
+    }
+    dtc = $doc.getElementsByTagName("iframe")[1];
+    $doc.styleSheets[0].cssRules[0].style.backgroundPositionY = "-100px";
+    dtc.contentWindow.onscroll = function() {
+      $doc.styleSheets[0].cssRules[0].style.backgroundPositionY = "-"
+          + parseInt((dtc.contentWindow.pageYOffset * 0.02 + 100)) + "px";
+      ardbeg.@net.skcomms.dtc.client.DtcArdbeg::onScrollDtcFrame()();
+    };
 
   }-*/;
 
@@ -214,6 +230,19 @@ public class DtcArdbeg implements EntryPoint {
     this.applyStylesToServiceRows(rows);
     Element sortedBody = this.createSortedTableBody(doc, rows);
 
+    DtcService.Util.getInstance().getDir("/", new AsyncCallback<List<Item>>() {
+      @Override
+      public void onFailure(Throwable caught) {
+
+      }
+
+      @Override
+      public void onSuccess(List<Item> result) {
+        // TODO Auto-generated method stub
+
+      }
+
+    });
     oldTableBody.getParentNode().replaceChild(sortedBody, oldTableBody);
   }
 

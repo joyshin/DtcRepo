@@ -15,6 +15,16 @@
 		<url-pattern>/dtcardbeg/greet</url-pattern>
 	</servlet-mapping>
 
+    <servlet>
+        <servlet-name>dtcServiceServlet</servlet-name>
+        <servlet-class>net.skcomms.dtc.server.DtcServiceImpl</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>dtcServiceServlet</servlet-name>
+        <url-pattern>/dtcardbeg/dtcservice</url-pattern>
+    </servlet-mapping>
+
 	<servlet>
 		<servlet-name>dtcProxyServlet</servlet-name>
 		<jsp-file>/DtcProxy.jsp</jsp-file>
@@ -37,5 +47,13 @@
 	<welcome-file-list>
 		<welcome-file>DtcArdbeg.html</welcome-file>
 	</welcome-file-list>
+	<servlet>
+		<servlet-name>DtcService</servlet-name>
+		<servlet-class>net.skcomms.dtc.server.DtcServiceImpl</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>DtcService</servlet-name>
+		<url-pattern>/dtcardbeg/DtcService</url-pattern>
+	</servlet-mapping>
 
 </web-app>
