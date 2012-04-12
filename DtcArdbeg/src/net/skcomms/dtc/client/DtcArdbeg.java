@@ -3,7 +3,6 @@ package net.skcomms.dtc.client;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 import net.skcomms.dtc.shared.DtcNodeInfo;
@@ -67,7 +66,7 @@ public class DtcArdbeg implements EntryPoint {
 
   private static native void addDtcFrameScrollEventHandler(DtcArdbeg ardbeg) /*-{
     if ($doc.cssInserted == null) {
-      $doc.cssInserted = 0;
+      $doc.cssInserted = true;
       $doc.styleSheets[0]
           .insertRule("div#dtcContainer iframe { background-position: 0px 0px; }", 0);
     }
@@ -75,7 +74,7 @@ public class DtcArdbeg implements EntryPoint {
     $doc.styleSheets[0].cssRules[0].style.backgroundPositionY = "-100px";
     dtc.contentWindow.onscroll = function() {
       $doc.styleSheets[0].cssRules[0].style.backgroundPositionY = "-"
-          + parseInt((dtc.contedtcFrameYOffset * 0.02 + 100)) + "px";
+          + parseInt((dtc.contentWindow.pageYOffset * 0.02 + 100)) + "px";
       ardbeg.@net.skcomms.dtc.client.DtcArdbeg::onScrollDtcFrame()();
     };
   }-*/;
@@ -332,14 +331,10 @@ public class DtcArdbeg implements EntryPoint {
         Document doc = IFrameElement.as(DtcArdbeg.this.dtcFrame.getElement()).getContentDocument();
         Element oldTableBody = doc.getElementsByTagName("tbody").getItem(0);
 
-        GWT.log(new Date() + ":Before createTableRows()");
         List<Pair<Integer, Node>> rows = DtcArdbeg.this.createTableRows(result);
-        GWT.log(new Date() + ":After createTableRows()");
         DtcArdbeg.sortServicesByVisitCount(rows);
-        GWT.log(new Date() + ":After sortServicesByVisitCount()");
         DtcArdbeg.this.applyStylesToServiceRows(rows);
         Element sortedBody = DtcArdbeg.this.createSortedTableBody(doc, rows);
-        GWT.log(new Date() + ":After createSortedTableBody()");
 
         oldTableBody.getParentNode().replaceChild(sortedBody, oldTableBody);
       }
