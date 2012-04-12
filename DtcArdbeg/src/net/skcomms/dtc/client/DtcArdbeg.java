@@ -77,15 +77,24 @@ public class DtcArdbeg implements EntryPoint {
     return DtcArdbeg.BASE_URL;
   }
 
-  public native static void addLoadEvent(Document doc) /*-{
+  public native static void addLoadEvent(DtcArdbeg ardbeg, Document doc) /*-{
     var responseIframe = doc.getElementsByTagName("frame")[1];
-     responseIframe.onload =  function() {
-       $wnd.alert("response onload called");
+    
+    responseIframe.onload =  function() {
+       
+       var doc = document.URL;
+       //var formElement = doc.getElementsByTagName("frame")[0].contentDocument.getElementsByTagName("form")[0];
+              
+       //@net.skcomms.dtc.client.DtcArdbeg::logKim(Ljava/lang/String;)(formElement);
+       
+       $wnd.alert(doc);
+        ardbeg.@net.skcomms.dtc.client.DtcArdbeg::writeCookie(Ljava/lang/String;)("aa");
+       //$wnd.alert("response onload called");
+      
        
        //write cookie...
      };
-     //@net.skcomms.dtc.client.DtcArdbeg::logKim(Ljava/lang/String;)("print " + msg);
-   }-*/;
+  }-*/;
   
   @Override
   public void onModuleLoad() {
@@ -106,7 +115,6 @@ public class DtcArdbeg implements EntryPoint {
         Document doc = IFrameElement.as(
             DtcArdbeg.this.dtcFrame.getElement()).getContentDocument();
 
-        GWT.log("ONLOAD");
         if (doc == null) {
           return;
         }
@@ -129,7 +137,7 @@ public class DtcArdbeg implements EntryPoint {
         if (index != -1) {
 //          Document iframeDocument = IFrameElement.as(doc.getElementsByTagName("iframe").getItem(1)).getContentDocument();
           
-          addLoadEvent(doc);
+          addLoadEvent(DtcArdbeg.this, doc);
           NodeList<Element> frameElements = doc.getElementsByTagName("frame");
           
           String frameAttr;
@@ -185,8 +193,49 @@ public class DtcArdbeg implements EntryPoint {
    * ("frame")[0].contentDocument query = reqDoc.forms[0].REQUEST2.value = ²É
    */
 
-  public static void writeCookie(FormElement formElement) {
+  private static void logKim(String log) {
+
+    java.lang.System.out.println(log);
+
+  }
+  
+  private static void testKim(Object log) {
+
+    java.lang.System.out.println(log);
+
+  }
+
+  private void writeCookie(String log) {
+   
+    Document doc = IFrameElement.as(DtcArdbeg.this.dtcFrame.getElement()).getContentDocument();
     
+    FormElement formElement = null;
+    NodeList<Element> frameElements = doc.getElementsByTagName("frame");
+    
+    String frameAttr;
+    Document requestDocument = null;
+    
+    for(int i=0; i < frameElements.getLength(); i++) {
+      frameAttr = frameElements.getItem(i).getAttribute("name");
+                  
+      if (frameAttr.equals("request")) {
+        requestDocument = FrameElement.as(frameElements.getItem(i)).getContentDocument();
+       
+        NodeList<Element> formList = requestDocument.getElementsByTagName("Form");
+        Element element;
+        
+        
+        for (int j=0; j < formList.getLength(); j++ ) {
+          element = formList.getItem(j);
+        
+          if (element.getAttribute("name").equals("frmMain")) {                           
+            formElement = FormElement.as(element);                  
+          }
+        }
+      }
+      
+    }
+        
     GWT.log("xmlResult != null");
     NodeCollection<Element> nodeCollection = formElement.getElements();
     if (nodeCollection == null ) 
