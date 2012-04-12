@@ -14,19 +14,19 @@ public class DtcServiceVerifierTest {
 
   @Test
   public void testDirectoryPathValidation() {
-    Assert.assertTrue(DtcServiceVerifier.isValidDirectory("/"));
-    Assert.assertTrue(DtcServiceVerifier.isValidDirectory("kshop2s/"));
-    Assert.assertTrue(DtcServiceVerifier.isValidDirectory("kshop2s/old/"));
-    Assert.assertTrue(DtcServiceVerifier.isValidDirectory("kshop2s/new/old/"));
+    Assert.assertTrue(DtcServiceVerifier.isValidPath("/"));
+    Assert.assertTrue(DtcServiceVerifier.isValidPath("/kshop2s/"));
+    Assert.assertTrue(DtcServiceVerifier.isValidPath("/kshop2s/old/"));
+    Assert.assertTrue(DtcServiceVerifier.isValidPath("/kshop2s/new/old/"));
 
-    Assert.assertFalse(DtcServiceVerifier.isValidDirectory(null));
-    Assert.assertFalse(DtcServiceVerifier.isValidDirectory(""));
-    Assert.assertFalse(DtcServiceVerifier.isValidDirectory("//"));
-    Assert.assertFalse(DtcServiceVerifier.isValidDirectory("kshop2s"));
-    Assert.assertFalse(DtcServiceVerifier.isValidDirectory("/kshop2s"));
-    Assert.assertFalse(DtcServiceVerifier.isValidDirectory("/kshop2s/"));
-    Assert.assertFalse(DtcServiceVerifier.isValidDirectory("/kshop2s/old"));
-    Assert.assertFalse(DtcServiceVerifier.isValidDirectory("/kshop2s/old/100.ini"));
+    Assert.assertFalse(DtcServiceVerifier.isValidPath(null));
+    Assert.assertFalse(DtcServiceVerifier.isValidPath(""));
+    Assert.assertFalse(DtcServiceVerifier.isValidPath("//"));
+    Assert.assertFalse(DtcServiceVerifier.isValidPath("kshop2s"));
+    Assert.assertFalse(DtcServiceVerifier.isValidPath("kshop2s/"));
+    Assert.assertFalse(DtcServiceVerifier.isValidPath("/kshop2s"));
+    Assert.assertFalse(DtcServiceVerifier.isValidPath("/kshop2s/old"));
+    Assert.assertFalse(DtcServiceVerifier.isValidPath("/kshop2s/old/100.ini"));
   }
 
 }

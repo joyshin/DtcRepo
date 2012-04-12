@@ -4,9 +4,8 @@
 package net.skcomms.dtc.client;
 
 import java.util.List;
-import java.util.Map;
 
-import net.skcomms.dtc.shared.Item;
+import net.skcomms.dtc.shared.DtcNodeInfo;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
@@ -15,9 +14,5 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  * 
  */
 public interface DtcServiceAsync {
-  void getDir(String path, AsyncCallback<List<Item>> callback);
-
-  void getRequestParameters(String path, AsyncCallback<Map<String, String>> callback);
-
-  void getDtcResponseFormat(String path, AsyncCallback<DtcResponseType> callback);
+  void getDir(String path, AsyncCallback<List<DtcNodeInfo>> callback);
 }

@@ -15,9 +15,9 @@
 package net.skcomms.dtc.client;
 
 import java.util.List;
-import java.util.Map;
 
-import net.skcomms.dtc.shared.Item;
+import net.skcomms.dtc.shared.DtcServiceVerifier;
+import net.skcomms.dtc.shared.DtcNodeInfo;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -26,11 +26,17 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("dtcservice")
 public interface DtcService extends RemoteService {
 
-  List<Item> getDir(String path) throws IllegalArgumentException;
-
-  Map<String, String> getRequestParameters(String path);
-
-  DtcResponseType getDtcResponseFormat(String path);
+  /**
+   * 디렉토리 리스트를 가져온다.
+   * 
+   * @param path
+   *          디렉토리 경로. 경로의 유효성은 {@link DtcServiceVerifier#isValidPath(String)}을
+   *          참고.
+   * @return 디렉토리 아이템 리스트.
+   * @throws IllegalArgumentException
+   *           디렉토리 경로가 유효하지 않은 경우.
+   */
+  List<DtcNodeInfo> getDir(String path) throws IllegalArgumentException;
 
   /**
    * Utility class for simplifying access to the instance of async service.
