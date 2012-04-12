@@ -3,20 +3,24 @@ package net.skcomms.dtc.client;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.BodyElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.FormElement;
 import com.google.gwt.dom.client.FrameElement;
 import com.google.gwt.dom.client.IFrameElement;
+import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.dom.client.LinkElement;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.NodeCollection;
 import com.google.gwt.dom.client.NodeList;
+import com.google.gwt.dom.client.SelectElement;
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
@@ -30,6 +34,7 @@ import com.google.gwt.user.client.ui.FormSubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormSubmitEvent;
 import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
@@ -50,7 +55,6 @@ public class DtcArdbeg implements EntryPoint {
     V value;
   }
 
-
   private final static String BASE_URL;
   private final static char FORM_VALUE_DELIMETER = 0x0b;
   private final static char FORM_FIELD_DELIMETER = 0x0C;
@@ -70,6 +74,7 @@ public class DtcArdbeg implements EntryPoint {
   private final static String DTC_HOME_URL = DtcArdbeg.BASE_URL + "_dtcproxy_/";
   private static ServiceDao serviceDao = new ServiceDao();
 
+
   private final Frame dtcFrame = new Frame();
   private final DtcNavigationBar navigationBar = new DtcNavigationBar(DtcArdbeg.DTC_HOME_URL);
 
@@ -78,21 +83,11 @@ public class DtcArdbeg implements EntryPoint {
   }
 
   public native static void addLoadEvent(DtcArdbeg ardbeg, Document doc) /*-{
+  
     var responseIframe = doc.getElementsByTagName("frame")[1];
-    
     responseIframe.onload =  function() {
-       
-       var doc = document.URL;
-       //var formElement = doc.getElementsByTagName("frame")[0].contentDocument.getElementsByTagName("form")[0];
-              
-       //@net.skcomms.dtc.client.DtcArdbeg::logKim(Ljava/lang/String;)(formElement);
-       
-       $wnd.alert(doc);
-        ardbeg.@net.skcomms.dtc.client.DtcArdbeg::writeCookie(Ljava/lang/String;)("aa");
-       //$wnd.alert("response onload called");
-      
-       
-       //write cookie...
+     
+       ardbeg.@net.skcomms.dtc.client.DtcArdbeg::writeCookie()();
      };
   }-*/;
   
@@ -103,6 +98,7 @@ public class DtcArdbeg implements EntryPoint {
   }
 
   private void initializeDtcFrame() {
+
     this.dtcFrame.setPixelSize(Window.getClientWidth() - 30, Window.getClientHeight() - 135);
 
     String dtcUrl = DtcArdbeg.createNewDtcUrl();
@@ -135,17 +131,12 @@ public class DtcArdbeg implements EntryPoint {
         
         index = doc.getURL().indexOf("?c=");
         if (index != -1) {
-//          Document iframeDocument = IFrameElement.as(doc.getElementsByTagName("iframe").getItem(1)).getContentDocument();
           
           addLoadEvent(DtcArdbeg.this, doc);
-          NodeList<Element> frameElements = doc.getElementsByTagName("frame");
-          
+          NodeList<Element> frameElements = doc.getElementsByTagName("frame");          
           String frameAttr;
           FormElement formElement = null;
-          
-          
           Document requestDocument = null;
-                    
           
           for(int i=0; i < frameElements.getLength(); i++) {
             frameAttr = frameElements.getItem(i).getAttribute("name");
@@ -155,23 +146,19 @@ public class DtcArdbeg implements EntryPoint {
              
               NodeList<Element> formList = requestDocument.getElementsByTagName("Form");
               Element element;
-              
-              
+                            
               for (int j=0; j < formList.getLength(); j++ ) {
                 element = formList.getItem(j);
               
                 if (element.getAttribute("name").equals("frmMain")) {                           
-                  formElement = FormElement.as(element);                  
+                  formElement = FormElement.as(element);    
+                  readCookie(formElement, formValueMap);
                 }
               }
             }
-            
-          }
-          
+          }          
           DtcArdbeg.this.onLoadDtcTestPage();
-
         }
-
       }
     });
 
@@ -193,19 +180,7 @@ public class DtcArdbeg implements EntryPoint {
    * ("frame")[0].contentDocument query = reqDoc.forms[0].REQUEST2.value = ²É
    */
 
-  private static void logKim(String log) {
-
-    java.lang.System.out.println(log);
-
-  }
-  
-  private static void testKim(Object log) {
-
-    java.lang.System.out.println(log);
-
-  }
-
-  private void writeCookie(String log) {
+  private void writeCookie() {
    
     Document doc = IFrameElement.as(DtcArdbeg.this.dtcFrame.getElement()).getContentDocument();
     
@@ -232,11 +207,9 @@ public class DtcArdbeg implements EntryPoint {
             formElement = FormElement.as(element);                  
           }
         }
-      }
-      
+      }      
     }
         
-    GWT.log("xmlResult != null");
     NodeCollection<Element> nodeCollection = formElement.getElements();
     if (nodeCollection == null ) 
       return;
@@ -245,6 +218,7 @@ public class DtcArdbeg implements EntryPoint {
     String formAttrValue;
     String cookie = "";
     String cookieKey ="";
+    InputElement inputElem = null;
     
     for (int i=0; i<nodeCollection.getLength(); i++) {
       formAttrName = nodeCollection.getItem(i).getAttribute("name");
@@ -252,20 +226,57 @@ public class DtcArdbeg implements EntryPoint {
         cookieKey = nodeCollection.getItem(i).getAttribute("value");
       }                   
       if (formAttrName.matches("REQUEST[0-9]+")) {
-        formAttrValue = nodeCollection.getItem(i).getAttribute("value");
+        inputElem = InputElement.as(nodeCollection.getItem(i));
+        
+        formAttrValue = inputElem.getValue();
         cookie = cookie + formAttrName + Character.toString(FORM_VALUE_DELIMETER) + formAttrValue + Character.toString(FORM_FIELD_DELIMETER);
      //   formValueMap.put(formAttrName, formAttrValue);
+      } 
+      if (formAttrName.equals("ip_text") ) {
+        inputElem = InputElement.as(nodeCollection.getItem(i));
+        formAttrValue = inputElem.getValue();
+        cookie = cookie + formAttrName + Character.toString(FORM_VALUE_DELIMETER) + formAttrValue + Character.toString(FORM_FIELD_DELIMETER);
+      }
+      if (formAttrName.equals("ip_select") ) {
+        SelectElement selectElem = SelectElement.as(nodeCollection.getItem(i));
+        formAttrValue = selectElem.getValue();
+        cookie = cookie + formAttrName + Character.toString(FORM_VALUE_DELIMETER) + formAttrValue + Character.toString(FORM_FIELD_DELIMETER);         
+      }
+      if (formAttrName.equals("port") ) {
+        inputElem = InputElement.as(nodeCollection.getItem(i));
+        formAttrValue = inputElem.getValue();
+        cookie = cookie + formAttrName + Character.toString(FORM_VALUE_DELIMETER) + formAttrValue + Character.toString(FORM_FIELD_DELIMETER);
       }
     }
-    Cookies.setCookie(cookieKey, cookie);
+    
+    Date now = new Date();
+    
+    long nowLong = now.getTime();
+    nowLong = nowLong + (1000 * 60 * 60 * 24 * 7);
+    now.setTime(nowLong);
+    Cookies.setCookie(cookieKey, cookie, now);
     GWT.log("setCookie: " + cookieKey + " : " + cookie);
   }
   
   public static void readCookie(FormElement formElement, HashMap<String,String> formValueMap) {
+
+    NodeCollection<Element> nodeCollection = formElement.getElements();
+    if (nodeCollection == null ) 
+      return;
+    
+    String formAttrName;
     String cookie = "";
     String cookieKey ="";
     
-    cookie = Cookies.getCookie(cookieKey);    
+    for (int i=0; i<nodeCollection.getLength(); i++) {
+      formAttrName = nodeCollection.getItem(i).getAttribute("name");
+      if (formAttrName.equals("c")) {
+        cookieKey = nodeCollection.getItem(i).getAttribute("value");
+        break;
+      }                   
+    }
+    
+    cookie = Cookies.getCookie(cookieKey);
     GWT.log("getCookie: " + cookieKey + " : " + cookie);
     
     if (cookie == null) {
@@ -280,17 +291,34 @@ public class DtcArdbeg implements EntryPoint {
     for(int i=0; i < formFieldArray.length; i++) {
       formValueArray = formFieldArray[i].split(Character.toString(FORM_VALUE_DELIMETER));
       if (formValueArray == null) 
-        continue;                  
+        continue;        
+      if (formValueArray.length != 2)
+        continue;
+      GWT.log("Name :" + formValueArray[0] + " Value :" + formValueArray[1]);
       formValueMap.put(formValueArray[0], formValueArray[1]);
      
     }
     
-    NodeCollection<Element> nodeCollection = formElement.getElements();
+    InputElement inputElem = null;
 
-    for (int k=0; k<nodeCollection.getLength(); k++) {
-      if (nodeCollection.getItem(k).getAttribute("name").matches("REQUEST[0-9]+")) {
-        nodeCollection.getItem(k).setAttribute(nodeCollection.getItem(k).getAttribute("name"),
-            formValueMap.get(nodeCollection.getItem(k).getAttribute("name"))) ;
+    for (int i=0; i<nodeCollection.getLength(); i++) {
+      formAttrName = nodeCollection.getItem(i).getAttribute("name");
+      if (formAttrName.matches("REQUEST[0-9]+")) {
+        inputElem = InputElement.as(nodeCollection.getItem(i));
+        inputElem.setValue(formValueMap.get(formAttrName));
+      }      
+      if (formAttrName.equals("ip_text") ) {
+        inputElem = InputElement.as(nodeCollection.getItem(i));
+        inputElem.setValue(formValueMap.get(formAttrName));
+      }
+      if (formAttrName.equals("ip_select") ) {
+        SelectElement selectElem = SelectElement.as(nodeCollection.getItem(i));
+        selectElem.setValue(formValueMap.get(formAttrName));         
+      }
+      
+      if (formAttrName.equals("port") ) {
+        inputElem = InputElement.as(nodeCollection.getItem(i));
+        inputElem.setValue(formValueMap.get(formAttrName));
       }
     }
   }
