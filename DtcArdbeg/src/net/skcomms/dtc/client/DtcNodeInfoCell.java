@@ -1,23 +1,23 @@
 package net.skcomms.dtc.client;
 
+import net.skcomms.dtc.shared.DtcNodeInfo;
+
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.Image;
 
-import net.skcomms.dtc.client.DaemonInfo;
-
-final class DaemonInfoCell extends AbstractCell<DaemonInfo> {
-  private static final DaemonInfoCell instance = new DaemonInfoCell();
+final class DtcNodeInfoCell extends AbstractCell<DtcNodeInfo> {
+  private static final DtcNodeInfoCell instance = new DtcNodeInfoCell();
   
-  public static DaemonInfoCell getInstance() {
+  public static DtcNodeInfoCell getInstance() {
     return instance;
   }
   
-  private DaemonInfoCell() {}
+  private DtcNodeInfoCell() {}
   
   @Override
-  public void render(Context context, DaemonInfo daemonInfo, SafeHtmlBuilder sb) {
+  public void render(Context context, DtcNodeInfo daemonInfo, SafeHtmlBuilder sb) {
     if(daemonInfo == null) {
       return;
     }
@@ -40,7 +40,7 @@ final class DaemonInfoCell extends AbstractCell<DaemonInfo> {
           sb.appendEscaped(daemonInfo.getDescription());
         sb.appendHtmlConstant("</div>");
         sb.appendHtmlConstant("<div style=\"height:22px; display:table; vertical-align:middle; \">");
-          sb.appendEscaped(daemonInfo.getLastModifiedDate());
+          sb.appendEscaped(daemonInfo.getUpdateTime());
         sb.appendHtmlConstant("</div>");
         sb.appendHtmlConstant("</div>");
 //      sb.appendHtmlConstant("</a>");
