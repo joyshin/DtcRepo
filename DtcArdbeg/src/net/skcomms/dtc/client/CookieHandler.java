@@ -88,15 +88,17 @@ public class CookieHandler {
 
     String cookieKey = CookieHandler.findCookieKey(nodeCollection);
     Map<String, String> params = CookieHandler.getLastParametersFromCookie(cookieKey);
-
     for (int i = 0; i < nodeCollection.getLength(); i++) {
       String name = nodeCollection.getItem(i).getAttribute("name");
-      if (name.matches("REQUEST[0-9]+") || name.equals("ip_text") || name.equals("port")) {
-        InputElement inputElem = InputElement.as(nodeCollection.getItem(i));
-        inputElem.setValue(params.get(name));
-      } else if (name.equals("ip_select")) {
-        SelectElement selectElem = SelectElement.as(nodeCollection.getItem(i));
-        selectElem.setValue(params.get(name));
+      String value = params.get(name);
+      if (value != null) {
+        if (name.matches("REQUEST[0-9]+") || name.equals("ip_text") || name.equals("port")) {
+          InputElement inputElem = InputElement.as(nodeCollection.getItem(i));
+          inputElem.setValue(value);
+        } else if (name.equals("ip_select")) {
+          SelectElement selectElem = SelectElement.as(nodeCollection.getItem(i));
+          selectElem.setValue(value);
+        }
       }
     }
   }
