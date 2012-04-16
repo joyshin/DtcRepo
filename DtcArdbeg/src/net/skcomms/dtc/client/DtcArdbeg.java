@@ -56,10 +56,8 @@ public class DtcArdbeg implements EntryPoint {
   }
 
   private final static String BASE_URL;
-  private final static char FORM_VALUE_DELIMETER = 0x0b;
-  private final static char FORM_FIELD_DELIMETER = 0x0C;
-  private final HashMap<String,String> formValueMap = new HashMap<String,String>();
-
+  private final CookieHandler cookieHandler = new CookieHandler();
+  
   static {
     int queryStringStart = Document.get().getURL().lastIndexOf('?');
     int index;
@@ -82,12 +80,13 @@ public class DtcArdbeg implements EntryPoint {
     return DtcArdbeg.BASE_URL;
   }
 
-  public native static void addLoadEvent(DtcArdbeg ardbeg, Document doc) /*-{
+  public native static void addLoadEvent(DtcArdbeg ardbeg, CookieHandler cookieHandler, Document doc) /*-{
   
     var responseIframe = doc.getElementsByTagName("frame")[1];
     responseIframe.onload =  function() {
-     
-       ardbeg.@net.skcomms.dtc.client.DtcArdbeg::writeCookie()();
+       
+       cookieHandler.@net.skcomms.dtc.client.CookieHandler::writeCookie(Ljava/lang/Object;)(doc);
+       //ardbeg.@net.skcomms.dtc.client.DtcArdbeg::cookieHandler.writeCookie(Ljava/lang/object)(doc);
      };
   }-*/;
   
@@ -132,31 +131,9 @@ public class DtcArdbeg implements EntryPoint {
         index = doc.getURL().indexOf("?c=");
         if (index != -1) {
           
-          addLoadEvent(DtcArdbeg.this, doc);
-          NodeList<Element> frameElements = doc.getElementsByTagName("frame");          
-          String frameAttr;
-          FormElement formElement = null;
-          Document requestDocument = null;
-          
-          for(int i=0; i < frameElements.getLength(); i++) {
-            frameAttr = frameElements.getItem(i).getAttribute("name");
-                        
-            if (frameAttr.equals("request")) {
-              requestDocument = FrameElement.as(frameElements.getItem(i)).getContentDocument();
-             
-              NodeList<Element> formList = requestDocument.getElementsByTagName("Form");
-              Element element;
-                            
-              for (int j=0; j < formList.getLength(); j++ ) {
-                element = formList.getItem(j);
-              
-                if (element.getAttribute("name").equals("frmMain")) {                           
-                  formElement = FormElement.as(element);    
-                  readCookie(formElement, formValueMap);
-                }
-              }
-            }
-          }          
+          addLoadEvent(DtcArdbeg.this, cookieHandler, doc);        
+          cookieHandler.readCookie(doc);
+                   
           DtcArdbeg.this.onLoadDtcTestPage();
         }
       }
@@ -179,151 +156,7 @@ public class DtcArdbeg implements EntryPoint {
    * .getElementsByTagName("iframe")[1].contentDocument.getElementsByTagName
    * ("frame")[0].contentDocument query = reqDoc.forms[0].REQUEST2.value = ²É
    */
-
-  private void writeCookie() {
-   
-    Document doc = IFrameElement.as(DtcArdbeg.this.dtcFrame.getElement()).getContentDocument();
-    
-    FormElement formElement = null;
-    NodeList<Element> frameElements = doc.getElementsByTagName("frame");
-    
-    String frameAttr;
-    Document requestDocument = null;
-    
-    for(int i=0; i < frameElements.getLength(); i++) {
-      frameAttr = frameElements.getItem(i).getAttribute("name");
-                  
-      if (frameAttr.equals("request")) {
-        requestDocument = FrameElement.as(frameElements.getItem(i)).getContentDocument();
-       
-        NodeList<Element> formList = requestDocument.getElementsByTagName("Form");
-        Element element;
-        
-        
-        for (int j=0; j < formList.getLength(); j++ ) {
-          element = formList.getItem(j);
-        
-          if (element.getAttribute("name").equals("frmMain")) {                           
-            formElement = FormElement.as(element);                  
-          }
-        }
-      }      
-    }
-        
-    NodeCollection<Element> nodeCollection = formElement.getElements();
-    if (nodeCollection == null ) 
-      return;
-    
-    String formAttrName;
-    String formAttrValue;
-    String cookie = "";
-    String cookieKey ="";
-    InputElement inputElem = null;
-    
-    for (int i=0; i<nodeCollection.getLength(); i++) {
-      formAttrName = nodeCollection.getItem(i).getAttribute("name");
-      if (formAttrName.equals("c")) {
-        cookieKey = nodeCollection.getItem(i).getAttribute("value");
-      }                   
-      if (formAttrName.matches("REQUEST[0-9]+")) {
-        inputElem = InputElement.as(nodeCollection.getItem(i));
-        
-        formAttrValue = inputElem.getValue();
-        cookie = cookie + formAttrName + Character.toString(FORM_VALUE_DELIMETER) + formAttrValue + Character.toString(FORM_FIELD_DELIMETER);
-     //   formValueMap.put(formAttrName, formAttrValue);
-      } 
-      if (formAttrName.equals("ip_text") ) {
-        inputElem = InputElement.as(nodeCollection.getItem(i));
-        formAttrValue = inputElem.getValue();
-        cookie = cookie + formAttrName + Character.toString(FORM_VALUE_DELIMETER) + formAttrValue + Character.toString(FORM_FIELD_DELIMETER);
-      }
-      if (formAttrName.equals("ip_select") ) {
-        SelectElement selectElem = SelectElement.as(nodeCollection.getItem(i));
-        formAttrValue = selectElem.getValue();
-        cookie = cookie + formAttrName + Character.toString(FORM_VALUE_DELIMETER) + formAttrValue + Character.toString(FORM_FIELD_DELIMETER);         
-      }
-      if (formAttrName.equals("port") ) {
-        inputElem = InputElement.as(nodeCollection.getItem(i));
-        formAttrValue = inputElem.getValue();
-        cookie = cookie + formAttrName + Character.toString(FORM_VALUE_DELIMETER) + formAttrValue + Character.toString(FORM_FIELD_DELIMETER);
-      }
-    }
-    
-    Date now = new Date();
-    
-    long nowLong = now.getTime();
-    nowLong = nowLong + (1000 * 60 * 60 * 24 * 7);
-    now.setTime(nowLong);
-    Cookies.setCookie(cookieKey, cookie, now);
-    GWT.log("setCookie: " + cookieKey + " : " + cookie);
-  }
-  
-  public static void readCookie(FormElement formElement, HashMap<String,String> formValueMap) {
-
-    NodeCollection<Element> nodeCollection = formElement.getElements();
-    if (nodeCollection == null ) 
-      return;
-    
-    String formAttrName;
-    String cookie = "";
-    String cookieKey ="";
-    
-    for (int i=0; i<nodeCollection.getLength(); i++) {
-      formAttrName = nodeCollection.getItem(i).getAttribute("name");
-      if (formAttrName.equals("c")) {
-        cookieKey = nodeCollection.getItem(i).getAttribute("value");
-        break;
-      }                   
-    }
-    
-    cookie = Cookies.getCookie(cookieKey);
-    GWT.log("getCookie: " + cookieKey + " : " + cookie);
-    
-    if (cookie == null) {
-      return;
-    }
-    
-    String[] formFieldArray = cookie.split(Character.toString(FORM_FIELD_DELIMETER));    
-    String[] formValueArray;
-    if (formFieldArray == null)
-      return;
-    
-    for(int i=0; i < formFieldArray.length; i++) {
-      formValueArray = formFieldArray[i].split(Character.toString(FORM_VALUE_DELIMETER));
-      if (formValueArray == null) 
-        continue;        
-      if (formValueArray.length != 2)
-        continue;
-      GWT.log("Name :" + formValueArray[0] + " Value :" + formValueArray[1]);
-      formValueMap.put(formValueArray[0], formValueArray[1]);
-     
-    }
-    
-    InputElement inputElem = null;
-
-    for (int i=0; i<nodeCollection.getLength(); i++) {
-      formAttrName = nodeCollection.getItem(i).getAttribute("name");
-      if (formAttrName.matches("REQUEST[0-9]+")) {
-        inputElem = InputElement.as(nodeCollection.getItem(i));
-        inputElem.setValue(formValueMap.get(formAttrName));
-      }      
-      if (formAttrName.equals("ip_text") ) {
-        inputElem = InputElement.as(nodeCollection.getItem(i));
-        inputElem.setValue(formValueMap.get(formAttrName));
-      }
-      if (formAttrName.equals("ip_select") ) {
-        SelectElement selectElem = SelectElement.as(nodeCollection.getItem(i));
-        selectElem.setValue(formValueMap.get(formAttrName));         
-      }
-      
-      if (formAttrName.equals("port") ) {
-        inputElem = InputElement.as(nodeCollection.getItem(i));
-        inputElem.setValue(formValueMap.get(formAttrName));
-      }
-    }
-  }
-  
-  
+ 
   
   protected void onLoadDtcTestPage() {
     RequestParameterSetter.execute();
