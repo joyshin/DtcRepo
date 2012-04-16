@@ -3,7 +3,11 @@ package net.skcomms.dtc.client;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import net.skcomms.dtc.shared.DtcNodeInfo;
 
@@ -41,6 +45,12 @@ public class DtcArdbeg implements EntryPoint {
       this.value = value;
     }
   }
+  
+  public class DtcFrameSrcProvider {
+    public String get() {
+      return getDtcFrameSrc();
+    }
+  }
 
   private final static String BASE_URL = DtcArdbeg.calculateBaseUrl();
 
@@ -49,19 +59,22 @@ public class DtcArdbeg implements EntryPoint {
   private static ServiceDao serviceDao = new ServiceDao();
 
   private static native void addDtcFrameScrollEventHandler(DtcArdbeg ardbeg) /*-{
-    if ($doc.cssInserted == null) {
-      $doc.cssInserted = true;
-      $doc.styleSheets[0]
-          .insertRule("div#dtcContainer iframe { background-position: 0px 0px; }", 0);
-    }
+		if ($doc.cssInserted == null) {
+			$doc.cssInserted = true;
+			$doc.styleSheets[0]
+					.insertRule(
+							"div#dtcContainer iframe { background-position: 0px 0px; }",
+							0);
+		}
 
-    dtc = $doc.getElementsByTagName("iframe")[1];
-    $doc.styleSheets[0].cssRules[0].style.backgroundPositionY = "-100px";
-    dtc.contentWindow.onscroll = function() {
-      $doc.styleSheets[0].cssRules[0].style.backgroundPositionY = "-"
-          + parseInt((dtc.contentWindow.pageYOffset * 0.02 + 100)) + "px";
-      ardbeg.@net.skcomms.dtc.client.DtcArdbeg::onScrollDtcFrame()();
-    };
+		dtc = $doc.getElementsByTagName("iframe")[1];
+		$doc.styleSheets[0].cssRules[0].style.backgroundPositionY = "-100px";
+		dtc.contentWindow.onscroll = function() {
+			$doc.styleSheets[0].cssRules[0].style.backgroundPositionY = "-"
+					+ parseInt((dtc.contentWindow.pageYOffset * 0.02 + 100))
+					+ "px";
+			ardbeg.@net.skcomms.dtc.client.DtcArdbeg::onScrollDtcFrame()();
+		};
   }-*/;
 
   private static String calculateBaseUrl() {
@@ -102,6 +115,10 @@ public class DtcArdbeg implements EntryPoint {
   private final Frame dtcFrame = new Frame();
 
   private final DtcNavigationBar navigationBar = new DtcNavigationBar(DtcArdbeg.DTC_PROXY_URL);
+
+  private final DtcRequestFormAccessor dtcRequestFormAccesser = new DtcRequestFormAccessor();
+
+  private final DtcUrlCopyHelper urlCopyHelper = new DtcUrlCopyHelper();
 
   private void addCssLinkIntoDtcFrame(Document doc) {
     LinkElement link = doc.createLinkElement();
@@ -229,6 +246,38 @@ public class DtcArdbeg implements EntryPoint {
     return rows;
   }
 
+  public String getDtcFrameSrc() {
+    return IFrameElement.as(
+        DtcArdbeg.this.dtcFrame.getElement()).getContentDocument().getURL();
+  }
+
+  public Map<String, String> getDtcRequestParameters() {
+    return this.dtcRequestFormAccesser.getDtcRequestParameters();
+  }
+
+  private String getParameterFromDtcFrame(String name) {
+    return this.getParameterMapFromDtcFrame().get(name);
+  }
+
+  private Map<String, String> getParameterMapFromDtcFrame() {
+    Map<String, String> params = new HashMap<String, String>();
+    String url = this.getDtcFrameSrc();
+    String queryString = "";
+    if (url.indexOf('?') != -1) {
+      queryString = url.substring(url.indexOf('?') + 1);
+    }
+    String[] dtcParams = queryString.split("&");
+    for (String param : dtcParams) {
+      String[] entry = param.split("=");
+      if (entry.length < 2) {
+        params.put(entry[0], null);
+      } else {
+        params.put(entry[0], entry[1]);
+      }
+    }
+    return params;
+  }
+
   private boolean hasVisitedService(List<Pair<Integer, Node>> rows) {
     return !rows.isEmpty() && rows.get(0).key > 0;
   }
@@ -250,6 +299,7 @@ public class DtcArdbeg implements EntryPoint {
    */
   private void onLoadDtcFrame(Document doc) {
     this.updateNavigationBar(doc);
+    this.dtcRequestFormAccesser.update();
   }
 
   /**
@@ -274,12 +324,18 @@ public class DtcArdbeg implements EntryPoint {
   }
 
   protected void onLoadDtcTestPage() {
-    RequestParameterSetter.execute();
+    String ardbegParam = Window.Location.getParameter("c");
+    String dtcFrameParam = this.getParameterFromDtcFrame("c");
+    GWT.log("ardbeg:" + ardbegParam + ", dtc:" + dtcFrameParam);
+    if (ardbegParam != null && ardbegParam.equals(dtcFrameParam)) {
+      this.setUrlParameters();
+    }
   }
 
   @Override
   public void onModuleLoad() {
     this.navigationBar.initialize(this);
+    this.urlCopyHelper.initialize(this);
     this.initializeDtcFrame();
   }
 
@@ -302,6 +358,13 @@ public class DtcArdbeg implements EntryPoint {
 
   public void setDtcFrameUrl(String href) {
     this.dtcFrame.setUrl(href);
+  }
+
+  private void setUrlParameters() {
+    Set<Entry<String, List<String>>> paramValues = Window.Location.getParameterMap().entrySet();
+    for (Entry<String, List<String>> entry : paramValues) {
+      this.dtcRequestFormAccesser.setDtcRequestParameter(entry.getKey(), entry.getValue().get(0));
+    }
   }
 
   void sortDtcNodes() {
