@@ -29,10 +29,6 @@
 		<servlet-name>dtcProxyServlet</servlet-name>
 		<jsp-file>/DtcProxy.jsp</jsp-file>
 		<init-param>
-			<param-name>hello</param-name>
-			<param-value>jsp</param-value>
-		</init-param>
-		<init-param>
             <param-name>trimSpaces</param-name>
             <param-value>true</param-value>
         </init-param>        

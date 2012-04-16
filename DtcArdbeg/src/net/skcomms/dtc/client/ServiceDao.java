@@ -12,6 +12,13 @@ import com.google.gwt.user.client.Cookies;
  * 
  */
 public class ServiceDao {
+  /**
+   * @param serviceName
+   */
+  public void addVisitCount(String serviceName) {
+    this.setVisitCount(serviceName, this.getVisitCount(serviceName) + 1);
+  }
+
   public int getVisitCount(String serviceName) {
     if (Cookies.getCookie(serviceName) == null) {
       return 0;
@@ -24,12 +31,5 @@ public class ServiceDao {
     Date expireDate = new Date();
     expireDate.setTime(expireDate.getTime() + 1000L * 60 * 60 * 24 * 365);
     Cookies.setCookie(serviceName, Integer.toString(visitCount), expireDate);
-  }
-
-  /**
-   * @param serviceName
-   */
-  public void addVisitCount(String serviceName) {
-    this.setVisitCount(serviceName, this.getVisitCount(serviceName) + 1);
   }
 }
