@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import net.skcomms.dtc.shared.DtcNodeInfo;
+import net.skcomms.dtc.shared.Pair;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -35,16 +36,6 @@ import com.google.gwt.user.client.ui.RootPanel;
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class DtcArdbeg implements EntryPoint {
-
-  private static class Pair<K, V> {
-    K key;
-    V value;
-
-    public Pair(K key, V value) {
-      this.key = key;
-      this.value = value;
-    }
-  }
 
   private final static String BASE_URL = DtcArdbeg.calculateBaseUrl();
 
@@ -105,7 +96,7 @@ public class DtcArdbeg implements EntryPoint {
     Collections.sort(rows, new Comparator<Pair<Integer, Node>>() {
       @Override
       public int compare(Pair<Integer, Node> arg0, Pair<Integer, Node> arg1) {
-        return -arg0.key.compareTo(arg1.key);
+        return -arg0.getKey().compareTo(arg1.getKey());
       }
     });
   }
@@ -144,8 +135,8 @@ public class DtcArdbeg implements EntryPoint {
 
   private void applyStylesToDtcDirectoryNodes(List<Pair<Integer, Node>> pairs) {
     for (Pair<Integer, Node> pair : pairs) {
-      if (pair.key == 0) {
-        Element.as(pair.value).setAttribute("style", "color:gray; ");
+      if (pair.getKey() == 0) {
+        Element.as(pair.getValue()).setAttribute("style", "color:gray; ");
       }
     }
   }
@@ -203,11 +194,11 @@ public class DtcArdbeg implements EntryPoint {
 
     int prevScore = 1;
     for (Pair<Integer, Node> pair : rows) {
-      if (prevScore != 0 && pair.key.equals(0)) {
+      if (prevScore != 0 && pair.getKey().equals(0)) {
         newTableBody.appendChild(oldTableBody.getFirstChild());
       }
-      newTableBody.appendChild(pair.value);
-      prevScore = pair.key;
+      newTableBody.appendChild(pair.getValue());
+      prevScore = pair.getKey();
     }
     return newTableBody;
   }
@@ -295,7 +286,7 @@ public class DtcArdbeg implements EntryPoint {
   }
 
   private boolean hasVisitedService(List<Pair<Integer, Node>> rows) {
-    return !rows.isEmpty() && rows.get(0).key > 0;
+    return !rows.isEmpty() && rows.get(0).getKey() > 0;
   }
 
   private void initializeDtcFrame() {
