@@ -3,6 +3,7 @@ package net.skcomms.dtc.client;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,18 +15,24 @@ import net.skcomms.dtc.shared.DtcNodeInfo;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
+import com.google.gwt.dom.client.BodyElement;
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.FrameElement;
 import com.google.gwt.dom.client.IFrameElement;
 import com.google.gwt.dom.client.ImageElement;
+import com.google.gwt.dom.client.LabelElement;
 import com.google.gwt.dom.client.LinkElement;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.dom.client.TableRowElement;
+import com.google.gwt.dom.client.Text;
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Frame;
@@ -45,13 +52,14 @@ public class DtcArdbeg implements EntryPoint {
       this.value = value;
     }
   }
-
+  
   private final static String BASE_URL = DtcArdbeg.calculateBaseUrl();
 
   private final static String DTC_PROXY_URL = DtcArdbeg.BASE_URL + "_dtcproxy_/";
 
   private static ServiceDao serviceDao = new ServiceDao();
-
+  private static DtcChrono dtcChrono = new DtcChrono();
+  
   private static native void addDtcFrameScrollEventHandler(DtcArdbeg ardbeg) /*-{
     if ($doc.cssInserted == null) {
       $doc.cssInserted = true;
@@ -72,6 +80,13 @@ public class DtcArdbeg implements EntryPoint {
     var responseIframe = dtcDoc.getElementsByTagName("frame")[1];
     responseIframe.onload = function() {
       module.@net.skcomms.dtc.client.DtcArdbeg::onLoadDtcResponseIFrame()();
+    };
+  }-*/;
+  
+  public native static void addDtcSearchButtonEventHandler (DtcArdbeg module, Document dtcDoc) /*-{
+    var searchButton = dtcDoc.getElementsByTagName("frame")[0].contentWindow.document.getElementById("div_search");
+    searchButton.onclick = function() {
+      module.@net.skcomms.dtc.client.DtcArdbeg::onClickSearchButton()();
     };
   }-*/;
 
@@ -328,8 +343,16 @@ public class DtcArdbeg implements EntryPoint {
     this.sortDtcNodes();
   }
 
+  ///////////////////////////////////////////////////////////////////////////////////////////
+  //onClickSearchButton
+  ///////////////////////////////////////////////////////////////////////////////////////////
+  private void onClickSearchButton() {
+    DtcArdbeg.dtcChrono.start();
+
+  }
   private void onLoadDtcResponseIFrame() {
     this.cookieHandler.storeRequestParametersIntoCookie(this.getDtcFrameDoc());
+    DtcArdbeg.dtcChrono.end();       
   }
 
   /**
@@ -344,6 +367,7 @@ public class DtcArdbeg implements EntryPoint {
   }
 
   protected void onLoadDtcTestPage(Document doc) {
+    DtcArdbeg.addDtcSearchButtonEventHandler(DtcArdbeg.this, doc);
     DtcArdbeg.addDtcResponseIFrameLoadEventHandler(DtcArdbeg.this, doc);
     DtcArdbeg.this.cookieHandler.loadAndSetRequestParameters(doc);
 
@@ -352,6 +376,11 @@ public class DtcArdbeg implements EntryPoint {
     if (ardbegParam != null && ardbegParam.equals(dtcFrameParam)) {
       this.setUrlParameters();
     }
+    //create DtcChrono
+    FrameElement responseFrame = DomExplorerHelper.getFrameElement(doc, "request");
+    Document responseDocument = FrameElement.as(responseFrame).getContentDocument();
+    BodyElement responseBody = responseDocument.getBody();
+    DtcArdbeg.dtcChrono.createChrono(responseDocument, responseBody);
   }
 
   @Override

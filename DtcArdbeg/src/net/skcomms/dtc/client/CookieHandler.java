@@ -35,7 +35,7 @@ public class CookieHandler {
 
   private static Map<String, String> getLastParametersFromCookie(String cookieKey) {
     String cookie = Cookies.getCookie(cookieKey);
-    GWT.log("getCookie: " + cookieKey + " : " + cookie);
+    //GWT.log("getCookie: " + cookieKey + " : " + cookie);
 
     Map<String, String> map = new HashMap<String, String>();
 
@@ -51,7 +51,7 @@ public class CookieHandler {
     for (String element : formFields) {
       String[] pair = element.split(Character.toString(CookieHandler.FORM_VALUE_DELIMETER));
       if (pair.length == 2) {
-        GWT.log("Name :" + pair[0] + " Value :" + pair[1]);
+        //GWT.log("Name :" + pair[0] + " Value :" + pair[1]);
         map.put(pair[0], pair[1]);
       }
     }
