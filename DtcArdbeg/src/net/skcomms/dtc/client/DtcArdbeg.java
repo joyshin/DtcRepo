@@ -75,7 +75,8 @@ public class DtcArdbeg implements EntryPoint {
   private static final SelectionModel<DtcNodeInfo> SELECTION_MODEL =
       new SingleSelectionModel<DtcNodeInfo>();
 
-  private static final FlowPanel panel = new FlowPanel();
+  // private static final SplitLayoutPanel panel = new SplitLayoutPanel();
+  private static final FlowPanel flowPanel = new FlowPanel();
 
   private static native void addDtcFrameScrollEventHandler(DtcArdbeg ardbeg) /*-{
                                                                              if ($doc.cssInserted == null) {
@@ -146,6 +147,7 @@ public class DtcArdbeg implements EntryPoint {
   }
 
   private final Frame dtcFrame = new Frame();
+
   private final DtcNavigationBar navigationBar = new DtcNavigationBar(DtcArdbeg.DTC_PROXY_URL);
 
   private final DtcRequestFormAccessor dtcRequestFormAccesser = new DtcRequestFormAccessor();
@@ -402,37 +404,17 @@ public class DtcArdbeg implements EntryPoint {
             selected.isLeaf());
         String href = DtcArdbeg.this.getHrefWithTypeAndPath(type, selected.getPath());
         DtcArdbeg.this.setDtcFrameUrl(href);
-
-        // DtcArdbeg.this.loadDtcPage(selected.getPath(), selected.isLeaf());
       }
     });
 
     dtcNodeCellList.setSelectionModel(SELECTION_MODEL);
 
-    // DtcArdbeg.this.refreshDtcNodeCellList("/");
+    flowPanel.add(dtcNodeCellList);
 
-    panel.add(dtcNodeCellList);
-
-    RootPanel.get("dtcContainer").add(panel);
+    RootPanel.get("dtcContainer").add(flowPanel);
   }
 
   private void loadDtcPage(String path, boolean isLeaf) {
-
-    // DtcPageType type = this.getTypeOfCurrentUrlWithPathAndIsLeaf(path,
-    // isLeaf);
-    // String href = this.getHrefWithTypeAndPath(type, path);
-    // this.dtcFrame.setUrl(href);
-
-    // switch (type) {
-    // case HOME:
-    // case DIRECTORY:
-    // this.refreshDtcNodeCellList(path);
-    // this.switchDtcFrameToPanel();
-    // break;
-    // case SEARCH:
-    // this.switchPanelToDtcFrame();
-    // break;
-    // }
   }
 
   private void onLoadDtcFrame(Document doc) {
@@ -510,11 +492,10 @@ public class DtcArdbeg implements EntryPoint {
         dtcNodeCellList.setRowData(dtcNodeList);
         dtcNodeCellList.setRowCount(dtcNodeList.size(), true);
 
+        GWT.log("on succeeded!!!");
         // dtcNodeCellList.setVisibleRange(0, 100);
       }
-
     });
-
   }
 
   private void removeComaparePageAnchor(Document doc) {
@@ -567,12 +548,12 @@ public class DtcArdbeg implements EntryPoint {
 
   private void switchDtcFrameToPanel() {
     this.dtcFrame.setVisible(false);
-    panel.setVisible(true);
+    flowPanel.setVisible(true);
   }
 
   private void switchPanelToDtcFrame() {
     this.dtcFrame.setVisible(true);
-    panel.setVisible(false);
+    flowPanel.setVisible(false);
   }
 
   private void updateNavigationBar(Document doc) {

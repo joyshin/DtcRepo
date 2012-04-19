@@ -26,13 +26,14 @@ final class DtcNodeInfoCell extends AbstractCell<DtcNodeInfo> {
     Image image = new Image();
 
     image
-        .setUrl("http://t1.gstatic.com/images?q=tbn:ANd9GcSlCSbbm87uDJiPgjXdvfq6msCJf3v9Jb6XYrEn2CtkyYGrFhBJ3Q");
+        // .setUrl("http://t1.gstatic.com/images?q=tbn:ANd9GcSlCSbbm87uDJiPgjXdvfq6msCJf3v9Jb6XYrEn2CtkyYGrFhBJ3Q");
+        .setUrl("https://encrypted-tbn2.google.com/images?q=tbn:ANd9GcScwAPeLjzjxfXlOmzXBIZZ65qTSKib647JumG-J8f2o1CBOhYD");
 
     image.setSize("100%", "100%");
     // sb.appendHtmlConstant("<a href = '" + daemonInfo.getHref() + "'>");
 
     // 1. div
-    sb.appendHtmlConstant("<div style=\"width:362px; height:74px; \">");
+    sb.appendHtmlConstant("<div style=\"position: relative; width:362px; height:74px; \">");
 
     // 2. div
     sb.appendHtmlConstant("<div style=\"width:62px; height:70px; float:left; margin-right:5px; \">");
