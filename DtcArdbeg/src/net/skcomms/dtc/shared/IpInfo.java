@@ -14,19 +14,28 @@ import java.util.List;
 @SuppressWarnings("serial")
 public class IpInfo implements Serializable {
 
-  private List<Pair<String, String>> options = new ArrayList<Pair<String, String>>();
+  private List<DtcRequestParameter> options = new ArrayList<DtcRequestParameter>();
+  private String ipText = "";
 
   /**
    * @param value
    * @param text
    */
   public void addOption(String value, String text) {
-    this.options.add(new Pair<String, String>(value, text));
+    this.options.add(new DtcRequestParameter(value, "", text));
+  }
+
+  public String getIpText() {
+    return this.ipText;
+  }
+
+  public void setIpText(String anIpText) {
+    this.ipText = anIpText;
   }
 
   @Override
   public String toString() {
-    return this.options.toString();
+    return "ipText:" + this.ipText + ", " + this.options.toString();
   }
 
 }

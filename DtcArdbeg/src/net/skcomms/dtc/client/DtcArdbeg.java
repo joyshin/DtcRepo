@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import net.skcomms.dtc.shared.DtcNodeInfo;
+import net.skcomms.dtc.shared.DtcRequestInfo;
 import net.skcomms.dtc.shared.Pair;
 
 import com.google.gwt.core.client.EntryPoint;
@@ -343,6 +344,20 @@ public class DtcArdbeg implements EntryPoint {
     if (ardbegParam != null && ardbegParam.equals(dtcFrameParam)) {
       this.setUrlParameters();
     }
+
+    String path = "/" + dtcFrameParam;
+    DtcService.Util.getInstance().getDtcRequestPageInfo(path, new AsyncCallback<DtcRequestInfo>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        GWT.log(caught.toString());
+      }
+
+      @Override
+      public void onSuccess(DtcRequestInfo requestInfo) {
+        Window.alert(requestInfo.toString());
+      }
+
+    });
   }
 
   @Override

@@ -27,7 +27,7 @@ public class DtcServiceImplTest {
 
   @Test
   public void testExtractItemsFrom() throws IOException, ParseException {
-    byte[] contents = DtcServiceImpl.getHtmlContents("/");
+    byte[] contents = DtcServiceImpl.getHtmlContents("http://dtc.skcomms.net/");
     List<DtcNodeInfo> items = DtcServiceImpl.createDtcNodeInfosFrom(contents);
     for (DtcNodeInfo item : items) {
       Assert.assertNotNull(item.getName());
@@ -37,10 +37,10 @@ public class DtcServiceImplTest {
 
       if (item.isLeaf()) {
         Assert.assertTrue(item.getPath().endsWith(".ini"));
-        Assert.assertFalse(DtcServiceVerifier.isValidPath(item.getPath()));
+        Assert.assertFalse(DtcServiceVerifier.isValidDirectoryPath(item.getPath()));
       } else {
         Assert.assertEquals("디렉토리", item.getDescription());
-        Assert.assertTrue(DtcServiceVerifier.isValidPath(item.getPath()));
+        Assert.assertTrue(DtcServiceVerifier.isValidDirectoryPath(item.getPath()));
       }
 
       new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").parse(item.getUpdateTime());
@@ -53,7 +53,7 @@ public class DtcServiceImplTest {
 
     Assert.assertFalse(items.isEmpty());
 
-    contents = DtcServiceImpl.getHtmlContents("/kshop2s/");
+    contents = DtcServiceImpl.getHtmlContents("http://dtc.skcomms.net/?b=kshop2s/");
     items = DtcServiceImpl.createDtcNodeInfosFrom(contents);
 
     for (DtcNodeInfo item : items) {
@@ -65,10 +65,10 @@ public class DtcServiceImplTest {
       if (item.isLeaf()) {
         Assert.assertTrue(item.getPath().endsWith(".ini"));
 
-        Assert.assertFalse(DtcServiceVerifier.isValidPath(item.getPath()));
+        Assert.assertFalse(DtcServiceVerifier.isValidDirectoryPath(item.getPath()));
       } else {
         Assert.assertEquals("디렉토리", item.getDescription());
-        Assert.assertTrue(DtcServiceVerifier.isValidPath(item.getPath()));
+        Assert.assertTrue(DtcServiceVerifier.isValidDirectoryPath(item.getPath()));
       }
 
       new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").parse(item.getUpdateTime());
@@ -82,21 +82,21 @@ public class DtcServiceImplTest {
   }
 
   @Test
-  public void testGetHtmlContents() throws IOException {
-    String path = "/";
-    String contents = new String(DtcServiceImpl.getHtmlContents(path));
-    Assert.assertNotNull(contents);
-    Assert.assertTrue(contents.substring(0, 16), contents.startsWith("<a"));
-  }
-
-  @Test
   public void testParseTestPage() throws IOException {
     String href = "http://10.141.6.198/request.html?c=kadcpts/100.ini";
     URL url = new URL(href);
     URLConnection conn = url.openConnection();
     byte[] contents = DtcServiceImpl.readAllBytes(conn.getInputStream());
-    // System.out.println(new String(contents));
     DtcRequestInfo requestInfo = DtcServiceImpl.createDtcRequestInfoFrom(contents);
+    System.out.println(requestInfo.getParams().toString());
+    System.out.println(requestInfo.getIpInfo());
+
+    href = "http://10.141.6.198/request.html?c=kegloos_new/100.ini";
+    url = new URL(href);
+    conn = url.openConnection();
+    contents = DtcServiceImpl.readAllBytes(conn.getInputStream());
+    requestInfo = DtcServiceImpl.createDtcRequestInfoFrom(contents);
+    System.out.println(requestInfo.getParams().toString());
     System.out.println(requestInfo.getIpInfo());
   }
 
