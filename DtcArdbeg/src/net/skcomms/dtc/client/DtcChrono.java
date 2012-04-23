@@ -33,6 +33,7 @@ public class DtcChrono {
     
     GWT.log("Search Time: " + this.getFormattedTime());
     GWT.log("StartTime: " + Long.toString(this.startTime));
+    formattedTimeText.setData(this.getFormattedTime());
     chronoAnimation = new ChronoAnimation(this.chronoElement, this.elapsedTimeText);
     chronoAnimation.run(10000);
   }
@@ -107,6 +108,8 @@ public class DtcChrono {
       startTime = currentDate.getTime();
       currentTime = 0l;
       endTime = 0l;
+      changeColor("red");
+
     }
     
     @Override

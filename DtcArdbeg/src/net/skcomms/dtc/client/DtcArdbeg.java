@@ -37,7 +37,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.RootPanel;
-
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
  */
@@ -90,6 +89,24 @@ public class DtcArdbeg implements EntryPoint {
     };
   }-*/;
 
+  public native static void addDtcFormEventHandler (DtcArdbeg module, Document dtcDoc) /*-{
+    var inputForm = dtcDoc.getElementsByTagName("frame")[0].contentWindow.document.getElementsByTagName("form")[0];
+    //$wnd.alert(inputForm.onsubmit);
+    for (i = 0 ; i < inputForm.elements.length ; i++) {
+    
+      var inputElement = inputForm.elements[i];
+      if (inputElement.type == "text") {
+        inputElement.onkeydown = function(event) {
+            if (event.keyCode == 13) {
+            module.@net.skcomms.dtc.client.DtcArdbeg::onSubmitRequestForm()();
+            this.form.submit();
+            this.select();
+          }
+        }
+      };
+    }
+  }-*/;
+  
   private static String calculateBaseUrl() {
     int queryStringStart = Document.get().getURL().indexOf('?');
     int index;
@@ -343,13 +360,17 @@ public class DtcArdbeg implements EntryPoint {
     this.sortDtcNodes();
   }
 
+  private void onSubmitRequestForm() {
+    DtcArdbeg.dtcChrono.start();
+  }
+  
   ///////////////////////////////////////////////////////////////////////////////////////////
   //onClickSearchButton
   ///////////////////////////////////////////////////////////////////////////////////////////
   private void onClickSearchButton() {
     DtcArdbeg.dtcChrono.start();
-
   }
+
   private void onLoadDtcResponseIFrame() {
     this.cookieHandler.storeRequestParametersIntoCookie(this.getDtcFrameDoc());
     DtcArdbeg.dtcChrono.end();       
@@ -368,6 +389,7 @@ public class DtcArdbeg implements EntryPoint {
 
   protected void onLoadDtcTestPage(Document doc) {
     DtcArdbeg.addDtcSearchButtonEventHandler(DtcArdbeg.this, doc);
+    DtcArdbeg.addDtcFormEventHandler(DtcArdbeg.this, doc);
     DtcArdbeg.addDtcResponseIFrameLoadEventHandler(DtcArdbeg.this, doc);
     DtcArdbeg.this.cookieHandler.loadAndSetRequestParameters(doc);
 
@@ -376,11 +398,12 @@ public class DtcArdbeg implements EntryPoint {
     if (ardbegParam != null && ardbegParam.equals(dtcFrameParam)) {
       this.setUrlParameters();
     }
+    
     //create DtcChrono
-    FrameElement responseFrame = DomExplorerHelper.getFrameElement(doc, "request");
-    Document responseDocument = FrameElement.as(responseFrame).getContentDocument();
-    BodyElement responseBody = responseDocument.getBody();
-    DtcArdbeg.dtcChrono.createChrono(responseDocument, responseBody);
+    FrameElement requestFrame = DomExplorerHelper.getFrameElement(doc, "request");
+    Document requestDocument = FrameElement.as(requestFrame).getContentDocument();
+    BodyElement requestBody = requestDocument.getBody();
+    DtcArdbeg.dtcChrono.createChrono(requestDocument, requestBody);
   }
 
   @Override
