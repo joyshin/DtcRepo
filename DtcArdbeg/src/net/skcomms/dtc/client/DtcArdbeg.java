@@ -3,7 +3,6 @@ package net.skcomms.dtc.client;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,50 +14,75 @@ import net.skcomms.dtc.shared.DtcNodeInfo;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
-import com.google.gwt.dom.client.BodyElement;
-import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.FrameElement;
 import com.google.gwt.dom.client.IFrameElement;
 import com.google.gwt.dom.client.ImageElement;
-import com.google.gwt.dom.client.LabelElement;
 import com.google.gwt.dom.client.LinkElement;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.dom.client.TableRowElement;
-import com.google.gwt.dom.client.Text;
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.RootPanel;
+
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class DtcArdbeg implements EntryPoint {
 
   private static class Pair<K, V> {
-    K key;
-    V value;
+    private K key;
+    private V value;
 
     public Pair(K key, V value) {
       this.key = key;
       this.value = value;
     }
+
+    public K getKey() {
+      return this.key;
+    }
+
+    /**
+     * @return
+     */
+    public V getValue() {
+      return this.value;
+    }
   }
-  
+
   private final static String BASE_URL = DtcArdbeg.calculateBaseUrl();
 
   private final static String DTC_PROXY_URL = DtcArdbeg.BASE_URL + "_dtcproxy_/";
 
   private static ServiceDao serviceDao = new ServiceDao();
   private static DtcChrono dtcChrono = new DtcChrono();
-  
+
+  public native static void addDtcFormEventHandler(DtcArdbeg module, Document dtcDoc) /*-{
+    var inputForm = dtcDoc.getElementsByTagName("frame")[0].contentWindow.document
+        .getElementsByTagName("form")[0];
+    for (i = 0; i < inputForm.elements.length; i++) {
+      var inputElement = inputForm.elements[i];
+      if (inputElement.type == "text") {
+        inputElement.onkeydown = function(event) {
+          if (event.keyCode == 13) {
+            module.@net.skcomms.dtc.client.DtcArdbeg::onSubmitRequestForm()();
+            this.form.submit();
+            this.select();
+          }
+        }
+      }
+      ;
+    }
+  }-*/;
+
   private static native void addDtcFrameScrollEventHandler(DtcArdbeg ardbeg) /*-{
     if ($doc.cssInserted == null) {
       $doc.cssInserted = true;
@@ -81,32 +105,15 @@ public class DtcArdbeg implements EntryPoint {
       module.@net.skcomms.dtc.client.DtcArdbeg::onLoadDtcResponseIFrame()();
     };
   }-*/;
-  
-  public native static void addDtcSearchButtonEventHandler (DtcArdbeg module, Document dtcDoc) /*-{
-    var searchButton = dtcDoc.getElementsByTagName("frame")[0].contentWindow.document.getElementById("div_search");
+
+  public native static void addDtcSearchButtonEventHandler(DtcArdbeg module, Document dtcDoc) /*-{
+    var searchButton = dtcDoc.getElementsByTagName("frame")[0].contentWindow.document
+        .getElementById("div_search");
     searchButton.onclick = function() {
       module.@net.skcomms.dtc.client.DtcArdbeg::onClickSearchButton()();
     };
   }-*/;
 
-  public native static void addDtcFormEventHandler (DtcArdbeg module, Document dtcDoc) /*-{
-    var inputForm = dtcDoc.getElementsByTagName("frame")[0].contentWindow.document.getElementsByTagName("form")[0];
-    //$wnd.alert(inputForm.onsubmit);
-    for (i = 0 ; i < inputForm.elements.length ; i++) {
-    
-      var inputElement = inputForm.elements[i];
-      if (inputElement.type == "text") {
-        inputElement.onkeydown = function(event) {
-            if (event.keyCode == 13) {
-            module.@net.skcomms.dtc.client.DtcArdbeg::onSubmitRequestForm()();
-            this.form.submit();
-            this.select();
-          }
-        }
-      };
-    }
-  }-*/;
-  
   private static String calculateBaseUrl() {
     int queryStringStart = Document.get().getURL().indexOf('?');
     int index;
@@ -137,7 +144,7 @@ public class DtcArdbeg implements EntryPoint {
     Collections.sort(rows, new Comparator<Pair<Integer, Node>>() {
       @Override
       public int compare(Pair<Integer, Node> arg0, Pair<Integer, Node> arg1) {
-        return -arg0.key.compareTo(arg1.key);
+        return -arg0.getKey().compareTo(arg1.getKey());
       }
     });
   }
@@ -176,8 +183,8 @@ public class DtcArdbeg implements EntryPoint {
 
   private void applyStylesToDtcDirectoryNodes(List<Pair<Integer, Node>> pairs) {
     for (Pair<Integer, Node> pair : pairs) {
-      if (pair.key == 0) {
-        Element.as(pair.value).setAttribute("style", "color:gray; ");
+      if (pair.getKey() == 0) {
+        Element.as(pair.getValue()).setAttribute("style", "color:gray; ");
       }
     }
   }
@@ -235,11 +242,11 @@ public class DtcArdbeg implements EntryPoint {
 
     int prevScore = 1;
     for (Pair<Integer, Node> pair : rows) {
-      if (prevScore != 0 && pair.key.equals(0)) {
+      if (prevScore != 0 && pair.getKey().equals(0)) {
         newTableBody.appendChild(oldTableBody.getFirstChild());
       }
-      newTableBody.appendChild(pair.value);
-      prevScore = pair.key;
+      newTableBody.appendChild(pair.getValue());
+      prevScore = pair.getKey();
     }
     return newTableBody;
   }
@@ -327,7 +334,7 @@ public class DtcArdbeg implements EntryPoint {
   }
 
   private boolean hasVisitedService(List<Pair<Integer, Node>> rows) {
-    return !rows.isEmpty() && rows.get(0).key > 0;
+    return !rows.isEmpty() && rows.get(0).getKey() > 0;
   }
 
   private void initializeDtcFrame() {
@@ -340,6 +347,13 @@ public class DtcArdbeg implements EntryPoint {
     RootPanel.get("dtcContainer").add(this.dtcFrame);
 
     this.dtcFrame.setUrl(DtcArdbeg.calculateInitialDtcUrl());
+  }
+
+  // /////////////////////////////////////////////////////////////////////////////////////////
+  // onClickSearchButton
+  // /////////////////////////////////////////////////////////////////////////////////////////
+  private void onClickSearchButton() {
+    DtcArdbeg.dtcChrono.start();
   }
 
   /**
@@ -360,20 +374,9 @@ public class DtcArdbeg implements EntryPoint {
     this.sortDtcNodes();
   }
 
-  private void onSubmitRequestForm() {
-    DtcArdbeg.dtcChrono.start();
-  }
-  
-  ///////////////////////////////////////////////////////////////////////////////////////////
-  //onClickSearchButton
-  ///////////////////////////////////////////////////////////////////////////////////////////
-  private void onClickSearchButton() {
-    DtcArdbeg.dtcChrono.start();
-  }
-
   private void onLoadDtcResponseIFrame() {
     this.cookieHandler.storeRequestParametersIntoCookie(this.getDtcFrameDoc());
-    DtcArdbeg.dtcChrono.end();       
+    DtcArdbeg.dtcChrono.end();
   }
 
   /**
@@ -398,12 +401,11 @@ public class DtcArdbeg implements EntryPoint {
     if (ardbegParam != null && ardbegParam.equals(dtcFrameParam)) {
       this.setUrlParameters();
     }
-    
-    //create DtcChrono
+
+    // create DtcChrono
     FrameElement requestFrame = DomExplorerHelper.getFrameElement(doc, "request");
     Document requestDocument = FrameElement.as(requestFrame).getContentDocument();
-    BodyElement requestBody = requestDocument.getBody();
-    DtcArdbeg.dtcChrono.createChrono(requestDocument, requestBody);
+    DtcArdbeg.dtcChrono.createChrono(requestDocument);
   }
 
   @Override
@@ -414,6 +416,10 @@ public class DtcArdbeg implements EntryPoint {
   }
 
   private void onScrollDtcFrame() {
+  }
+
+  private void onSubmitRequestForm() {
+    DtcArdbeg.dtcChrono.start();
   }
 
   private void removeComaparePageAnchor(Document doc) {

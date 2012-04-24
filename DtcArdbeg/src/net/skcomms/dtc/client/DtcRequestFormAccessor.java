@@ -31,7 +31,7 @@ public class DtcRequestFormAccessor {
   private static final String EMPTY = "";
 
   private static native void toggleIpElement(JavaScriptObject requestFrame) /*-{
-		requestFrame.contentWindow.fnCHANGE_IP();
+    requestFrame.contentWindow.fnCHANGE_IP();
   }-*/;
 
   private FrameElement requestFrame;
@@ -46,6 +46,14 @@ public class DtcRequestFormAccessor {
   }
 
   private boolean containsInOptions(String value) {
+    if (!this.isAvailable) {
+      return false;
+    }
+
+    if (this.ipSelectElement == null) {
+      return false;
+    }
+
     NodeList<OptionElement> options = this.ipSelectElement.getOptions();
     for (int i = 0; i < options.getLength(); i++) {
       if (options.getItem(i).getValue().equals(value)) {
@@ -60,7 +68,7 @@ public class DtcRequestFormAccessor {
     boolean ipTextEnabling = (type == InputElementType.TEXT);
 
     if (this.isIpTextEnabled() != ipTextEnabling) {
-      toggleIpElement(this.requestFrame.cast());
+      DtcRequestFormAccessor.toggleIpElement(this.requestFrame.cast());
     }
   }
 
@@ -91,20 +99,20 @@ public class DtcRequestFormAccessor {
       ipValue = this.ipSelectElement.getValue();
     }
 
-    return ipValue != null ? ipValue : EMPTY;
+    return ipValue != null ? ipValue : DtcRequestFormAccessor.EMPTY;
   }
 
   public String getDtcRequestParameter(String name) {
 
     if (!this.isAvailable()) {
-      return EMPTY;
+      return DtcRequestFormAccessor.EMPTY;
     }
 
     if (name.equals("IP")) {
       return this.getDtcIpRequestParameter();
     } else {
       InputElement inputElement = this.findInputElementByCellText(name);
-      return inputElement != null ? inputElement.getValue() : EMPTY;
+      return inputElement != null ? inputElement.getValue() : DtcRequestFormAccessor.EMPTY;
     }
   }
 
@@ -196,11 +204,12 @@ public class DtcRequestFormAccessor {
     }
 
     this.requestFrame = FrameElement.as(doc.getElementsByTagName("frame").getItem(0));
-    this.ipSelectElement = SelectElement.as(this.requestFrame
-        .getContentDocument()
-        .getElementById("ip_select"));
     this.ipTextElement = InputElement.as(this.requestFrame.getContentDocument()
         .getElementById("ip_text"));
+    Element element = this.requestFrame.getContentDocument().getElementById("ip_select");
+    if (element != null) {
+      this.ipSelectElement = SelectElement.as(element);
+    }
 
     this.setAvailable(true);
   }
