@@ -31,6 +31,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Frame;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionModel;
@@ -48,7 +49,7 @@ public class DtcArdbeg implements EntryPoint {
   }
 
   public enum DtcPageType {
-    NONE, HOME, DIRECTORY, SEARCH;
+    NONE, HOME, DIRECTORY, TEST;
   }
 
   private static class Pair<K, V> {
@@ -67,18 +68,20 @@ public class DtcArdbeg implements EntryPoint {
 
   private static ServiceDao serviceDao = new ServiceDao();
 
-  static List<DtcNodeInfo> dtcNodeList = new ArrayList<DtcNodeInfo>();
+  private static final FlowPanel dtcNodePanel = new FlowPanel();
+
+  private static final FlowPanel dtcfavoriteNodePanel = new FlowPanel();
 
   private static final CellList<DtcNodeInfo> dtcNodeCellList = new CellList<DtcNodeInfo>(
+      DtcNodeInfoCell.getInstance());
+
+  private static final CellList<DtcNodeInfo> dtcfavoriteNodeCellList = new CellList<DtcNodeInfo>(
       DtcNodeInfoCell.getInstance());
 
   private static final SelectionModel<DtcNodeInfo> SELECTION_MODEL =
       new SingleSelectionModel<DtcNodeInfo>();
 
-  // private static final SplitLayoutPanel panel = new SplitLayoutPanel();
-  private static final FlowPanel flowPanel = new FlowPanel();
-
-  private static native void addDtcFrameScrollEventHandler(DtcArdbeg ardbeg) /*-{
+  private native static void addDtcFrameScrollEventHandler(DtcArdbeg ardbeg) /*-{
                                                                              if ($doc.cssInserted == null) {
                                                                              $doc.cssInserted = true;
                                                                              $doc.styleSheets[0]
@@ -146,6 +149,8 @@ public class DtcArdbeg implements EntryPoint {
     });
   }
 
+  private final List<DtcNodeInfo> dtcNodeList = new ArrayList<DtcNodeInfo>();
+
   private final Frame dtcFrame = new Frame();
 
   private final DtcNavigationBar navigationBar = new DtcNavigationBar(DtcArdbeg.DTC_PROXY_URL);
@@ -153,8 +158,6 @@ public class DtcArdbeg implements EntryPoint {
   private final DtcRequestFormAccessor dtcRequestFormAccesser = new DtcRequestFormAccessor();
 
   private final DtcUrlCopyHelper urlCopyHelper = new DtcUrlCopyHelper();
-
-  // private static final ScrollPanel scrollPanel = new ScrollPanel();
 
   /**
    * @param doc
@@ -201,7 +204,7 @@ public class DtcArdbeg implements EntryPoint {
 
         DtcArdbeg.this.onLoadDtcFrame(doc);
 
-        DtcPageType type = DtcArdbeg.this.getTypeOfCurrentPage(doc.getURL());
+        DtcPageType type = DtcArdbeg.this.getTypeOfPage(doc.getURL());
 
         switch (type) {
         case HOME:
@@ -210,7 +213,7 @@ public class DtcArdbeg implements EntryPoint {
         case DIRECTORY:
           DtcArdbeg.this.onLoadDtcServiceDirectoryPage(doc);
           break;
-        case SEARCH:
+        case TEST:
           DtcArdbeg.this.onLoadDtcTestPage();
           break;
         default:
@@ -297,6 +300,12 @@ public class DtcArdbeg implements EntryPoint {
     return rows;
   }
 
+  private void direcotyPageDisplay() {
+    RootPanel.get("dtcContainer").setVisible(false);
+    RootPanel.get("favoriteNodeContainer").setVisible(false);
+    RootPanel.get("nodeContainer").setVisible(true);
+  }
+
   public String getDtcFrameSrc() {
     return IFrameElement.as(
         DtcArdbeg.this.dtcFrame.getElement()).getContentDocument().getURL();
@@ -308,7 +317,6 @@ public class DtcArdbeg implements EntryPoint {
 
   private String getHrefWithTypeAndPath(DtcPageType type, String path) {
 
-    // String href = DtcArdbeg.getBaseUrl();
     String href = DtcArdbeg.DTC_PROXY_URL;
 
     switch (type) {
@@ -316,7 +324,7 @@ public class DtcArdbeg implements EntryPoint {
       return href;
     case DIRECTORY:
       return href + "?b=" + path.substring(1);
-    case SEARCH:
+    case TEST:
       return href + "?c=" + path.substring(1);
     }
 
@@ -346,7 +354,7 @@ public class DtcArdbeg implements EntryPoint {
     return params;
   }
 
-  protected DtcPageType getTypeOfCurrentPage(String url) {
+  protected DtcPageType getTypeOfPage(String url) {
     if (url.equals(DtcArdbeg.DTC_PROXY_URL)) {
       return DtcPageType.HOME;
     }
@@ -358,14 +366,25 @@ public class DtcArdbeg implements EntryPoint {
 
     index = url.indexOf("?c=");
     if (index != -1) {
-      return DtcPageType.SEARCH;
+      return DtcPageType.TEST;
     }
     return DtcPageType.NONE;
   }
 
-  private DtcPageType getTypeOfCurrentUrlWithPathAndIsLeaf(String path, boolean isLeaf) {
+  /**
+   * 선택된 아이템의 DtcPageType을 가져온다.
+   * 
+   * @param path
+   *          이동할 페이지 경로
+   * 
+   * @param isLeaf
+   *          True: Test, False: 나머지
+   * 
+   * @return DtcPageType
+   */
+  private DtcPageType getTypeOfSelected(String path, boolean isLeaf) {
     if (isLeaf == true) {
-      return DtcPageType.SEARCH;
+      return DtcPageType.TEST;
     } else {
       if (path.equals("/")) {
         return DtcPageType.HOME;
@@ -379,6 +398,12 @@ public class DtcArdbeg implements EntryPoint {
     return !rows.isEmpty() && rows.get(0).key > 0;
   }
 
+  private void homePageDisplay() {
+    RootPanel.get("dtcContainer").setVisible(false);
+    RootPanel.get("nodeContainer").setVisible(true);
+    RootPanel.get("favoriteNodeContainer").setVisible(true);
+  }
+
   private void initializeDtcFrame() {
     this.dtcFrame.setPixelSize(Window.getClientWidth() - 30, Window.getClientHeight() - 135);
 
@@ -386,21 +411,21 @@ public class DtcArdbeg implements EntryPoint {
 
     Window.addResizeHandler(this.createDtcFrameResizeHandler());
 
-    this.switchDtcFrameToPanel();
+    this.homePageDisplay();
 
     RootPanel.get("dtcContainer").add(this.dtcFrame);
 
     this.dtcFrame.setUrl(DtcArdbeg.calculateInitialDtcUrl());
   }
 
-  private void initializeDtcPanel() {
+  private void initializeDtcNodeContainer() {
     SELECTION_MODEL.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
       @Override
       public void onSelectionChange(SelectionChangeEvent event) {
         DtcNodeInfo selected = ((SingleSelectionModel<DtcNodeInfo>) SELECTION_MODEL)
             .getSelectedObject();
 
-        DtcPageType type = DtcArdbeg.this.getTypeOfCurrentUrlWithPathAndIsLeaf(selected.getPath(),
+        DtcPageType type = DtcArdbeg.this.getTypeOfSelected(selected.getPath(),
             selected.isLeaf());
         String href = DtcArdbeg.this.getHrefWithTypeAndPath(type, selected.getPath());
         DtcArdbeg.this.setDtcFrameUrl(href);
@@ -408,10 +433,32 @@ public class DtcArdbeg implements EntryPoint {
     });
 
     dtcNodeCellList.setSelectionModel(SELECTION_MODEL);
+    dtcNodePanel.add(dtcNodeCellList);
 
-    flowPanel.add(dtcNodeCellList);
+    dtcfavoriteNodeCellList.setSelectionModel(SELECTION_MODEL);
+    dtcfavoriteNodePanel.add(dtcfavoriteNodeCellList);
 
-    RootPanel.get("dtcContainer").add(flowPanel);
+    List<DtcNodeInfo> testNodeList = new ArrayList<DtcNodeInfo>();
+    DtcNodeInfo tmpNode = new DtcNodeInfo();
+    tmpNode.setDescription("DTC_PROXY_URL");
+    tmpNode.setName("Favorite Test");
+    tmpNode.setPath("/");
+    tmpNode.setUpdateTime("11");
+    testNodeList.add(tmpNode);
+    dtcfavoriteNodeCellList.setRowData(testNodeList);
+
+    Label dtcNodePanelLabel = new Label();
+    dtcNodePanelLabel.setText("Services"); // 한글 인코딩 문제 발견
+
+    Label dtcFavoriteNodePanelLabel = new Label();
+    dtcFavoriteNodePanelLabel.setText("Favorites");
+
+    RootPanel.get("nodeContainer").add(dtcNodePanelLabel);
+    RootPanel.get("nodeContainer").add(dtcNodePanel);
+
+    RootPanel.get("favoriteNodeContainer").add(dtcFavoriteNodePanelLabel);
+    RootPanel.get("favoriteNodeContainer").add(dtcfavoriteNodePanel);
+
   }
 
   private void loadDtcPage(String path, boolean isLeaf) {
@@ -431,7 +478,7 @@ public class DtcArdbeg implements EntryPoint {
     this.removeComaparePageAnchor(doc);
 
     DtcArdbeg.this.refreshDtcNodeCellList("/");
-    this.switchDtcFrameToPanel();
+    this.homePageDisplay();
     // this.sortDtcNodes();
   }
 
@@ -450,7 +497,7 @@ public class DtcArdbeg implements EntryPoint {
     }
 
     DtcArdbeg.this.refreshDtcNodeCellList("/" + directoryPath);
-    this.switchDtcFrameToPanel();
+    this.direcotyPageDisplay();
   }
 
   protected void onLoadDtcTestPage() {
@@ -461,7 +508,7 @@ public class DtcArdbeg implements EntryPoint {
       this.setUrlParameters();
     }
 
-    this.switchPanelToDtcFrame();
+    this.testPageDisplay();
   }
 
   @Override
@@ -469,7 +516,7 @@ public class DtcArdbeg implements EntryPoint {
     this.navigationBar.initialize(this);
     this.urlCopyHelper.initialize(this);
     this.initializeDtcFrame();
-    this.initializeDtcPanel();
+    this.initializeDtcNodeContainer();
   }
 
   private void onScrollDtcFrame() {
@@ -486,14 +533,11 @@ public class DtcArdbeg implements EntryPoint {
 
       @Override
       public void onSuccess(List<DtcNodeInfo> nodeInfos) {
-        dtcNodeList.clear();
-        dtcNodeList.addAll(nodeInfos);
+        DtcArdbeg.this.dtcNodeList.clear();
+        DtcArdbeg.this.dtcNodeList.addAll(nodeInfos);
 
-        dtcNodeCellList.setRowData(dtcNodeList);
-        dtcNodeCellList.setRowCount(dtcNodeList.size(), true);
-
-        GWT.log("on succeeded!!!");
-        // dtcNodeCellList.setVisibleRange(0, 100);
+        dtcNodeCellList.setRowData(DtcArdbeg.this.dtcNodeList);
+        dtcNodeCellList.setRowCount(DtcArdbeg.this.dtcNodeList.size(), true);
       }
     });
   }
@@ -546,14 +590,10 @@ public class DtcArdbeg implements EntryPoint {
     });
   }
 
-  private void switchDtcFrameToPanel() {
-    this.dtcFrame.setVisible(false);
-    flowPanel.setVisible(true);
-  }
-
-  private void switchPanelToDtcFrame() {
-    this.dtcFrame.setVisible(true);
-    flowPanel.setVisible(false);
+  private void testPageDisplay() {
+    RootPanel.get("nodeContainer").setVisible(false);
+    RootPanel.get("favoriteNodeContainer").setVisible(false);
+    RootPanel.get("dtcContainer").setVisible(true);
   }
 
   private void updateNavigationBar(Document doc) {
