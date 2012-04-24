@@ -26,16 +26,12 @@ import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
-import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SelectionModel;
-import com.google.gwt.view.client.SingleSelectionModel;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
@@ -72,14 +68,7 @@ public class DtcArdbeg implements EntryPoint {
 
   private static final FlowPanel dtcfavoriteNodePanel = new FlowPanel();
 
-  private static final CellList<DtcNodeInfo> dtcNodeCellList = new CellList<DtcNodeInfo>(
-      DtcNodeInfoCell.getInstance());
-
-  private static final CellList<DtcNodeInfo> dtcfavoriteNodeCellList = new CellList<DtcNodeInfo>(
-      DtcNodeInfoCell.getInstance());
-
-  private static final SelectionModel<DtcNodeInfo> SELECTION_MODEL =
-      new SingleSelectionModel<DtcNodeInfo>();
+  private static final Frame dtcFrame = new Frame();
 
   private native static void addDtcFrameScrollEventHandler(DtcArdbeg ardbeg) /*-{
                                                                              if ($doc.cssInserted == null) {
@@ -140,6 +129,14 @@ public class DtcArdbeg implements EntryPoint {
     return DtcArdbeg.BASE_URL;
   }
 
+  public static String getDtcProxyUrl() {
+    return DTC_PROXY_URL;
+  }
+
+  public static void setDtcFrameUrl(String href) {
+    dtcFrame.setUrl(href);
+  }
+
   private static void sortServicesByVisitCount(List<Pair<Integer, Node>> rows) {
     Collections.sort(rows, new Comparator<Pair<Integer, Node>>() {
       @Override
@@ -149,15 +146,13 @@ public class DtcArdbeg implements EntryPoint {
     });
   }
 
-  private final List<DtcNodeInfo> dtcNodeList = new ArrayList<DtcNodeInfo>();
-
-  private final Frame dtcFrame = new Frame();
-
   private final DtcNavigationBar navigationBar = new DtcNavigationBar(DtcArdbeg.DTC_PROXY_URL);
 
   private final DtcRequestFormAccessor dtcRequestFormAccesser = new DtcRequestFormAccessor();
 
   private final DtcUrlCopyHelper urlCopyHelper = new DtcUrlCopyHelper();
+
+  private final DtcArdbegNodeData dtcArdbegNodeData = DtcArdbegNodeData.getInstance();
 
   /**
    * @param doc
@@ -194,7 +189,7 @@ public class DtcArdbeg implements EntryPoint {
       @Override
       public void onLoad(LoadEvent event) {
         Document doc = IFrameElement.as(
-            DtcArdbeg.this.dtcFrame.getElement()).getContentDocument();
+            DtcArdbeg.dtcFrame.getElement()).getContentDocument();
 
         if (doc == null) {
           return;
@@ -228,7 +223,7 @@ public class DtcArdbeg implements EntryPoint {
     return new ResizeHandler() {
       @Override
       public void onResize(ResizeEvent event) {
-        DtcArdbeg.this.dtcFrame.setPixelSize(Window.getClientWidth() - 30,
+        DtcArdbeg.dtcFrame.setPixelSize(Window.getClientWidth() - 30,
             Window.getClientHeight() - 200);
       }
     };
@@ -254,7 +249,7 @@ public class DtcArdbeg implements EntryPoint {
   }
 
   private List<Pair<Integer, Node>> createTableRows(List<DtcNodeInfo> nodeInfos) {
-    Document doc = IFrameElement.as(this.dtcFrame.getElement()).getContentDocument();
+    Document doc = IFrameElement.as(dtcFrame.getElement()).getContentDocument();
     List<Pair<Integer, Node>> rows = new ArrayList<Pair<Integer, Node>>();
 
     for (DtcNodeInfo nodeInfo : nodeInfos) {
@@ -308,27 +303,11 @@ public class DtcArdbeg implements EntryPoint {
 
   public String getDtcFrameSrc() {
     return IFrameElement.as(
-        DtcArdbeg.this.dtcFrame.getElement()).getContentDocument().getURL();
+        DtcArdbeg.dtcFrame.getElement()).getContentDocument().getURL();
   }
 
   public Map<String, String> getDtcRequestParameters() {
     return this.dtcRequestFormAccesser.getDtcRequestParameters();
-  }
-
-  private String getHrefWithTypeAndPath(DtcPageType type, String path) {
-
-    String href = DtcArdbeg.DTC_PROXY_URL;
-
-    switch (type) {
-    case HOME:
-      return href;
-    case DIRECTORY:
-      return href + "?b=" + path.substring(1);
-    case TEST:
-      return href + "?c=" + path.substring(1);
-    }
-
-    return null;
   }
 
   private String getParameterFromDtcFrame(String name) {
@@ -371,29 +350,6 @@ public class DtcArdbeg implements EntryPoint {
     return DtcPageType.NONE;
   }
 
-  /**
-   * 선택된 아이템의 DtcPageType을 가져온다.
-   * 
-   * @param path
-   *          이동할 페이지 경로
-   * 
-   * @param isLeaf
-   *          True: Test, False: 나머지
-   * 
-   * @return DtcPageType
-   */
-  private DtcPageType getTypeOfSelected(String path, boolean isLeaf) {
-    if (isLeaf == true) {
-      return DtcPageType.TEST;
-    } else {
-      if (path.equals("/")) {
-        return DtcPageType.HOME;
-      } else {
-        return DtcPageType.DIRECTORY;
-      }
-    }
-  }
-
   private boolean hasVisitedService(List<Pair<Integer, Node>> rows) {
     return !rows.isEmpty() && rows.get(0).key > 0;
   }
@@ -405,47 +361,25 @@ public class DtcArdbeg implements EntryPoint {
   }
 
   private void initializeDtcFrame() {
-    this.dtcFrame.setPixelSize(Window.getClientWidth() - 30, Window.getClientHeight() - 135);
+    dtcFrame.setPixelSize(Window.getClientWidth() - 30, Window.getClientHeight() - 135);
 
-    this.dtcFrame.addLoadHandler(this.createDtcFrameLoadHandler());
+    dtcFrame.addLoadHandler(this.createDtcFrameLoadHandler());
 
     Window.addResizeHandler(this.createDtcFrameResizeHandler());
 
     this.homePageDisplay();
 
-    RootPanel.get("dtcContainer").add(this.dtcFrame);
+    RootPanel.get("dtcContainer").add(dtcFrame);
 
-    this.dtcFrame.setUrl(DtcArdbeg.calculateInitialDtcUrl());
+    dtcFrame.setUrl(DtcArdbeg.calculateInitialDtcUrl());
   }
 
   private void initializeDtcNodeContainer() {
-    SELECTION_MODEL.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-      @Override
-      public void onSelectionChange(SelectionChangeEvent event) {
-        DtcNodeInfo selected = ((SingleSelectionModel<DtcNodeInfo>) SELECTION_MODEL)
-            .getSelectedObject();
 
-        DtcPageType type = DtcArdbeg.this.getTypeOfSelected(selected.getPath(),
-            selected.isLeaf());
-        String href = DtcArdbeg.this.getHrefWithTypeAndPath(type, selected.getPath());
-        DtcArdbeg.this.setDtcFrameUrl(href);
-      }
-    });
+    this.dtcArdbegNodeData.initialize();
 
-    dtcNodeCellList.setSelectionModel(SELECTION_MODEL);
-    dtcNodePanel.add(dtcNodeCellList);
-
-    dtcfavoriteNodeCellList.setSelectionModel(SELECTION_MODEL);
-    dtcfavoriteNodePanel.add(dtcfavoriteNodeCellList);
-
-    List<DtcNodeInfo> testNodeList = new ArrayList<DtcNodeInfo>();
-    DtcNodeInfo tmpNode = new DtcNodeInfo();
-    tmpNode.setDescription("DTC_PROXY_URL");
-    tmpNode.setName("Favorite Test");
-    tmpNode.setPath("/");
-    tmpNode.setUpdateTime("11");
-    testNodeList.add(tmpNode);
-    dtcfavoriteNodeCellList.setRowData(testNodeList);
+    dtcNodePanel.add(this.dtcArdbegNodeData.getDtcNodeCellList());
+    dtcfavoriteNodePanel.add(this.dtcArdbegNodeData.getDtcFavoriteNodeCellList());
 
     Label dtcNodePanelLabel = new Label();
     dtcNodePanelLabel.setText("Services"); // 한글 인코딩 문제 발견
@@ -477,7 +411,7 @@ public class DtcArdbeg implements EntryPoint {
     this.addCssLinkIntoDtcFrame(doc);
     this.removeComaparePageAnchor(doc);
 
-    DtcArdbeg.this.refreshDtcNodeCellList("/");
+    this.dtcArdbegNodeData.refreshDtcNode("/");
     this.homePageDisplay();
     // this.sortDtcNodes();
   }
@@ -496,7 +430,7 @@ public class DtcArdbeg implements EntryPoint {
       DtcArdbeg.serviceDao.addVisitCount(serviceName);
     }
 
-    DtcArdbeg.this.refreshDtcNodeCellList("/" + directoryPath);
+    this.dtcArdbegNodeData.refreshDtcNode("/" + directoryPath);
     this.direcotyPageDisplay();
   }
 
@@ -522,26 +456,6 @@ public class DtcArdbeg implements EntryPoint {
   private void onScrollDtcFrame() {
   }
 
-  private void refreshDtcNodeCellList(String path) {
-
-    DtcService.Util.getInstance().getDir(path, new AsyncCallback<List<DtcNodeInfo>>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        caught.printStackTrace();
-        GWT.log(caught.getMessage());
-      }
-
-      @Override
-      public void onSuccess(List<DtcNodeInfo> nodeInfos) {
-        DtcArdbeg.this.dtcNodeList.clear();
-        DtcArdbeg.this.dtcNodeList.addAll(nodeInfos);
-
-        dtcNodeCellList.setRowData(DtcArdbeg.this.dtcNodeList);
-        dtcNodeCellList.setRowCount(DtcArdbeg.this.dtcNodeList.size(), true);
-      }
-    });
-  }
-
   private void removeComaparePageAnchor(Document doc) {
     Node anchor = doc.getBody().getChild(0);
     doc.getBody().removeChild(anchor);
@@ -554,10 +468,6 @@ public class DtcArdbeg implements EntryPoint {
 
     br = doc.getBody().getChild(0);
     doc.getBody().removeChild(br);
-  }
-
-  public void setDtcFrameUrl(String href) {
-    this.dtcFrame.setUrl(href);
   }
 
   private void setUrlParameters() {
@@ -577,7 +487,7 @@ public class DtcArdbeg implements EntryPoint {
 
       @Override
       public void onSuccess(List<DtcNodeInfo> nodeInfos) {
-        Document doc = IFrameElement.as(DtcArdbeg.this.dtcFrame.getElement()).getContentDocument();
+        Document doc = IFrameElement.as(DtcArdbeg.dtcFrame.getElement()).getContentDocument();
         Element oldTableBody = doc.getElementsByTagName("tbody").getItem(0);
 
         List<Pair<Integer, Node>> rows = DtcArdbeg.this.createTableRows(nodeInfos);
