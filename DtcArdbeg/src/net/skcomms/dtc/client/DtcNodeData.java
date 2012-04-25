@@ -13,11 +13,11 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 
-public class DtcArdbegNodeData {
+public class DtcNodeData {
 
   private static List<DtcNodeInfo> dtcNodeList = new ArrayList<DtcNodeInfo>();
 
-  private static DtcArdbegNodeData instance = new DtcArdbegNodeData();
+  private static DtcNodeData instance = new DtcNodeData();
 
   private static final CellList<DtcNodeInfo> dtcNodeCellList = new CellList<DtcNodeInfo>(
       DtcNodeInfoCell.getInstance());
@@ -28,7 +28,7 @@ public class DtcArdbegNodeData {
   private static final CellList<DtcNodeInfo> dtcFavoriteNodeCellList = new CellList<DtcNodeInfo>(
       DtcNodeInfoCell.getInstance());
 
-  public static DtcArdbegNodeData getInstance() {
+  public static DtcNodeData getInstance() {
     return instance;
   }
 
@@ -87,9 +87,9 @@ public class DtcArdbegNodeData {
         DtcNodeInfo selected = ((SingleSelectionModel<DtcNodeInfo>) SELECTION_MODEL)
             .getSelectedObject();
 
-        DtcPageType type = DtcArdbegNodeData.this.getTypeOfSelected(selected.getPath(),
+        DtcPageType type = DtcNodeData.this.getTypeOfSelected(selected.getPath(),
             selected.isLeaf());
-        String href = DtcArdbegNodeData.this.getHrefWithTypeAndPath(type, selected.getPath());
+        String href = DtcNodeData.this.getHrefWithTypeAndPath(type, selected.getPath());
         DtcArdbeg.setDtcFrameUrl(href);
       }
     });

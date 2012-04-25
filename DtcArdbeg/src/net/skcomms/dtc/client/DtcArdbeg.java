@@ -152,7 +152,7 @@ public class DtcArdbeg implements EntryPoint {
 
   private final DtcUrlCopyHelper urlCopyHelper = new DtcUrlCopyHelper();
 
-  private final DtcArdbegNodeData dtcArdbegNodeData = DtcArdbegNodeData.getInstance();
+  private final DtcNodeData dtcArdbegNodeData = DtcNodeData.getInstance();
 
   /**
    * @param doc
