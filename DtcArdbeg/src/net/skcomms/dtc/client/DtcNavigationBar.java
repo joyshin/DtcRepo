@@ -45,6 +45,7 @@ public class DtcNavigationBar {
       public void onClick(ClickEvent event) {
         event.stopPropagation();
         DtcNavigationBar.this.owner.setDtcFrameUrl(href);
+        // DtcArdbeg.setDtcFrameUrl(href);
       }
     });
 

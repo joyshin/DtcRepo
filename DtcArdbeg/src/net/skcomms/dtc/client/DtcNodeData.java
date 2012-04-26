@@ -32,6 +32,8 @@ public class DtcNodeData {
     return instance;
   }
 
+  public DtcArdbeg owner;
+
   public CellList<DtcNodeInfo> getDtcFavoriteNodeCellList() {
     return dtcFavoriteNodeCellList;
   }
@@ -79,8 +81,10 @@ public class DtcNodeData {
     }
   }
 
-  public void initialize()
+  public void initialize(DtcArdbeg dtcArdbeg)
   {
+    this.owner = dtcArdbeg;
+
     SELECTION_MODEL.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
       @Override
       public void onSelectionChange(SelectionChangeEvent event) {
@@ -90,7 +94,7 @@ public class DtcNodeData {
         DtcPageType type = DtcNodeData.this.getTypeOfSelected(selected.getPath(),
             selected.isLeaf());
         String href = DtcNodeData.this.getHrefWithTypeAndPath(type, selected.getPath());
-        DtcArdbeg.setDtcFrameUrl(href);
+        DtcNodeData.this.owner.setDtcFrameUrl(href);
       }
     });
 
