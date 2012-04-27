@@ -17,12 +17,23 @@ import com.google.gwt.dom.client.OptionElement;
 import com.google.gwt.dom.client.SelectElement;
 import com.google.gwt.user.client.Cookies;
 
-public class IpHistoryManager {
+public class IpHistoryManager implements DtcArdbegObserver {
+
+  native static void addDtcIpSelectClickEventHandler(Document dtcFrameDoc,
+      IpHistoryManager ipHistoryManager) /*-{
+		var select = dtcFrameDoc.getElementsByTagName("frame")[0].contentDocument
+				.getElementById("ip_select");
+		select.onclick = function() {
+			//alert("onclick~~");
+			ipHistoryManager.@net.skcomms.dtc.client.IpHistoryManager::redrawIpOptions(Lcom/google/gwt/dom/client/Document;)(dtcFrameDoc);
+		};
+  }-*/;
 
   private final List<IpOption> options = new ArrayList<IpOption>();
   private final DtcRequestFormAccessor requestParameter;
   private String ipText;
   private OptGroupElement dtcOptGroup;
+
   private OptGroupElement cookieOptGroup;
 
   public IpHistoryManager(DtcRequestFormAccessor dtcRequestFormAccesser) {
@@ -88,6 +99,33 @@ public class IpHistoryManager {
         option.setLastSuccessTime(date);
       }
     }
+  }
+
+  @Override
+  public void onLoadDtcDirectory() {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public void onLoadDtcHome() {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public void onLoadDtcResponseFrame(Document dtcFrameDoc, boolean success) {
+    if (success) {
+      updateIpHistory(dtcFrameDoc);
+      redrawIpOptions(dtcFrameDoc);
+    }
+  }
+
+  @Override
+  public void onLoadDtcTestPage(Document dtcFrameDoc) {
+    retrieveInfo(dtcFrameDoc);
+    redrawIpOptions(dtcFrameDoc);
+    addDtcIpSelectClickEventHandler(dtcFrameDoc, this);
   }
 
   public void redrawIpOptions(Document dtcFrameDoc) {

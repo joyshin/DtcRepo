@@ -71,16 +71,6 @@ public class DtcArdbeg implements EntryPoint {
 		};
   }-*/;
 
-  private native static void addDtcIpSelectClickEventHandler(Document dtcFrameDoc,
-      IpHistoryManager ipHistoryManager) /*-{
-		var select = dtcFrameDoc.getElementsByTagName("frame")[0].contentDocument
-				.getElementById("ip_select");
-		select.onclick = function() {
-			//alert("onclick~~");
-			ipHistoryManager.@net.skcomms.dtc.client.IpHistoryManager::redrawIpOptions(Lcom/google/gwt/dom/client/Document;)(dtcFrameDoc);
-		};
-  }-*/;
-
   public native static void addDtcResponseFrameLoadEventHandler(DtcArdbeg module, Document dtcDoc) /*-{
 		var responseFrame = dtcDoc.getElementsByTagName("frame")[1];
 		responseFrame.onload = function() {
@@ -155,6 +145,8 @@ public class DtcArdbeg implements EntryPoint {
 
   private final IpHistoryManager ipHistoryManager = new IpHistoryManager(dtcRequestFormAccesser);
 
+  private final List<DtcArdbegObserver> dtcArdbegObservers = new ArrayList<DtcArdbegObserver>();
+
   /**
    * @param doc
    */
@@ -175,6 +167,10 @@ public class DtcArdbeg implements EntryPoint {
     link.setAttribute("rel", "stylesheet");
     link.setAttribute("href", DtcArdbeg.BASE_URL + "DtcFrame.css");
     doc.getBody().appendChild(link);
+  }
+
+  private void addDtcArdbegObserver(DtcArdbegObserver observer) {
+    dtcArdbegObservers.add(observer);
   }
 
   private void applyStylesToDtcDirectoryNodes(List<Pair<Integer, Node>> pairs) {
@@ -359,17 +355,17 @@ public class DtcArdbeg implements EntryPoint {
    * 
    */
   private void onLoadDtcHomePage(Document doc) {
+    for (DtcArdbegObserver observer : dtcArdbegObservers) {
+      observer.onLoadDtcHome();
+    }
+
     this.addCssLinkIntoDtcFrame(doc);
     this.removeComaparePageAnchor(doc);
     this.sortDtcNodes();
   }
 
   private void onLoadDtcResponseFrame(boolean success) {
-
     if (success) {
-      ipHistoryManager.updateIpHistory(getDtcFrameDoc());
-      ipHistoryManager.redrawIpOptions(getDtcFrameDoc());
-
       this.cookieHandler.storeRequestParametersIntoCookie(this.getDtcFrameDoc());
     }
   }
@@ -379,6 +375,10 @@ public class DtcArdbeg implements EntryPoint {
    * @param serviceName
    */
   private void onLoadDtcServiceDirectoryPage(Document doc, String serviceName) {
+    for (DtcArdbegObserver observer : dtcArdbegObservers) {
+      observer.onLoadDtcDirectory();
+    }
+
     this.addCssLinkIntoDtcFrame(doc);
     if (doc.getReferrer().equals(DtcArdbeg.DTC_PROXY_URL)) {
       DtcArdbeg.serviceDao.addVisitCount(serviceName);
@@ -386,10 +386,10 @@ public class DtcArdbeg implements EntryPoint {
   }
 
   protected void onLoadDtcTestPage(Document dtcFrameDoc) {
-    ipHistoryManager.retrieveInfo(dtcFrameDoc);
+    for (DtcArdbegObserver observer : dtcArdbegObservers) {
+      observer.onLoadDtcTestPage(dtcFrameDoc);
+    }
 
-    ipHistoryManager.redrawIpOptions(dtcFrameDoc);
-    DtcArdbeg.addDtcIpSelectClickEventHandler(dtcFrameDoc, ipHistoryManager);
     DtcArdbeg.this.cookieHandler.loadAndSetRequestParameters(dtcFrameDoc);
 
     String ardbegParam = Window.Location.getParameter("c");
@@ -401,6 +401,8 @@ public class DtcArdbeg implements EntryPoint {
 
   @Override
   public void onModuleLoad() {
+    addDtcArdbegObserver(ipHistoryManager);
+
     this.navigationBar.initialize(this);
     this.urlCopyHelper.initialize(this);
     this.initializeDtcFrame();
