@@ -3,14 +3,17 @@
  */
 package net.skcomms.dtc.server;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 
 import net.skcomms.dtc.shared.DtcNodeInfo;
 import net.skcomms.dtc.shared.DtcRequestInfo;
@@ -18,6 +21,9 @@ import net.skcomms.dtc.shared.DtcServiceVerifier;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * @author jujang@sk.com
@@ -101,12 +107,27 @@ public class DtcServiceImplTest {
   }
 
   @Test
-  public void testPattern() {
-    String input = "'<option value=\"10.141.242.31\">10.141.242.31 - sstgss1</option>'";
-    Pattern pattern = Pattern.compile("<option value=\"(.*)\">(.*)</option>");
-    Matcher m = pattern.matcher(input);
-    m.find();
-    System.out.println(m.group(1));
-    System.out.println(m.group(2));
+  public void testSaxParser() throws IOException, ParserConfigurationException, SAXException {
+    byte[] htmlContents = DtcServiceImpl
+        // .getHtmlContents("http://10.173.2.120:9001/KSHOP2SD/100?Dummy1=1&Dummy2=1&Dummy3=1&Dummy4=1&Version=100&Query=%B3%AA%C0%CC%C5%B0&ResultStartPos=1&ResultCount=2&Sort=PD&Property=&Adult=1&ClientCode=TAA&ClientURI=DTC");
+        .getHtmlContents("http://10.141.242.31:21002/KEGLOOSD/100?Dummy1=1&Dummy2=1&Dummy3=1&Dummy4=1&Version=100&ClientCode=NSB&ClientURL=&Query=%EB%A7%8C%ED%99%94&ResultStartPos=1&ResultCount=10&OrderBy=PD&SearchField=AL&ResultDocLength=256");
+    SAXParserFactory sax = SAXParserFactory.newInstance();
+    SAXParser p = sax.newSAXParser();
+    p.parse(new ByteArrayInputStream(htmlContents), new DefaultHandler() {
+      @Override
+      public void characters(char[] ch, int start, int length) {
+        System.out.print(new String(ch, start, length));
+        System.out.println("start:" + start + ", length" + length);
+      }
+
+      @Override
+      public void startElement(String uri, String localName, String qName, Attributes attributes)
+          throws SAXException {
+        System.out.println("<" + qName);
+        for (int i = 0; i < attributes.getLength(); i++) {
+          System.out.println("*" + attributes.getQName(i));
+        }
+      }
+    });
   }
 }
