@@ -32,7 +32,7 @@
     TransformerFactory tf = TransformerFactory.newInstance();
     Transformer transformer = tf.newTransformer();
     transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-    transformer.setOutputProperty(OutputKeys.ENCODING, "euc-kr");
+    //transformer.setOutputProperty(OutputKeys.ENCODING, "euc-kr");
     transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
     transformer.setOutputProperty(OutputKeys.INDENT, "yes");
     java.io.StringWriter sw = new java.io.StringWriter();
@@ -42,30 +42,8 @@
 
     return xml;
   }%>
-<%! public static Document decorateXml(Document xmlDoc) {
-  Document htmlDoc;
-  Element root = xmlDoc.getDocumentElement();
+
   
-  Node responseInfoRoot = root.getElementsByTagName("ResponseInfo").item(0);
-  System.out.println(responseInfoRoot.getNodeName());
-  NodeList responseInfoChildNodes = responseInfoRoot.getChildNodes();
-  
-  try {
-    DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-    htmlDoc = builder.newDocument();
-    Node responseInfoNode;
-    for (int i = 0; i < responseInfoChildNodes.getLength(); i+=2) {
-      responseInfoNode = responseInfoChildNodes.item(i);
-      System.out.println(responseInfoNode.getNodeName());
-      responseInfoRoot.insertBefore(xmlDoc.createElement("div"), responseInfoNode);
-    }
-  } catch (ParserConfigurationException e) {
-  }
-  
-  htmlDoc = xmlDoc;
-  
-  return htmlDoc;
-  }%>
 <%!public static String guessCharacterEncoding(byte[] bytes) throws IOException {
     String string;
     if (bytes.length > 1024) {
@@ -79,6 +57,7 @@
     }
     return "windows-949";
   }%>
+  
 <%!public static byte[] readAllBytes(InputStream is) throws IOException {
     DataInputStream dis = new DataInputStream(is);
     ByteArrayOutputStream bos = new ByteArrayOutputStream(40960);
@@ -97,14 +76,7 @@
   URLConnection conn = url.openConnection();
   DocumentBuilder htmlBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
   BufferedReader reader;
-  /*
-  if (forwardedUrl.contains("/response_xml.html?")) {
-    response.setContentType("text/xml");
-  }
-  else if (forwardedUrl.contains("/response_json.html?")) {
-    response.setContentType("text/json");
-  }
-   */
+  
   if (request.getMethod().equals("POST")) { // POST
     ((HttpURLConnection) conn).setRequestMethod("POST");
     conn.setDoOutput(true);
@@ -125,6 +97,7 @@
   if (forwardedUrl.contains("/response_xml.html?")) {
     response.setContentType("text/xml");
     try {
+      StringBuffer rawHtml = null;
       DtcXmlParser dp = new DtcXmlParser();
 
       ByteArrayInputStream bufferInputStream = new ByteArrayInputStream(content);
@@ -173,49 +146,80 @@
    final String RESULTS = "Results";
    final String RESULT_SET = "ResultSet";
    final String RESPONSE_INFO = "ResponseInfo";
-   final String RESULT_HEAD = "ResultHeader";
-   final String RESULt_LIST = "ResultList";
+   final String RESULT_HEADER = "ResultHeader";
+   final String RESULT_LIST = "ResultList";
    final String DOCUMENT = "Document";
+   final String CDATA_TOKEN = "<![CDATA[";
+   
    private StringBuffer parseBuffer;
    private StringBuffer rawHtml;
+   private String previousTag;
     
    public DtcXmlParser() {
       super();
       parseBuffer = new StringBuffer();
       rawHtml = new StringBuffer();
+      previousTag = null;
     }
 
     public void characters(char ch[], int start, int length) throws SAXException {
 
-      //System.out.print("\"");
+      //System.out.print("START :" + Integer.toString(start));
 
       for (int i = 0; i < start + length; i++) {
           //System.out.print(ch[i]);
           parseBuffer.append(ch[i]);
       }
       //System.out.println("\"");
-      parseBuffer.append("\n");
     }
 
     public void startDocument() throws SAXException {
 
+      String dtd = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+			       +"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML Basic 1.1//EN\" "
+                   +"\"http://www.w3.org/TR/xhtml-basic/xhtml-basic11.dtd\">\n"
+      		       +"<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\">";
+
+      rawHtml.append(dtd);
+      rawHtml.append("<body>");
     }
 
     public void endDocument() throws SAXException {
-      System.out.println(rawHtml);
+      //System.out.println(rawHtml);
+      rawHtml.append("</body>");
+      rawHtml.append("</html>");
     }
 
     public void startElement(String uri, String name, String qName, Attributes atts)
         throws SAXException {
       //System.out.println("qName Start: " + qName + "..." + atts.getLength());
-      StringBuffer divForm = new StringBuffer("<div id=\"");
+      StringBuffer divForm = new StringBuffer(); 
       StringBuffer attrBuffer = new StringBuffer();
       String elementName = qName;
+      String className = null;
+      
+      if ( (elementName == RESULTS) ||
+		   (elementName == RESULT_SET) || 
+           (elementName == RESULTS) ) {        
+        className = elementName;
+      	divForm.append("<div id=\"");  
+      	
+      } else if ( (elementName == RESPONSE_INFO) ||
+                  (elementName == RESULT_HEADER) ||
+                  (elementName == RESULT_LIST) ||
+                  (elementName == DOCUMENT))
+      {
+        className = elementName;
+      	divForm.append("<ul id=\"");        
+      } else {
+        className = elementName;
+      	divForm.append("<li id=\"");      
+      }
       
       if (atts.getLength() > 0) {
         String[] attrName = new String[atts.getLength()];
         String[] attrValue = new String[atts.getLength()];
-        if (elementName == RESULTS) elementName = "ResultRoot";
+                
         for (int i = 0; i < atts.getLength(); i++) {
           attrBuffer.append(" ");
           attrBuffer.append(atts.getQName(i));
@@ -224,8 +228,16 @@
           attrBuffer.append("\"");
         }
       }
+      
       divForm.append(elementName);
       divForm.append("\"");
+      
+      if (className != null) {
+        divForm.append(" class=\"");
+        divForm.append(className);
+        divForm.append("\"");
+      }
+      
       divForm.append(attrBuffer);
       divForm.append(">\n");
       rawHtml.append(divForm);
@@ -233,14 +245,39 @@
 
     public void endElement(String uri, String name, String qName) throws SAXException {
       //System.out.println("qName End: " + qName);
-      StringBuffer divForm = new StringBuffer("</div>\n");
+      StringBuffer divForm = new StringBuffer();
+      String elementName = qName;
       String temp;
+      
+      if ( (elementName == RESULTS ) || 
+           (elementName == RESULT_SET) || 
+    	   (elementName == RESULTS) ) {
+      	divForm.append("</div>\n");     	
+      } else if ( (elementName == RESPONSE_INFO) ||
+                  (elementName == RESULT_HEADER) ||
+                  (elementName == RESULT_LIST) ||
+                  (elementName == DOCUMENT))
+      {
+      	divForm.append("</ul>\n");
+      	divForm.append("<hr />");
+      } else {
+      	divForm.append("</li>\n");      
+      }
       
       if(parseBuffer.length() > 0 && parseBuffer.lastIndexOf(">") > 0 ) { // Text Node 영역에 tag가 들어올 경우
         temp = parseBuffer.substring(parseBuffer.lastIndexOf(">") + 1);
         parseBuffer.setLength(0);
+        parseBuffer.append(CDATA_TOKEN);
         parseBuffer.append(temp);
+        parseBuffer.append("]]>");
+        parseBuffer.append("\n");
+
+      } else if (parseBuffer.length() > 0){
+        parseBuffer.insert(0, CDATA_TOKEN);
+        parseBuffer.append("]]>");
+        parseBuffer.append("\n");
       }
+      
       rawHtml.append(parseBuffer);
       rawHtml.append(divForm);
       parseBuffer.setLength(0);
