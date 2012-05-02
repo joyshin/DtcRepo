@@ -45,7 +45,7 @@ public class DtcServiceImplTest {
         Assert.assertTrue(item.getPath().endsWith(".ini"));
         Assert.assertFalse(DtcServiceVerifier.isValidDirectoryPath(item.getPath()));
       } else {
-        Assert.assertEquals("µð·ºÅä¸®", item.getDescription());
+        Assert.assertEquals("ë””ë ‰í† ë¦¬", item.getDescription());
         Assert.assertTrue(DtcServiceVerifier.isValidDirectoryPath(item.getPath()));
       }
 
@@ -73,7 +73,7 @@ public class DtcServiceImplTest {
 
         Assert.assertFalse(DtcServiceVerifier.isValidDirectoryPath(item.getPath()));
       } else {
-        Assert.assertEquals("µð·ºÅä¸®", item.getDescription());
+        Assert.assertEquals("ë””ë ‰í† ë¦¬", item.getDescription());
         Assert.assertTrue(DtcServiceVerifier.isValidDirectoryPath(item.getPath()));
       }
 

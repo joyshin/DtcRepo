@@ -42,14 +42,14 @@ public interface DtcService extends RemoteService {
   }
 
   /**
-   * µğ·ºÅä¸® ¸®½ºÆ®¸¦ °¡Á®¿Â´Ù.
+   * ë””ë ‰í† ë¦¬ ë¦¬ìŠ¤íŠ¸ë¥¼ ê°€ì ¸ì˜¨ë‹¤.
    * 
    * @param path
-   *          µğ·ºÅä¸® °æ·Î. °æ·ÎÀÇ À¯È¿¼ºÀº
-   *          {@link DtcServiceVerifier#isValidDirectoryPath(String)}À» Âü°í.
-   * @return µğ·ºÅä¸® ¾ÆÀÌÅÛ ¸®½ºÆ®.
+   *          ë””ë ‰í† ë¦¬ ê²½ë¡œ. ê²½ë¡œì˜ ìœ íš¨ì„±ì€
+   *          {@link DtcServiceVerifier#isValidDirectoryPath(String)}ì„ ì°¸ê³ .
+   * @return ë””ë ‰í† ë¦¬ ì•„ì´í…œ ë¦¬ìŠ¤íŠ¸.
    * @throws IllegalArgumentException
-   *           µğ·ºÅä¸® °æ·Î°¡ À¯È¿ÇÏÁö ¾ÊÀº °æ¿ì.
+   *           ë””ë ‰í† ë¦¬ ê²½ë¡œê°€ ìœ íš¨í•˜ì§€ ì•Šì€ ê²½ìš°.
    */
   List<DtcNodeInfo> getDir(String path) throws IllegalArgumentException;
 
