@@ -9,22 +9,26 @@ import com.google.gwt.dom.client.Document;
  * @author jujang@sk.com
  * 
  */
-public abstract class DefaultDtcArdbegObserver implements DtcArdbegObserver {
+public class DefaultDtcArdbegObserver implements DtcArdbegObserver {
 
   @Override
-  public void onLoadDtcDirectory(Document dtcFrameDoc) {
+  public void onDtcDirectoryLoaded(Document dtcFrameDoc) {
   }
 
   @Override
-  public void onLoadDtcHome(Document dtcFrameDoc) {
+  public void onDtcHomeLoaded(Document dtcFrameDoc) {
   }
 
   @Override
-  public void onLoadDtcResponseFrame(Document dtcFrameDoc, boolean success) {
+  public void onDtcResponseFrameLoaded(Document dtcFrameDoc, boolean success) {
   }
 
   @Override
-  public void onLoadDtcTestPage(Document dtcFrameDoc) {
+  public void onDtcTestPageLoaded(Document dtcFrameDoc) {
+  }
+
+  @Override
+  public void onSubmittingDtcRequest() {
   }
 
 }

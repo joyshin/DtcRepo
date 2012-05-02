@@ -106,7 +106,7 @@ public class IpHistoryManager extends DefaultDtcArdbegObserver {
   }
 
   @Override
-  public void onLoadDtcResponseFrame(Document dtcFrameDoc, boolean success) {
+  public void onDtcResponseFrameLoaded(Document dtcFrameDoc, boolean success) {
     if (success) {
       this.updateIpHistory(dtcFrameDoc);
       this.redrawIpOptions(dtcFrameDoc);
@@ -114,7 +114,7 @@ public class IpHistoryManager extends DefaultDtcArdbegObserver {
   }
 
   @Override
-  public void onLoadDtcTestPage(Document dtcFrameDoc) {
+  public void onDtcTestPageLoaded(Document dtcFrameDoc) {
     this.retrieveInfo(dtcFrameDoc);
     this.redrawIpOptions(dtcFrameDoc);
     IpHistoryManager.addDtcIpSelectClickEventHandler(dtcFrameDoc, this);

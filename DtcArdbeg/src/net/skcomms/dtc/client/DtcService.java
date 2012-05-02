@@ -16,8 +16,9 @@ package net.skcomms.dtc.client;
 
 import java.util.List;
 
-import net.skcomms.dtc.shared.DtcServiceVerifier;
 import net.skcomms.dtc.shared.DtcNodeInfo;
+import net.skcomms.dtc.shared.DtcRequestInfo;
+import net.skcomms.dtc.shared.DtcServiceVerifier;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -25,18 +26,6 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 @RemoteServiceRelativePath("dtcservice")
 public interface DtcService extends RemoteService {
-
-  /**
-   * µğ·ºÅä¸® ¸®½ºÆ®¸¦ °¡Á®¿Â´Ù.
-   * 
-   * @param path
-   *          µğ·ºÅä¸® °æ·Î. °æ·ÎÀÇ À¯È¿¼ºÀº {@link DtcServiceVerifier#isValidPath(String)}À»
-   *          Âü°í.
-   * @return µğ·ºÅä¸® ¾ÆÀÌÅÛ ¸®½ºÆ®.
-   * @throws IllegalArgumentException
-   *           µğ·ºÅä¸® °æ·Î°¡ À¯È¿ÇÏÁö ¾ÊÀº °æ¿ì.
-   */
-  List<DtcNodeInfo> getDir(String path) throws IllegalArgumentException;
 
   /**
    * Utility class for simplifying access to the instance of async service.
@@ -51,4 +40,19 @@ public interface DtcService extends RemoteService {
       return Util.instance;
     }
   }
+
+  /**
+   * ë””ë ‰í† ë¦¬ ë¦¬ìŠ¤íŠ¸ë¥¼ ê°€ì ¸ì˜¨ë‹¤.
+   * 
+   * @param path
+   *          ë””ë ‰í† ë¦¬ ê²½ë¡œ. ê²½ë¡œì˜ ìœ íš¨ì„±ì€
+   *          {@link DtcServiceVerifier#isValidDirectoryPath(String)}ì„ ì°¸ê³ .
+   * @return ë””ë ‰í† ë¦¬ ì•„ì´í…œ ë¦¬ìŠ¤íŠ¸.
+   * @throws IllegalArgumentException
+   *           ë””ë ‰í† ë¦¬ ê²½ë¡œê°€ ìœ íš¨í•˜ì§€ ì•Šì€ ê²½ìš°.
+   */
+  List<DtcNodeInfo> getDir(String path) throws IllegalArgumentException;
+
+  DtcRequestInfo getDtcRequestPageInfo(String path);
+
 }

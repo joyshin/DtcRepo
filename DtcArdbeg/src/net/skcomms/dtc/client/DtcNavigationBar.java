@@ -92,17 +92,17 @@ public class DtcNavigationBar extends DefaultDtcArdbegObserver {
   }
 
   @Override
-  public void onLoadDtcDirectory(Document dtcFrameDoc) {
+  public void onDtcDirectoryLoaded(Document dtcFrameDoc) {
     this.addPath(dtcFrameDoc.getURL());
   }
 
   @Override
-  public void onLoadDtcHome(Document dtcFrameDoc) {
+  public void onDtcHomeLoaded(Document dtcFrameDoc) {
     this.addPath(dtcFrameDoc.getURL());
   }
 
   @Override
-  public void onLoadDtcTestPage(Document dtcFrameDoc) {
+  public void onDtcTestPageLoaded(Document dtcFrameDoc) {
     this.addPath(dtcFrameDoc.getURL());
   }
 }

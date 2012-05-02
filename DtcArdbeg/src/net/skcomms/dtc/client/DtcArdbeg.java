@@ -34,12 +34,23 @@ import com.google.gwt.user.client.ui.RootPanel;
 public class DtcArdbeg implements EntryPoint {
 
   private static class Pair<K, V> {
-    K key;
-    V value;
+    private K key;
+    private V value;
 
     public Pair(K key, V value) {
       this.key = key;
       this.value = value;
+    }
+
+    public K getKey() {
+      return this.key;
+    }
+
+    /**
+     * @return
+     */
+    public V getValue() {
+      return this.value;
     }
   }
 
@@ -48,6 +59,25 @@ public class DtcArdbeg implements EntryPoint {
   private final static String DTC_PROXY_URL = DtcArdbeg.BASE_URL + "_dtcproxy_/";
 
   private static ServiceDao serviceDao = new ServiceDao();
+  private static DtcChrono dtcChrono = new DtcChrono();
+
+  public native static void addDtcFormEventHandler(DtcArdbeg module, Document dtcDoc) /*-{
+    var inputForm = dtcDoc.getElementsByTagName("frame")[0].contentWindow.document
+        .getElementsByTagName("form")[0];
+    for (i = 0; i < inputForm.elements.length; i++) {
+      var inputElement = inputForm.elements[i];
+      if (inputElement.type == "text") {
+        inputElement.onkeydown = function(event) {
+          if (event.keyCode == 13) {
+            module.@net.skcomms.dtc.client.DtcArdbeg::onSubmitRequestForm()();
+            this.form.submit();
+            this.select();
+          }
+        }
+      }
+      ;
+    }
+  }-*/;
 
   private native static void addDtcFrameScrollEventHandler(DtcArdbeg ardbeg) /*-{
     if ($doc.cssInserted == null) {
@@ -89,6 +119,14 @@ public class DtcArdbeg implements EntryPoint {
     }
   }-*/;
 
+  public native static void addDtcSearchButtonEventHandler(DtcArdbeg module, Document dtcDoc) /*-{
+    var searchButton = dtcDoc.getElementsByTagName("frame")[0].contentWindow.document
+        .getElementById("div_search");
+    searchButton.onclick = function() {
+      module.@net.skcomms.dtc.client.DtcArdbeg::onSubmitRequestForm()();
+    };
+  }-*/;
+
   private static String calculateBaseUrl() {
     int queryStringStart = Document.get().getURL().indexOf('?');
     int index;
@@ -119,7 +157,7 @@ public class DtcArdbeg implements EntryPoint {
     Collections.sort(rows, new Comparator<Pair<Integer, Node>>() {
       @Override
       public int compare(Pair<Integer, Node> arg0, Pair<Integer, Node> arg1) {
-        return -arg0.key.compareTo(arg1.key);
+        return -arg0.getKey().compareTo(arg1.getKey());
       }
     });
   }
@@ -167,8 +205,8 @@ public class DtcArdbeg implements EntryPoint {
 
   private void applyStylesToDtcDirectoryNodes(List<Pair<Integer, Node>> pairs) {
     for (Pair<Integer, Node> pair : pairs) {
-      if (pair.key == 0) {
-        Element.as(pair.value).setAttribute("style", "color:gray; ");
+      if (pair.getKey() == 0) {
+        Element.as(pair.getValue()).setAttribute("style", "color:gray; ");
       }
     }
   }
@@ -184,8 +222,6 @@ public class DtcArdbeg implements EntryPoint {
         }
 
         DtcArdbeg.addDtcFrameScrollEventHandler(DtcArdbeg.this);
-
-        DtcArdbeg.this.onLoadDtcFrame(doc);
 
         if (doc.getURL().equals(DtcArdbeg.DTC_PROXY_URL)) {
           DtcArdbeg.this.onLoadDtcHomePage(doc);
@@ -228,11 +264,11 @@ public class DtcArdbeg implements EntryPoint {
 
     int prevScore = 1;
     for (Pair<Integer, Node> pair : rows) {
-      if (prevScore != 0 && pair.key.equals(0)) {
+      if (prevScore != 0 && pair.getKey().equals(0)) {
         newTableBody.appendChild(oldTableBody.getFirstChild());
       }
-      newTableBody.appendChild(pair.value);
-      prevScore = pair.key;
+      newTableBody.appendChild(pair.getValue());
+      prevScore = pair.getKey();
     }
     return newTableBody;
   }
@@ -297,7 +333,7 @@ public class DtcArdbeg implements EntryPoint {
   }
 
   private boolean hasVisitedService(List<Pair<Integer, Node>> rows) {
-    return !rows.isEmpty() && rows.get(0).key > 0;
+    return !rows.isEmpty() && rows.get(0).getKey() > 0;
   }
 
   private void initializeDtcFrame() {
@@ -314,18 +350,11 @@ public class DtcArdbeg implements EntryPoint {
 
   /**
    * @param doc
-   */
-  private void onLoadDtcFrame(Document doc) {
-    this.dtcRequestFormAccessor.update();
-  }
-
-  /**
-   * @param doc
    * 
    */
   private void onLoadDtcHomePage(Document doc) {
     for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
-      observer.onLoadDtcHome(doc);
+      observer.onDtcHomeLoaded(doc);
     }
 
     this.addCssLinkIntoDtcFrame(doc);
@@ -335,7 +364,7 @@ public class DtcArdbeg implements EntryPoint {
 
   private void onLoadDtcResponseFrame(boolean success) {
     for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
-      observer.onLoadDtcResponseFrame(this.getDtcFrameDoc(), success);
+      observer.onDtcResponseFrameLoaded(this.getDtcFrameDoc(), success);
     }
   }
 
@@ -345,7 +374,7 @@ public class DtcArdbeg implements EntryPoint {
    */
   private void onLoadDtcServiceDirectoryPage(Document doc, String serviceName) {
     for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
-      observer.onLoadDtcDirectory(doc);
+      observer.onDtcDirectoryLoaded(doc);
     }
 
     this.addCssLinkIntoDtcFrame(doc);
@@ -356,19 +385,31 @@ public class DtcArdbeg implements EntryPoint {
 
   protected void onLoadDtcTestPage(Document dtcFrameDoc) {
     for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
-      observer.onLoadDtcTestPage(dtcFrameDoc);
+      observer.onDtcTestPageLoaded(dtcFrameDoc);
     }
+
+    DtcArdbeg.addDtcResponseFrameLoadEventHandler(DtcArdbeg.this, dtcFrameDoc);
+    DtcArdbeg.addDtcSearchButtonEventHandler(DtcArdbeg.this, dtcFrameDoc);
+    DtcArdbeg.addDtcFormEventHandler(DtcArdbeg.this, dtcFrameDoc);
   }
 
   @Override
   public void onModuleLoad() {
     this.ipHistoryManager.initialize(this);
     this.navigationBar.initialize(this);
+    this.dtcRequestFormAccessor.initialize(this);
     this.urlCopyManager.initialize(this);
+    this.cookieHandler.initialize(this);
     this.initializeDtcFrame();
   }
 
   private void onScrollDtcFrame() {
+  }
+
+  private void onSubmitRequestForm() {
+    for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
+      observer.onSubmittingDtcRequest();
+    }
   }
 
   private void removeComaparePageAnchor(Document doc) {

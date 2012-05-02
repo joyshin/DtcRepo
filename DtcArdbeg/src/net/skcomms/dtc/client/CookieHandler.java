@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.FormElement;
@@ -35,7 +34,7 @@ public class CookieHandler extends DefaultDtcArdbegObserver {
 
   private static Map<String, String> getLastParametersFromCookie(String cookieKey) {
     String cookie = Cookies.getCookie(cookieKey);
-    GWT.log("getCookie: " + cookieKey + " : " + cookie);
+    // GWT.log("getCookie: " + cookieKey + " : " + cookie);
 
     Map<String, String> map = new HashMap<String, String>();
 
@@ -51,7 +50,7 @@ public class CookieHandler extends DefaultDtcArdbegObserver {
     for (String element : formFields) {
       String[] pair = element.split(Character.toString(CookieHandler.FORM_VALUE_DELIMETER));
       if (pair.length == 2) {
-        GWT.log("Name :" + pair[0] + " Value :" + pair[1]);
+        // GWT.log("Name :" + pair[0] + " Value :" + pair[1]);
         map.put(pair[0], pair[1]);
       }
     }
@@ -80,6 +79,13 @@ public class CookieHandler extends DefaultDtcArdbegObserver {
     return nodeCollection;
   }
 
+  /**
+   * @param dtcArdbeg
+   */
+  public void initialize(DtcArdbeg dtcArdbeg) {
+    dtcArdbeg.addDtcArdbegObserver(this);
+  }
+
   public void loadAndSetRequestParameters(Document doc) {
     NodeCollection<Element> nodeCollection = this.getFormControlElements(doc);
     if (nodeCollection == null) {
@@ -104,15 +110,19 @@ public class CookieHandler extends DefaultDtcArdbegObserver {
   }
 
   @Override
-  public void onLoadDtcResponseFrame(Document dtcFrameDoc, boolean success) {
+  public void onDtcResponseFrameLoaded(Document dtcFrameDoc, boolean success) {
     if (success) {
       this.storeRequestParametersIntoCookie(dtcFrameDoc);
     }
   }
 
   @Override
-  public void onLoadDtcTestPage(Document dtcFrameDoc) {
+  public void onDtcTestPageLoaded(Document dtcFrameDoc) {
     this.loadAndSetRequestParameters(dtcFrameDoc);
+  }
+
+  @Override
+  public void onSubmittingDtcRequest() {
   }
 
   public void storeRequestParametersIntoCookie(Document dtcFrameDoc) {

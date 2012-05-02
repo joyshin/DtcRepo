@@ -47,6 +47,14 @@ public class DtcRequestFormAccessor extends DefaultDtcArdbegObserver {
   }
 
   private boolean containsInOptions(String value) {
+    if (!this.isAvailable) {
+      return false;
+    }
+
+    if (this.ipSelectElement == null) {
+      return false;
+    }
+
     NodeList<OptionElement> options = this.ipSelectElement.getOptions();
     for (int i = 0; i < options.getLength(); i++) {
       if (options.getItem(i).getValue().equals(value)) {
@@ -159,6 +167,10 @@ public class DtcRequestFormAccessor extends DefaultDtcArdbegObserver {
     return names;
   }
 
+  public void initialize(DtcArdbeg dtcArdbeg) {
+    dtcArdbeg.addDtcArdbegObserver(this);
+  }
+
   public boolean isAvailable() {
     return this.isAvailable;
   }
@@ -168,17 +180,17 @@ public class DtcRequestFormAccessor extends DefaultDtcArdbegObserver {
   }
 
   @Override
-  public void onLoadDtcDirectory(Document dtcFrameDoc) {
+  public void onDtcDirectoryLoaded(Document dtcFrameDoc) {
     this.update();
   }
 
   @Override
-  public void onLoadDtcHome(Document dtcFrameDoc) {
+  public void onDtcHomeLoaded(Document dtcFrameDoc) {
     this.update();
   }
 
   @Override
-  public void onLoadDtcTestPage(Document dtcFrameDoc) {
+  public void onDtcTestPageLoaded(Document dtcFrameDoc) {
     this.update();
     this.setUrlParameters(dtcFrameDoc);
   }
@@ -247,11 +259,12 @@ public class DtcRequestFormAccessor extends DefaultDtcArdbegObserver {
     }
 
     this.requestFrame = FrameElement.as(doc.getElementsByTagName("frame").getItem(0));
-    this.ipSelectElement = SelectElement.as(this.requestFrame
-        .getContentDocument()
-        .getElementById("ip_select"));
     this.ipTextElement = InputElement.as(this.requestFrame.getContentDocument()
         .getElementById("ip_text"));
+    Element element = this.requestFrame.getContentDocument().getElementById("ip_select");
+    if (element != null) {
+      this.ipSelectElement = SelectElement.as(element);
+    }
 
     this.setAvailable(true);
   }

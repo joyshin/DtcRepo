@@ -4,11 +4,13 @@ import com.google.gwt.dom.client.Document;
 
 public interface DtcArdbegObserver {
 
-  void onLoadDtcDirectory(Document dtcFrameDoc);
+  void onDtcDirectoryLoaded(Document dtcFrameDoc);
 
-  void onLoadDtcHome(Document dtcFrameDoc);
+  void onDtcHomeLoaded(Document dtcFrameDoc);
 
-  void onLoadDtcResponseFrame(Document dtcFrameDoc, boolean success);
+  void onDtcResponseFrameLoaded(Document dtcFrameDoc, boolean success);
 
-  void onLoadDtcTestPage(Document dtcFrameDoc);
+  void onDtcTestPageLoaded(Document dtcFrameDoc);
+
+  void onSubmittingDtcRequest();
 }

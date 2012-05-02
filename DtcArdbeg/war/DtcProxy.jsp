@@ -3,6 +3,10 @@
 <%@page import="java.io.*"%>
 <%@page import="java.util.*"%>
 <%@page import="java.lang.*"%>
+<%@page import="org.w3c.dom.*"%>
+<%@page import="org.xml.sax.*"%>
+<%@page import="javax.xml.parsers.*"%>
+
 <%!final String DTC_URL = "http://10.141.6.198/";%>
 <%!public String getForwardedUrl(HttpServletRequest request) {
     int index = request.getRequestURL().toString().indexOf("/_dtcproxy_/");
@@ -43,13 +47,6 @@
 <%
   final String forwardedUrl = getForwardedUrl(request);
 
-  if (forwardedUrl.contains("/response_xml.html?")) {
-    response.setContentType("text/xml");
-  }
-  else if (forwardedUrl.contains("/response_json.html?")) {
-    response.setContentType("text/json");
-  }
-
   URL url = new URL(forwardedUrl);
   URLConnection conn = url.openConnection();
 
@@ -63,7 +60,46 @@
     writer.close();
   }
 
-  byte[] content = readAllBytes(conn.getInputStream());
+  //byte[] content = readAllBytes(conn.getInputStream());
+  Document htmlDoc = null;
+  DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
+  DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
+  byte[] content;
+  
+  if (forwardedUrl.contains("/response_xml.html?")) {
+    response.setContentType("text/xml");
+  }
+  else if (forwardedUrl.contains("/response_json.html?")) {
+    response.setContentType("text/json");
+  }
+  /*
+   if (forwardedUrl.contains("/response_xml.html?")) {
+   response.setContentType("text/xml");
+   //change xml to html
+
+   try {
+   htmlDoc = docBuilder.parse(conn.getInputStream());
+   } catch (SAXException se) {
+   System.out.println(se.getMessage());
+   return;
+   } catch (IOException ie) {
+   System.out.println(ie.getMessage());
+   return;
+   }
+
+   System.out.println(transformDoc.getTextContent());
+   content = htmlDoc.getTextContent().getBytes();
+
+   }
+   else if (forwardedUrl.contains("/response_json.html?")) {
+   response.setContentType("text/json");
+   //change json to html
+   content = htmlDoc.getTextContent().getBytes();
+
+   }
+   else
+   */
+  content = readAllBytes(conn.getInputStream());
 
   String encoding = guessCharacterEncoding(content);
   response.setCharacterEncoding(encoding);

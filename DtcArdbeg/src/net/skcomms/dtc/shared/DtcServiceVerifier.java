@@ -10,20 +10,37 @@ package net.skcomms.dtc.shared;
 public class DtcServiceVerifier {
 
   /**
-   * ÁöÁ¤µÈ °æ·ÎÀÇ À¯È¿¼ºÀ» °Ë»çÇÑ´Ù.
+   * ì§€ì •ëœ ê²½ë¡œì˜ ìœ íš¨ì„±ì„ ê²€ì‚¬í•œë‹¤.
    * 
-   * Á¤±Ô½Ä "/([a-zA-Z0-9_.-]+/)*"¿¡ ÀÏÄ¡ÇÏ¸é À¯È¿ÇÑ °ÍÀ¸·Î ÆÇ´ÜÇÑ´Ù.
+   * ì •ê·œì‹ "/([a-zA-Z0-9_.-]+/)*"ì— ì¼ì¹˜í•˜ë©´ ìœ íš¨í•œ ê²ƒìœ¼ë¡œ íŒë‹¨í•œë‹¤.
    * 
    * @param path
-   *          °Ë»çÇÒ °æ·Î
-   * @return À¯È¿ÇÑ °æ¿ì true; ¾Æ´Ï¸é false
+   *          ê²€ì‚¬í•  ê²½ë¡œ
+   * @return ìœ íš¨í•œ ê²½ìš° true; ì•„ë‹ˆë©´ false
    */
-  public static boolean isValidPath(String path) {
+  public static boolean isValidDirectoryPath(String path) {
     if (path == null) {
       return false;
     }
 
     String regex = "/([a-zA-Z0-9_.-]+/)*";
+    return path.matches(regex);
+  }
+
+  /**
+   * ì§€ì •ëœ í…ŒìŠ¤íŠ¸ í˜ì´ì§€ì˜ ìœ íš¨ì„±ì„ ê²€ì‚¬í•œë‹¤.
+   * 
+   * ì •ê·œì‹ "/([a-zA-Z0-9_.-]+/)*[a-zA-Z0-9_.-]+\\.ini"ì— ì¼ì¹˜í•˜ë©´ ìœ íš¨í•œ ê²ƒìœ¼ë¡œ íŒë‹¨í•œë‹¤.
+   * 
+   * @param path
+   * @return
+   */
+  public static boolean isValidTestPage(String path) {
+    if (path == null) {
+      return false;
+    }
+
+    String regex = "/([a-zA-Z0-9_.-]+/)*[a-zA-Z0-9_.-]+\\.ini";
     return path.matches(regex);
   }
 
