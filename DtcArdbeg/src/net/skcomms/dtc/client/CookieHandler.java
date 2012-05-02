@@ -14,7 +14,7 @@ import com.google.gwt.dom.client.NodeCollection;
 import com.google.gwt.dom.client.SelectElement;
 import com.google.gwt.user.client.Cookies;
 
-public class CookieHandler {
+public class CookieHandler extends DefaultDtcArdbegObserver {
 
   private static final String EMPTY_STRING = "";
 
@@ -101,6 +101,18 @@ public class CookieHandler {
         }
       }
     }
+  }
+
+  @Override
+  public void onLoadDtcResponseFrame(Document dtcFrameDoc, boolean success) {
+    if (success) {
+      this.storeRequestParametersIntoCookie(dtcFrameDoc);
+    }
+  }
+
+  @Override
+  public void onLoadDtcTestPage(Document dtcFrameDoc) {
+    this.loadAndSetRequestParameters(dtcFrameDoc);
   }
 
   public void storeRequestParametersIntoCookie(Document dtcFrameDoc) {

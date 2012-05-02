@@ -21,8 +21,9 @@ import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.dom.client.TableElement;
 import com.google.gwt.dom.client.TableRowElement;
+import com.google.gwt.user.client.Window;
 
-public class DtcRequestFormAccessor {
+public class DtcRequestFormAccessor extends DefaultDtcArdbegObserver {
 
   private enum InputElementType {
     SELECT, TEXT;
@@ -31,7 +32,7 @@ public class DtcRequestFormAccessor {
   private static final String EMPTY = "";
 
   private static native void toggleIpElement(JavaScriptObject requestFrame) /*-{
-		requestFrame.contentWindow.fnCHANGE_IP();
+    requestFrame.contentWindow.fnCHANGE_IP();
   }-*/;
 
   private FrameElement requestFrame;
@@ -60,7 +61,7 @@ public class DtcRequestFormAccessor {
     boolean ipTextEnabling = (type == InputElementType.TEXT);
 
     if (this.isIpTextEnabled() != ipTextEnabling) {
-      toggleIpElement(this.requestFrame.cast());
+      DtcRequestFormAccessor.toggleIpElement(this.requestFrame.cast());
     }
   }
 
@@ -91,20 +92,20 @@ public class DtcRequestFormAccessor {
       ipValue = this.ipSelectElement.getValue();
     }
 
-    return ipValue != null ? ipValue : EMPTY;
+    return ipValue != null ? ipValue : DtcRequestFormAccessor.EMPTY;
   }
 
   public String getDtcRequestParameter(String name) {
 
     if (!this.isAvailable()) {
-      return EMPTY;
+      return DtcRequestFormAccessor.EMPTY;
     }
 
     if (name.equals("IP")) {
       return this.getDtcIpRequestParameter();
     } else {
       InputElement inputElement = this.findInputElementByCellText(name);
-      return inputElement != null ? inputElement.getValue() : EMPTY;
+      return inputElement != null ? inputElement.getValue() : DtcRequestFormAccessor.EMPTY;
     }
   }
 
@@ -120,6 +121,29 @@ public class DtcRequestFormAccessor {
     }
 
     return pairs;
+  }
+
+  String getParameterFromDtcFrame(Document dtcFrameDoc, String name) {
+    return this.getParameterMapFromDtcFrame(dtcFrameDoc).get(name);
+  }
+
+  Map<String, String> getParameterMapFromDtcFrame(Document dtcFrameDoc) {
+    Map<String, String> params = new HashMap<String, String>();
+    String url = dtcFrameDoc.getURL();
+    String queryString = "";
+    if (url.indexOf('?') != -1) {
+      queryString = url.substring(url.indexOf('?') + 1);
+    }
+    String[] dtcParams = queryString.split("&");
+    for (String param : dtcParams) {
+      String[] entry = param.split("=");
+      if (entry.length < 2) {
+        params.put(entry[0], null);
+      } else {
+        params.put(entry[0], entry[1]);
+      }
+    }
+    return params;
   }
 
   private List<String> getParameterNames() {
@@ -141,6 +165,22 @@ public class DtcRequestFormAccessor {
 
   private boolean isIpTextEnabled() {
     return this.ipTextElement.getStyle().getDisplay().equals(Display.BLOCK.getCssName());
+  }
+
+  @Override
+  public void onLoadDtcDirectory(Document dtcFrameDoc) {
+    this.update();
+  }
+
+  @Override
+  public void onLoadDtcHome(Document dtcFrameDoc) {
+    this.update();
+  }
+
+  @Override
+  public void onLoadDtcTestPage(Document dtcFrameDoc) {
+    this.update();
+    this.setUrlParameters(dtcFrameDoc);
   }
 
   private void setAvailable(boolean available) {
@@ -180,6 +220,17 @@ public class DtcRequestFormAccessor {
     Set<Entry<String, String>> entries = paramValues.entrySet();
     for (Entry<String, String> entry : entries) {
       this.setDtcRequestParameter(entry.getKey(), entry.getValue());
+    }
+  }
+
+  private void setUrlParameters(Document dtcFrameDoc) {
+    String ardbegParam = Window.Location.getParameter("c");
+    String dtcFrameParam = this.getParameterFromDtcFrame(dtcFrameDoc, "c");
+    if (ardbegParam != null && ardbegParam.equals(dtcFrameParam)) {
+      Set<Entry<String, List<String>>> paramValues = Window.Location.getParameterMap().entrySet();
+      for (Entry<String, List<String>> entry : paramValues) {
+        this.setDtcRequestParameter(entry.getKey(), entry.getValue().get(0));
+      }
     }
   }
 

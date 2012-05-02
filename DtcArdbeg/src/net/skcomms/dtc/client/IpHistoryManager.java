@@ -17,16 +17,16 @@ import com.google.gwt.dom.client.OptionElement;
 import com.google.gwt.dom.client.SelectElement;
 import com.google.gwt.user.client.Cookies;
 
-public class IpHistoryManager implements DtcArdbegObserver {
+public class IpHistoryManager extends DefaultDtcArdbegObserver {
 
   native static void addDtcIpSelectClickEventHandler(Document dtcFrameDoc,
       IpHistoryManager ipHistoryManager) /*-{
-		var select = dtcFrameDoc.getElementsByTagName("frame")[0].contentDocument
-				.getElementById("ip_select");
-		select.onclick = function() {
-			//alert("onclick~~");
-			ipHistoryManager.@net.skcomms.dtc.client.IpHistoryManager::redrawIpOptions(Lcom/google/gwt/dom/client/Document;)(dtcFrameDoc);
-		};
+    var select = dtcFrameDoc.getElementsByTagName("frame")[0].contentDocument
+        .getElementById("ip_select");
+    select.onclick = function() {
+      //alert("onclick~~");
+      ipHistoryManager.@net.skcomms.dtc.client.IpHistoryManager::redrawIpOptions(Lcom/google/gwt/dom/client/Document;)(dtcFrameDoc);
+    };
   }-*/;
 
   private final List<IpOption> options = new ArrayList<IpOption>();
@@ -37,7 +37,7 @@ public class IpHistoryManager implements DtcArdbegObserver {
   private OptGroupElement cookieOptGroup;
 
   public IpHistoryManager(DtcRequestFormAccessor dtcRequestFormAccesser) {
-    requestParameter = dtcRequestFormAccesser;
+    this.requestParameter = dtcRequestFormAccesser;
   }
 
   private String combineKeyPrefix(Document requestDoc) {
@@ -55,13 +55,13 @@ public class IpHistoryManager implements DtcArdbegObserver {
   }
 
   private IpOption getOrCreateIpOptionBy(String ip) {
-    for (IpOption option : options) {
+    for (IpOption option : this.options) {
       if (ip.equals(option.getIp())) {
         return option;
       }
     }
     IpOption option = new IpOption(ip, ip, Origin.COOKIE);
-    options.add(option);
+    this.options.add(option);
 
     return option;
   }
@@ -72,10 +72,10 @@ public class IpHistoryManager implements DtcArdbegObserver {
     if (select == null) {
 
       String innerHtml = "<div><input type=\"text\" name=\"ip_text\" id=\"ip_text\" value=\""
-          + ipText + "\" style=\"width:226px;display:none;\" disabled>";
+          + this.ipText + "\" style=\"width:226px;display:none;\" disabled>";
       innerHtml += "<select name=\"ip_select\" id=\"ip_select\" style=\"width:226px; font-size:10pt\">";
       innerHtml += "</select></div>";
-      innerHtml += "<div style=\"float:right;\"><input type=\"button\" value=\"¡ê\" onclick=\"javascript:fnCHANGE_IP();\"></div>";
+      innerHtml += "<div style=\"float:right;\"><input type=\"button\" value=\"â†”\" onclick=\"javascript:fnCHANGE_IP();\"></div>";
 
       Element spanIp = requestDoc.getElementById("span_ip");
       spanIp.setInnerHTML(innerHtml);
@@ -84,8 +84,12 @@ public class IpHistoryManager implements DtcArdbegObserver {
     return SelectElement.as(select);
   }
 
+  public void initialize(DtcArdbeg dtcArdbeg) {
+    dtcArdbeg.addDtcArdbegObserver(this);
+  }
+
   private void joinAdditionalInfo(Document requestDoc) {
-    String keyPrefix = combineKeyPrefix(requestDoc);
+    String keyPrefix = this.combineKeyPrefix(requestDoc);
 
     ArrayList<String> cookieNames = new ArrayList<String>(Cookies.getCookieNames());
     for (String key : cookieNames) {
@@ -95,66 +99,54 @@ public class IpHistoryManager implements DtcArdbegObserver {
         String value = Cookies.getCookie(key);
         Date date = new Date(Long.parseLong(value));
 
-        IpOption option = getOrCreateIpOptionBy(ip);
+        IpOption option = this.getOrCreateIpOptionBy(ip);
         option.setLastSuccessTime(date);
       }
     }
   }
 
   @Override
-  public void onLoadDtcDirectory() {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void onLoadDtcHome() {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
   public void onLoadDtcResponseFrame(Document dtcFrameDoc, boolean success) {
     if (success) {
-      updateIpHistory(dtcFrameDoc);
-      redrawIpOptions(dtcFrameDoc);
+      this.updateIpHistory(dtcFrameDoc);
+      this.redrawIpOptions(dtcFrameDoc);
     }
   }
 
   @Override
   public void onLoadDtcTestPage(Document dtcFrameDoc) {
-    retrieveInfo(dtcFrameDoc);
-    redrawIpOptions(dtcFrameDoc);
-    addDtcIpSelectClickEventHandler(dtcFrameDoc, this);
+    this.retrieveInfo(dtcFrameDoc);
+    this.redrawIpOptions(dtcFrameDoc);
+    IpHistoryManager.addDtcIpSelectClickEventHandler(dtcFrameDoc, this);
   }
 
   public void redrawIpOptions(Document dtcFrameDoc) {
 
-    if (options.size() < 2) {
+    if (this.options.size() < 2) {
       return;
     }
 
     Document requestDoc = FrameElement.as(dtcFrameDoc.getElementsByTagName("frame").getItem(0))
         .getContentDocument();
-    SelectElement select = getOrCreateIpSelectElement(requestDoc);
+    SelectElement select = this.getOrCreateIpSelectElement(requestDoc);
     int current = select.getSelectedIndex();
 
     select.clear();
 
-    for (IpOption option : options) {
+    for (IpOption option : this.options) {
       OptionElement optionElement = requestDoc.createOptionElement();
       optionElement.setValue(option.getIp());
       optionElement.setInnerText(option.getText() + option.getDecoratedText());
 
       // select.add(optionElement, null);
       if (option.getOrigin().equals(Origin.DTC)) {
-        dtcOptGroup.appendChild(optionElement);
+        this.dtcOptGroup.appendChild(optionElement);
       } else {
-        cookieOptGroup.appendChild(optionElement);
+        this.cookieOptGroup.appendChild(optionElement);
       }
     }
-    select.appendChild(dtcOptGroup);
-    select.appendChild(cookieOptGroup);
+    select.appendChild(this.dtcOptGroup);
+    select.appendChild(this.cookieOptGroup);
 
     select.setSelectedIndex(current);
     // Window.alert("" + select.getOptions().getLength());
@@ -164,39 +156,39 @@ public class IpHistoryManager implements DtcArdbegObserver {
     Document requestDoc = FrameElement.as(dtcFrameDoc.getElementsByTagName("frame").getItem(0))
         .getContentDocument();
 
-    retrieveNativeIpInfos(requestDoc);
-    joinAdditionalInfo(requestDoc);
+    this.retrieveNativeIpInfos(requestDoc);
+    this.joinAdditionalInfo(requestDoc);
 
-    dtcOptGroup = requestDoc.createOptGroupElement();
-    dtcOptGroup.setLabel("DTC");
-    cookieOptGroup = requestDoc.createOptGroupElement();
-    cookieOptGroup.setLabel("Cookie");
+    this.dtcOptGroup = requestDoc.createOptGroupElement();
+    this.dtcOptGroup.setLabel("DTC");
+    this.cookieOptGroup = requestDoc.createOptGroupElement();
+    this.cookieOptGroup.setLabel("Cookie");
 
   }
 
   private void retrieveNativeIpInfos(Document requestDoc) {
-    options.clear();
+    this.options.clear();
 
     NodeList<Element> elementsByTagName = requestDoc.getElementsByTagName("option");
     for (int i = 0; i < elementsByTagName.getLength(); i++) {
       String ip = elementsByTagName.getItem(i).getAttribute("value");
       String text = elementsByTagName.getItem(i).getInnerText();
       GWT.log(ip + ":" + text);
-      options.add(new IpOption(ip, text, IpOption.Origin.DTC));
+      this.options.add(new IpOption(ip, text, IpOption.Origin.DTC));
     }
     Element ipTextElement = requestDoc.getElementById("ip_text");
-    ipText = InputElement.as(ipTextElement).getValue();
+    this.ipText = InputElement.as(ipTextElement).getValue();
   }
 
   public void updateIpHistory(Document dtcFrameDoc) {
     Document requestDoc = FrameElement.as(dtcFrameDoc.getElementsByTagName("frame").getItem(0))
         .getContentDocument();
 
-    String keyPrefix = combineKeyPrefix(requestDoc);
-    String ip = requestParameter.getDtcRequestParameter("IP");
+    String keyPrefix = this.combineKeyPrefix(requestDoc);
+    String ip = this.requestParameter.getDtcRequestParameter("IP");
 
     String key = keyPrefix + ip;
-    IpOption option = getOrCreateIpOptionBy(ip);
+    IpOption option = this.getOrCreateIpOptionBy(ip);
 
     Date now = new Date();
     option.setLastSuccessTime(now);

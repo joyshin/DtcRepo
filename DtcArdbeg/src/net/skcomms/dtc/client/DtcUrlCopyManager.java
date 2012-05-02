@@ -13,7 +13,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-public class DtcUrlCopyHelper {
+public class DtcUrlCopyManager {
 
   private DtcArdbeg module;
 
@@ -51,7 +51,7 @@ public class DtcUrlCopyHelper {
     closeButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        DtcUrlCopyHelper.this.dialogBox.hide();
+        DtcUrlCopyManager.this.dialogBox.hide();
       }
     });
   }
@@ -69,12 +69,12 @@ public class DtcUrlCopyHelper {
           sb.append(Window.Location.getHref().substring(0, Window.Location.getHref().indexOf('?')));
         }
 
-        if (DtcUrlCopyHelper.this.module.getDtcFrameSrc().indexOf('?') != -1) {
-          sb.append(DtcUrlCopyHelper.this.module.getDtcFrameSrc().substring(
-              DtcUrlCopyHelper.this.module.getDtcFrameSrc().indexOf('?')));
+        if (DtcUrlCopyManager.this.module.getDtcFrameSrc().indexOf('?') != -1) {
+          sb.append(DtcUrlCopyManager.this.module.getDtcFrameSrc().substring(
+              DtcUrlCopyManager.this.module.getDtcFrameSrc().indexOf('?')));
         }
 
-        Map<String, String> params = DtcUrlCopyHelper.this.module.getDtcRequestParameters();
+        Map<String, String> params = DtcUrlCopyManager.this.module.getDtcRequestParameters();
         for (Entry<String, String> entry : params.entrySet()) {
           sb.append('&');
           sb.append(entry.getKey());
@@ -82,9 +82,9 @@ public class DtcUrlCopyHelper {
           sb.append(entry.getValue());
         }
 
-        DtcUrlCopyHelper.this.textUrl.setText(URL.encode(sb.toString()));
-        DtcUrlCopyHelper.this.dialogBox.center();
-        DtcUrlCopyHelper.this.textUrl.selectAll();
+        DtcUrlCopyManager.this.textUrl.setText(URL.encode(sb.toString()));
+        DtcUrlCopyManager.this.dialogBox.center();
+        DtcUrlCopyManager.this.textUrl.selectAll();
       }
     });
   }

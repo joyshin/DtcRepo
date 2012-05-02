@@ -3,6 +3,7 @@
  */
 package net.skcomms.dtc.client;
 
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Anchor;
@@ -14,16 +15,46 @@ import com.google.gwt.user.client.ui.RootPanel;
  * @author jujang@sk.com
  * 
  */
-public class DtcNavigationBar {
+public class DtcNavigationBar extends DefaultDtcArdbegObserver {
+
+  static String[] getNavigationNodes(String url) {
+    int valueStartIndex = url.lastIndexOf("?");
+    if (valueStartIndex == -1) {
+      return new String[0];
+    }
+    String valueSource = url.substring(valueStartIndex + 3);
+    return valueSource.split("/");
+
+  }
 
   private final HorizontalPanel naviPanel = new HorizontalPanel();
-  private final static String NAVIGATION_DELIMITER = "/";
 
+  private final static String NAVIGATION_DELIMITER = "/";
   private final String baseUrl;
+
   private DtcArdbeg owner;
 
   public DtcNavigationBar(String baseUrl) {
     this.baseUrl = baseUrl;
+  }
+
+  private void addAnchor(String text, final String href) {
+    Anchor anchor = new Anchor(text);
+
+    anchor.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        event.stopPropagation();
+        DtcNavigationBar.this.owner.setDtcFrameUrl(href);
+      }
+    });
+
+    this.naviPanel.add(anchor);
+  }
+
+  private void addLabel(String Text) {
+    Label label = new Label(Text);
+    this.naviPanel.add(label);
   }
 
   public void addPath(String url) {
@@ -49,36 +80,9 @@ public class DtcNavigationBar {
 
   }
 
-  static String[] getNavigationNodes(String url) {
-    int valueStartIndex = url.lastIndexOf("?");
-    if (valueStartIndex == -1) {
-      return new String[0];
-    }
-    String valueSource = url.substring(valueStartIndex + 3);
-    return valueSource.split("/");
-
-  }
-
-  private void addAnchor(String text, final String href) {
-    Anchor anchor = new Anchor(text);
-
-    anchor.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        event.stopPropagation();
-        DtcNavigationBar.this.owner.setDtcFrameUrl(href);
-      }
-    });
-
-    this.naviPanel.add(anchor);
-  }
-
-  private void addLabel(String Text) {
-    Label label = new Label(Text);
-    this.naviPanel.add(label);
-  }
-
   public void initialize(DtcArdbeg dtcArdbeg) {
+    dtcArdbeg.addDtcArdbegObserver(this);
+
     this.naviPanel.clear();
     this.naviPanel.setSpacing(3);
     this.owner = dtcArdbeg;
@@ -87,4 +91,18 @@ public class DtcNavigationBar {
     RootPanel.get("naviBarContainer").add(this.naviPanel);
   }
 
+  @Override
+  public void onLoadDtcDirectory(Document dtcFrameDoc) {
+    this.addPath(dtcFrameDoc.getURL());
+  }
+
+  @Override
+  public void onLoadDtcHome(Document dtcFrameDoc) {
+    this.addPath(dtcFrameDoc.getURL());
+  }
+
+  @Override
+  public void onLoadDtcTestPage(Document dtcFrameDoc) {
+    this.addPath(dtcFrameDoc.getURL());
+  }
 }

@@ -3,11 +3,8 @@ package net.skcomms.dtc.client;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import net.skcomms.dtc.shared.DtcNodeInfo;
 
@@ -53,49 +50,43 @@ public class DtcArdbeg implements EntryPoint {
   private static ServiceDao serviceDao = new ServiceDao();
 
   private native static void addDtcFrameScrollEventHandler(DtcArdbeg ardbeg) /*-{
-		if ($doc.cssInserted == null) {
-			$doc.cssInserted = true;
-			$doc.styleSheets[0]
-					.insertRule(
-							"div#dtcContainer iframe { background-position: 0px 0px; }",
-							0);
-		}
+    if ($doc.cssInserted == null) {
+      $doc.cssInserted = true;
+      $doc.styleSheets[0]
+          .insertRule("div#dtcContainer iframe { background-position: 0px 0px; }", 0);
+    }
 
-		dtc = $doc.getElementsByTagName("iframe")[1];
-		$doc.styleSheets[0].cssRules[0].style.backgroundPositionY = "-100px";
-		dtc.contentWindow.onscroll = function() {
-			$doc.styleSheets[0].cssRules[0].style.backgroundPositionY = "-"
-					+ parseInt((dtc.contentWindow.pageYOffset * 0.02 + 100))
-					+ "px";
-			ardbeg.@net.skcomms.dtc.client.DtcArdbeg::onScrollDtcFrame()();
-		};
+    dtc = $doc.getElementsByTagName("iframe")[1];
+    $doc.styleSheets[0].cssRules[0].style.backgroundPositionY = "-100px";
+    dtc.contentWindow.onscroll = function() {
+      $doc.styleSheets[0].cssRules[0].style.backgroundPositionY = "-"
+          + parseInt((dtc.contentWindow.pageYOffset * 0.02 + 100)) + "px";
+      ardbeg.@net.skcomms.dtc.client.DtcArdbeg::onScrollDtcFrame()();
+    };
   }-*/;
 
   public native static void addDtcResponseFrameLoadEventHandler(DtcArdbeg module, Document dtcDoc) /*-{
-		var responseFrame = dtcDoc.getElementsByTagName("frame")[1];
-		responseFrame.onload = function() {
-			var resultFrame = responseFrame.contentDocument
-					.getElementById("xmlresult");
-			var successfulSearch = false;
+    var responseFrame = dtcDoc.getElementsByTagName("frame")[1];
+    responseFrame.onload = function() {
+      var resultFrame = responseFrame.contentDocument.getElementById("xmlresult");
+      var successfulSearch = false;
 
-			if (resultFrame != null) {
-				var codeElements = resultFrame.contentDocument
-						.getElementsByTagName("Code");
+      if (resultFrame != null) {
+        var codeElements = resultFrame.contentDocument.getElementsByTagName("Code");
 
-				if (codeElements.length > 0
-						&& codeElements[0].textContent == "100") {
-					successfulSearch = true;
-				}
-			} else {
-				form = responseFrame.contentDocument.forms[0];
-				var patt = /status: 100/gi;
+        if (codeElements.length > 0 && codeElements[0].textContent == "100") {
+          successfulSearch = true;
+        }
+      } else {
+        form = responseFrame.contentDocument.forms[0];
+        var patt = /status: 100/gi;
 
-				if (form.innerText.substring(0, 100).match(patt) != null) {
-					successfulSearch = true;
-				}
-			}
-			module.@net.skcomms.dtc.client.DtcArdbeg::onLoadDtcResponseFrame(Z)(successfulSearch);
-		}
+        if (form.innerText.substring(0, 100).match(patt) != null) {
+          successfulSearch = true;
+        }
+      }
+      module.@net.skcomms.dtc.client.DtcArdbeg::onLoadDtcResponseFrame(Z)(successfulSearch);
+    }
   }-*/;
 
   private static String calculateBaseUrl() {
@@ -139,11 +130,12 @@ public class DtcArdbeg implements EntryPoint {
 
   private final DtcNavigationBar navigationBar = new DtcNavigationBar(DtcArdbeg.DTC_PROXY_URL);
 
-  private final DtcRequestFormAccessor dtcRequestFormAccesser = new DtcRequestFormAccessor();
+  final DtcRequestFormAccessor dtcRequestFormAccessor = new DtcRequestFormAccessor();
 
-  private final DtcUrlCopyHelper urlCopyHelper = new DtcUrlCopyHelper();
+  private final DtcUrlCopyManager urlCopyManager = new DtcUrlCopyManager();
 
-  private final IpHistoryManager ipHistoryManager = new IpHistoryManager(dtcRequestFormAccesser);
+  private final IpHistoryManager ipHistoryManager = new IpHistoryManager(
+      this.dtcRequestFormAccessor);
 
   private final List<DtcArdbegObserver> dtcArdbegObservers = new ArrayList<DtcArdbegObserver>();
 
@@ -169,8 +161,8 @@ public class DtcArdbeg implements EntryPoint {
     doc.getBody().appendChild(link);
   }
 
-  private void addDtcArdbegObserver(DtcArdbegObserver observer) {
-    dtcArdbegObservers.add(observer);
+  void addDtcArdbegObserver(DtcArdbegObserver observer) {
+    this.dtcArdbegObservers.add(observer);
   }
 
   private void applyStylesToDtcDirectoryNodes(List<Pair<Integer, Node>> pairs) {
@@ -209,7 +201,8 @@ public class DtcArdbeg implements EntryPoint {
         index = doc.getURL().indexOf("?c=");
         if (index != -1) {
           DtcArdbeg.this.onLoadDtcTestPage(doc);
-          DtcArdbeg.addDtcResponseFrameLoadEventHandler(DtcArdbeg.this, getDtcFrameDoc());
+          DtcArdbeg.addDtcResponseFrameLoadEventHandler(DtcArdbeg.this,
+              DtcArdbeg.this.getDtcFrameDoc());
         }
       }
     };
@@ -266,7 +259,7 @@ public class DtcArdbeg implements EntryPoint {
         ImageElement image = doc.createImageElement();
         image.setSrc("http://dtc.skcomms.net/newwindow.png");
         image.setAttribute("border", "0");
-        image.setTitle("»õÃ¢¿­±â");
+        image.setTitle("ìƒˆì°½ì—´ê¸°");
         a.appendChild(image);
         cell.appendChild(a);
       } else {
@@ -300,30 +293,7 @@ public class DtcArdbeg implements EntryPoint {
   }
 
   public Map<String, String> getDtcRequestParameters() {
-    return this.dtcRequestFormAccesser.getDtcRequestParameters();
-  }
-
-  private String getParameterFromDtcFrame(String name) {
-    return this.getParameterMapFromDtcFrame().get(name);
-  }
-
-  private Map<String, String> getParameterMapFromDtcFrame() {
-    Map<String, String> params = new HashMap<String, String>();
-    String url = this.getDtcFrameSrc();
-    String queryString = "";
-    if (url.indexOf('?') != -1) {
-      queryString = url.substring(url.indexOf('?') + 1);
-    }
-    String[] dtcParams = queryString.split("&");
-    for (String param : dtcParams) {
-      String[] entry = param.split("=");
-      if (entry.length < 2) {
-        params.put(entry[0], null);
-      } else {
-        params.put(entry[0], entry[1]);
-      }
-    }
-    return params;
+    return this.dtcRequestFormAccessor.getDtcRequestParameters();
   }
 
   private boolean hasVisitedService(List<Pair<Integer, Node>> rows) {
@@ -346,8 +316,7 @@ public class DtcArdbeg implements EntryPoint {
    * @param doc
    */
   private void onLoadDtcFrame(Document doc) {
-    this.updateNavigationBar(doc);
-    this.dtcRequestFormAccesser.update();
+    this.dtcRequestFormAccessor.update();
   }
 
   /**
@@ -355,8 +324,8 @@ public class DtcArdbeg implements EntryPoint {
    * 
    */
   private void onLoadDtcHomePage(Document doc) {
-    for (DtcArdbegObserver observer : dtcArdbegObservers) {
-      observer.onLoadDtcHome();
+    for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
+      observer.onLoadDtcHome(doc);
     }
 
     this.addCssLinkIntoDtcFrame(doc);
@@ -365,8 +334,8 @@ public class DtcArdbeg implements EntryPoint {
   }
 
   private void onLoadDtcResponseFrame(boolean success) {
-    if (success) {
-      this.cookieHandler.storeRequestParametersIntoCookie(this.getDtcFrameDoc());
+    for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
+      observer.onLoadDtcResponseFrame(this.getDtcFrameDoc(), success);
     }
   }
 
@@ -375,8 +344,8 @@ public class DtcArdbeg implements EntryPoint {
    * @param serviceName
    */
   private void onLoadDtcServiceDirectoryPage(Document doc, String serviceName) {
-    for (DtcArdbegObserver observer : dtcArdbegObservers) {
-      observer.onLoadDtcDirectory();
+    for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
+      observer.onLoadDtcDirectory(doc);
     }
 
     this.addCssLinkIntoDtcFrame(doc);
@@ -386,25 +355,16 @@ public class DtcArdbeg implements EntryPoint {
   }
 
   protected void onLoadDtcTestPage(Document dtcFrameDoc) {
-    for (DtcArdbegObserver observer : dtcArdbegObservers) {
+    for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
       observer.onLoadDtcTestPage(dtcFrameDoc);
-    }
-
-    DtcArdbeg.this.cookieHandler.loadAndSetRequestParameters(dtcFrameDoc);
-
-    String ardbegParam = Window.Location.getParameter("c");
-    String dtcFrameParam = this.getParameterFromDtcFrame("c");
-    if (ardbegParam != null && ardbegParam.equals(dtcFrameParam)) {
-      this.setUrlParameters();
     }
   }
 
   @Override
   public void onModuleLoad() {
-    addDtcArdbegObserver(ipHistoryManager);
-
+    this.ipHistoryManager.initialize(this);
     this.navigationBar.initialize(this);
-    this.urlCopyHelper.initialize(this);
+    this.urlCopyManager.initialize(this);
     this.initializeDtcFrame();
   }
 
@@ -432,13 +392,6 @@ public class DtcArdbeg implements EntryPoint {
     this.dtcFrame.setUrl(href);
   }
 
-  private void setUrlParameters() {
-    Set<Entry<String, List<String>>> paramValues = Window.Location.getParameterMap().entrySet();
-    for (Entry<String, List<String>> entry : paramValues) {
-      this.dtcRequestFormAccesser.setDtcRequestParameter(entry.getKey(), entry.getValue().get(0));
-    }
-  }
-
   void sortDtcNodes() {
     DtcService.Util.getInstance().getDir("/", new AsyncCallback<List<DtcNodeInfo>>() {
       @Override
@@ -460,10 +413,6 @@ public class DtcArdbeg implements EntryPoint {
         oldTableBody.getParentNode().replaceChild(sortedBody, oldTableBody);
       }
     });
-  }
-
-  private void updateNavigationBar(Document doc) {
-    this.navigationBar.addPath(doc.getURL());
   }
 
 }
