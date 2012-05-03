@@ -25,25 +25,6 @@
     return forwardedUrl;
   }%>
 
-<%!public static String transformXmlToHtml(Document xmlDoc) throws TransformerException,
-      TransformerConfigurationException {
-    DOMSource domSource = new DOMSource(xmlDoc);
-
-    TransformerFactory tf = TransformerFactory.newInstance();
-    Transformer transformer = tf.newTransformer();
-    transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-    //transformer.setOutputProperty(OutputKeys.ENCODING, "euc-kr");
-    transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-    java.io.StringWriter sw = new java.io.StringWriter();
-    StreamResult sr = new StreamResult(sw);
-    transformer.transform(domSource, sr);
-    String xml = sw.toString();
-
-    return xml;
-  }%>
-
-  
 <%!public static String guessCharacterEncoding(byte[] bytes) throws IOException {
     String string;
     if (bytes.length > 1024) {
@@ -74,7 +55,6 @@
 
   URL url = new URL(forwardedUrl);
   URLConnection conn = url.openConnection();
-  DocumentBuilder htmlBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
   BufferedReader reader;
   
   if (request.getMethod().equals("POST")) { // POST
@@ -91,8 +71,6 @@
 
   String encoding = guessCharacterEncoding(content);
   response.setCharacterEncoding(encoding);
-  //  reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
-  //      content), encoding));
 
   if (forwardedUrl.contains("/response_xml.html?")) {
     response.setContentType("text/xml");
@@ -105,8 +83,6 @@
       SAXParser sp = sf.newSAXParser();
       sp.parse(bufferInputStream, dp);
 
-      //String tmpXML = sw.toString().replaceAll("[<]", "&lt");
-      //String xml = tmpXML.replaceAll("[>]", "&gt");
       out.println(dp.getHtml());
 
     } catch (org.xml.sax.SAXException se) {
@@ -127,6 +103,8 @@
     response.setContentType("text/json");
     reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
         content), encoding));
+    
+    //TODO: add json parsing routine
   }
   else {
     reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
@@ -165,7 +143,6 @@
     public void characters(char ch[], int start, int length) throws SAXException {
 
       //System.out.print("START :" + Integer.toString(start));
-
       for (int i = 0; i < start + length; i++) {
           //System.out.print(ch[i]);
           parseBuffer.append(ch[i]);
@@ -175,16 +152,18 @@
 
     public void startDocument() throws SAXException {
 
-      String dtd = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+      //add DTD
+      String dtd = "<?xml version=\"1.0\" encoding=\"euc-kr\"?>\n"
 			       +"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML Basic 1.1//EN\" "
                    +"\"http://www.w3.org/TR/xhtml-basic/xhtml-basic11.dtd\">\n"
-      		       +"<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\">";
+      		       +"<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"ko\" xml:lang=\"ko\">\n";
 
       rawHtml.append(dtd);
-      rawHtml.append("<body>");
+      rawHtml.append("<body>\n");
     }
 
     public void endDocument() throws SAXException {
+      //close document
       //System.out.println(rawHtml);
       rawHtml.append("</body>");
       rawHtml.append("</html>");
@@ -192,6 +171,7 @@
 
     public void startElement(String uri, String name, String qName, Attributes atts)
         throws SAXException {
+      
       //System.out.println("qName Start: " + qName + "..." + atts.getLength());
       StringBuffer divForm = new StringBuffer(); 
       StringBuffer attrBuffer = new StringBuffer();
