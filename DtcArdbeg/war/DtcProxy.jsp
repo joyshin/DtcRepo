@@ -1,12 +1,8 @@
 <%@page language="java" contentType="text/html" pageEncoding="windows-949"%>
 <%@page import="java.net.*"%>
 <%@page import="java.io.*"%>
-<%@page import="java.util.*"%>
-<%@page import="java.lang.*"%>
-<%@page import="org.w3c.dom.*"%>
-<%@page import="org.xml.sax.*"%>
 <%@page import="javax.xml.parsers.*"%>
-
+<%@page import="net.skcomms.dtc.server.DtcXmlToHtmlHandler"%>
 <%!final String DTC_URL = "http://10.141.6.198/";%>
 <%!public String getForwardedUrl(HttpServletRequest request) {
     int index = request.getRequestURL().toString().indexOf("/_dtcproxy_/");
@@ -44,12 +40,20 @@
     }
     return bos.toByteArray();
   }%>
+<%!public String getHtmlFromXml(byte[] content) throws Exception {
+    DtcXmlToHtmlHandler dp = new DtcXmlToHtmlHandler();
+    ByteArrayInputStream bufferInputStream = new ByteArrayInputStream(content);
+    SAXParserFactory sf = SAXParserFactory.newInstance();
+    SAXParser sp = sf.newSAXParser();
+    sp.parse(bufferInputStream, dp);
+    return dp.getHtml().toString();
+  }%>
+
 <%
   final String forwardedUrl = getForwardedUrl(request);
 
   URL url = new URL(forwardedUrl);
   URLConnection conn = url.openConnection();
-
   if (request.getMethod().equals("POST")) { // POST
     ((HttpURLConnection) conn).setRequestMethod("POST");
     conn.setDoOutput(true);
@@ -60,57 +64,37 @@
     writer.close();
   }
 
-  //byte[] content = readAllBytes(conn.getInputStream());
-  Document htmlDoc = null;
-  DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
-  DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
-  byte[] content;
-  
   if (forwardedUrl.contains("/response_xml.html?")) {
     response.setContentType("text/xml");
   }
   else if (forwardedUrl.contains("/response_json.html?")) {
     response.setContentType("text/json");
   }
-  /*
-   if (forwardedUrl.contains("/response_xml.html?")) {
-   response.setContentType("text/xml");
-   //change xml to html
-
-   try {
-   htmlDoc = docBuilder.parse(conn.getInputStream());
-   } catch (SAXException se) {
-   System.out.println(se.getMessage());
-   return;
-   } catch (IOException ie) {
-   System.out.println(ie.getMessage());
-   return;
-   }
-
-   System.out.println(transformDoc.getTextContent());
-   content = htmlDoc.getTextContent().getBytes();
-
-   }
-   else if (forwardedUrl.contains("/response_json.html?")) {
-   response.setContentType("text/json");
-   //change json to html
-   content = htmlDoc.getTextContent().getBytes();
-
-   }
-   else
-   */
-  content = readAllBytes(conn.getInputStream());
+  
+  byte[] content = readAllBytes(conn.getInputStream());
 
   String encoding = guessCharacterEncoding(content);
   response.setCharacterEncoding(encoding);
-  BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
-      content), encoding));
 
-  String line;
-  while ((line = reader.readLine()) != null) {
-    line = line.replace("/newwindow.png", DTC_URL + "newwindow.png");
-    line = line.replace("/?c=", "?c=");
-    out.println(line);
+  if (forwardedUrl.contains("/response_xml.html?")) {
+    response.setContentType("text/xml");
+    out.print(getHtmlFromXml(content));
   }
-  reader.close();
+  else if (forwardedUrl.contains("/response_json.html?")) {
+    response.setContentType("text/json");
+    BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
+        content), encoding));
+    //TODO: add json parsing routine
+  }
+  else {
+    BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
+        content), encoding));
+    String line;
+    while ((line = reader.readLine()) != null) {
+      line = line.replace("/newwindow.png", "http://dtc.skcomms.net/newwindow.png");
+      line = line.replace("/?c=", "?c=");
+      out.println(line);
+    }
+    reader.close();
+  }
 %>

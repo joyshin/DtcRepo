@@ -79,7 +79,7 @@ public class DtcArdbeg implements EntryPoint {
     }
   }-*/;
 
-  private native static void addDtcFrameScrollEventHandler(DtcArdbeg ardbeg) /*-{
+  private static native void addDtcFrameScrollEventHandler(DtcArdbeg ardbeg) /*-{
     if ($doc.cssInserted == null) {
       $doc.cssInserted = true;
       $doc.styleSheets[0]
@@ -346,6 +346,14 @@ public class DtcArdbeg implements EntryPoint {
     RootPanel.get("dtcContainer").add(this.dtcFrame);
 
     this.dtcFrame.setUrl(DtcArdbeg.calculateInitialDtcUrl());
+  }
+
+  // /////////////////////////////////////////////////////////////////////////////////////////
+  // onClickSearchButton
+  // /////////////////////////////////////////////////////////////////////////////////////////
+  private void onClickSearchButton() {
+    DtcArdbeg.dtcChrono.start();
+
   }
 
   /**
