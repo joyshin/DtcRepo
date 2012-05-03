@@ -23,7 +23,6 @@ public class IpHistoryManager extends DefaultDtcArdbegObserver {
     var select = dtcFrameDoc.getElementsByTagName("frame")[0].contentDocument
         .getElementById("ip_select");
     select.onclick = function() {
-      //alert("onclick~~");
       ipHistoryManager.@net.skcomms.dtc.client.IpHistoryManager::redrawIpOptions(Lcom/google/gwt/dom/client/Document;)(dtcFrameDoc);
     };
   }-*/;
@@ -106,9 +105,9 @@ public class IpHistoryManager extends DefaultDtcArdbegObserver {
 
   @Override
   public void onDtcResponseFrameLoaded(Document dtcFrameDoc, boolean success) {
+    this.updateIpHistory(dtcFrameDoc);
+    this.redrawIpOptions(dtcFrameDoc);
     if (success) {
-      this.updateIpHistory(dtcFrameDoc);
-      this.redrawIpOptions(dtcFrameDoc);
     }
   }
 
@@ -120,7 +119,6 @@ public class IpHistoryManager extends DefaultDtcArdbegObserver {
   }
 
   public void redrawIpOptions(Document dtcFrameDoc) {
-
     if (this.options.size() < 2) {
       return;
     }
@@ -137,7 +135,6 @@ public class IpHistoryManager extends DefaultDtcArdbegObserver {
       optionElement.setValue(option.getIp());
       optionElement.setInnerText(option.getText() + option.getDecoratedText());
 
-      // select.add(optionElement, null);
       if (option.getOrigin().equals(Origin.DTC)) {
         this.dtcOptGroup.appendChild(optionElement);
       } else {
@@ -148,7 +145,6 @@ public class IpHistoryManager extends DefaultDtcArdbegObserver {
     select.appendChild(this.cookieOptGroup);
 
     select.setSelectedIndex(current);
-    // Window.alert("" + select.getOptions().getLength());
   }
 
   public void retrieveInfo(Document dtcFrameDoc) {
@@ -193,7 +189,6 @@ public class IpHistoryManager extends DefaultDtcArdbegObserver {
 
     Date expireTime = new Date(now.getTime() + (1000 * 60 * 60 * 24 * 7));
     Cookies.setCookie(key, Long.toString(now.getTime()), expireTime);
-
   }
 
 }

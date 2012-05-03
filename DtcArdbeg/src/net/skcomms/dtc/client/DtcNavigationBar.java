@@ -24,12 +24,12 @@ public class DtcNavigationBar extends DefaultDtcArdbegObserver {
     }
     String valueSource = url.substring(valueStartIndex + 3);
     return valueSource.split("/");
-
   }
 
   private final HorizontalPanel naviPanel = new HorizontalPanel();
 
   private final static String NAVIGATION_DELIMITER = "/";
+
   private final String baseUrl;
 
   private DtcArdbeg owner;
@@ -71,13 +71,14 @@ public class DtcNavigationBar extends DefaultDtcArdbegObserver {
 
       this.addAnchor("Home", this.baseUrl);
       this.addLabel(DtcNavigationBar.NAVIGATION_DELIMITER);
+      String nodeHistory = "";
       for (int i = 0; i < nodes.length - 1; i++) {
-        this.addAnchor(nodes[i], addressSource.concat(nodes[i] + "/"));
+        nodeHistory = nodeHistory + nodes[i] + "/";
+        this.addAnchor(nodes[i], addressSource.concat(nodeHistory));
         this.addLabel(DtcNavigationBar.NAVIGATION_DELIMITER);
       }
       this.addLabel(nodes[nodes.length - 1]);
     }
-
   }
 
   public void initialize(DtcArdbeg dtcArdbeg) {

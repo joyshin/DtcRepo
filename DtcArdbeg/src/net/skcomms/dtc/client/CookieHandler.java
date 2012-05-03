@@ -111,8 +111,8 @@ public class CookieHandler extends DefaultDtcArdbegObserver {
 
   @Override
   public void onDtcResponseFrameLoaded(Document dtcFrameDoc, boolean success) {
+    this.storeRequestParametersIntoCookie(dtcFrameDoc);
     if (success) {
-      this.storeRequestParametersIntoCookie(dtcFrameDoc);
     }
   }
 
