@@ -5,11 +5,11 @@ import java.util.Date;
 import com.google.gwt.animation.client.Animation;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.FrameElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Text;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
+import com.google.gwt.user.client.ui.RootPanel;
 
 public class DtcChrono extends DefaultDtcArdbegObserver {
 
@@ -79,12 +79,12 @@ public class DtcChrono extends DefaultDtcArdbegObserver {
 
   ChronoAnimation chronoAnimation;
 
-  public void createChrono(Document dtcRequestDoc) {
-    DivElement chronoElement = dtcRequestDoc.createDivElement();
+  public void createChrono(Document dtcFrameDoc) {
+    DivElement chronoElement = dtcFrameDoc.createDivElement();
     chronoElement.setId("responseTimeContainer");
 
-    Text searchTimeText = dtcRequestDoc.createTextNode(ChronoAnimation.getCurrentTimeString());
-    Text elapsedTimeText = dtcRequestDoc.createTextNode("");
+    Text searchTimeText = dtcFrameDoc.createTextNode(ChronoAnimation.getCurrentTimeString());
+    Text elapsedTimeText = dtcFrameDoc.createTextNode("");
     chronoElement.appendChild(searchTimeText);
     chronoElement.appendChild(elapsedTimeText);
 
@@ -96,23 +96,26 @@ public class DtcChrono extends DefaultDtcArdbegObserver {
 
     this.chronoAnimation = new ChronoAnimation(chronoStyle, searchTimeText, elapsedTimeText);
 
-    dtcRequestDoc.getBody().insertFirst(chronoElement);
+    RootPanel.get("chronoContainer").getElement().appendChild(chronoElement);
   }
 
   public void end() {
     this.chronoAnimation.cancel();
   }
 
+  public void initialize(DtcArdbeg dtcArdbeg) {
+    dtcArdbeg.addDtcArdbegObserver(this);
+    this.createChrono(dtcArdbeg.getDtcFrameDoc());
+  }
+
   @Override
   public void onDtcDirectoryLoaded(Document dtcFrameDoc) {
-    // TODO Auto-generated method stub
-
+    RootPanel.get("chronoContainer").setVisible(false);
   }
 
   @Override
   public void onDtcHomeLoaded(Document dtcFrameDoc) {
-    // TODO Auto-generated method stub
-
+    RootPanel.get("chronoContainer").setVisible(false);
   }
 
   @Override
@@ -122,10 +125,7 @@ public class DtcChrono extends DefaultDtcArdbegObserver {
 
   @Override
   public void onDtcTestPageLoaded(Document dtcFrameDoc) {
-    // create DtcChrono
-    FrameElement requestFrame = DomExplorerHelper.getFrameElement(dtcFrameDoc, "request");
-    Document requestDocument = FrameElement.as(requestFrame).getContentDocument();
-    this.createChrono(requestDocument);
+    RootPanel.get("chronoContainer").setVisible(true);
   }
 
   @Override
@@ -134,7 +134,6 @@ public class DtcChrono extends DefaultDtcArdbegObserver {
   }
 
   public void start() {
-
     this.chronoAnimation.run(10000);
   }
 }

@@ -320,7 +320,7 @@ public class DtcArdbeg implements EntryPoint {
     return rows;
   }
 
-  private Document getDtcFrameDoc() {
+  Document getDtcFrameDoc() {
     return IFrameElement.as(DtcArdbeg.this.dtcFrame.getElement()).getContentDocument();
   }
 
@@ -395,12 +395,14 @@ public class DtcArdbeg implements EntryPoint {
 
   @Override
   public void onModuleLoad() {
+    this.initializeDtcFrame();
+
     this.ipHistoryManager.initialize(this);
     this.navigationBar.initialize(this);
     this.dtcRequestFormAccessor.initialize(this);
     this.urlCopyManager.initialize(this);
     this.cookieHandler.initialize(this);
-    this.initializeDtcFrame();
+    new DtcChrono().initialize(this);
   }
 
   private void onScrollDtcFrame() {
@@ -424,6 +426,10 @@ public class DtcArdbeg implements EntryPoint {
 
     br = doc.getBody().getChild(0);
     doc.getBody().removeChild(br);
+  }
+
+  public void removeDtcArdbegObserver(DtcArdbegObserver observer) {
+    this.dtcArdbegObservers.remove(observer);
   }
 
   /**
