@@ -6,7 +6,6 @@ import java.util.List;
 
 import net.skcomms.dtc.client.IpOption.Origin;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.FrameElement;
@@ -173,7 +172,6 @@ public class IpHistoryManager extends DefaultDtcArdbegObserver {
     for (int i = 0; i < elementsByTagName.getLength(); i++) {
       String ip = elementsByTagName.getItem(i).getAttribute("value");
       String text = elementsByTagName.getItem(i).getInnerText();
-      GWT.log(ip + ":" + text);
       this.options.add(new IpOption(ip, text, IpOption.Origin.DTC));
     }
     Element ipTextElement = requestDoc.getElementById("ip_text");
