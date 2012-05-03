@@ -54,7 +54,6 @@
 
   URL url = new URL(forwardedUrl);
   URLConnection conn = url.openConnection();
-
   if (request.getMethod().equals("POST")) { // POST
     ((HttpURLConnection) conn).setRequestMethod("POST");
     conn.setDoOutput(true);
@@ -78,13 +77,8 @@
     response.setContentType("text/json");
     BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
         content), encoding));
-    String line;
-    while ((line = reader.readLine()) != null) {
-      line = line.replace("/newwindow.png", DTC_URL + "newwindow.png");
-      line = line.replace("/?c=", "?c=");
-      out.println(line);
-    }
-    reader.close();
+    
+    //TODO: add json parsing routine
   }
   else {
     BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
