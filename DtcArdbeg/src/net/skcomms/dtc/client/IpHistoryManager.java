@@ -22,9 +22,11 @@ public class IpHistoryManager extends DefaultDtcArdbegObserver {
       IpHistoryManager ipHistoryManager) /*-{
     var select = dtcFrameDoc.getElementsByTagName("frame")[0].contentDocument
         .getElementById("ip_select");
-    select.onclick = function() {
-      ipHistoryManager.@net.skcomms.dtc.client.IpHistoryManager::redrawIpOptions(Lcom/google/gwt/dom/client/Document;)(dtcFrameDoc);
-    };
+    if (select != null) {
+      select.onclick = function() {
+        ipHistoryManager.@net.skcomms.dtc.client.IpHistoryManager::redrawIpOptions(Lcom/google/gwt/dom/client/Document;)(dtcFrameDoc);
+      }
+    }
   }-*/;
 
   private final List<IpOption> options = new ArrayList<IpOption>();

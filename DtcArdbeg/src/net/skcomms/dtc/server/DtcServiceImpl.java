@@ -30,6 +30,10 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTML.Tag;
@@ -42,6 +46,9 @@ import net.skcomms.dtc.shared.DtcRequestInfo;
 import net.skcomms.dtc.shared.DtcRequestParameter;
 import net.skcomms.dtc.shared.DtcServiceVerifier;
 import net.skcomms.dtc.shared.IpInfo;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -320,11 +327,19 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     return bos.toByteArray();
   }
 
+  private EntityManagerFactory emf;
+
   @Override
   public List<DtcNodeInfo> getDir(String path) {
     if (!DtcServiceVerifier.isValidDirectoryPath(path)) {
       throw new IllegalArgumentException("Invalid directory:" + path);
     }
+
+    EntityManager manager = this.emf.createEntityManager();
+    manager.getTransaction().begin();
+    manager.persist(new DtcLog("\"" + path + "\" requested."));
+    manager.getTransaction().commit();
+    manager.close();
 
     try {
       String href;
@@ -365,5 +380,19 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
       e.printStackTrace();
       throw new IllegalArgumentException(e);
     }
+  }
+
+  @Override
+  public void init(ServletConfig config) throws ServletException {
+    System.out.println("init() called.");
+    super.init(config);
+    WebApplicationContextUtils.getRequiredWebApplicationContext(this.getServletContext())
+        .getAutowireCapableBeanFactory().autowireBean(this);
+  }
+
+  @Autowired
+  void setEntityManagerFactory(EntityManagerFactory emf) {
+    System.out.println("setEntityManagerFactory() called.");
+    this.emf = emf;
   }
 }
