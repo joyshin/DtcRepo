@@ -1,9 +1,12 @@
 package net.skcomms.dtc.client;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import net.skcomms.dtc.client.DtcArdbeg.DtcPageType;
+import net.skcomms.dtc.client.DtcArdbeg.Pair;
 import net.skcomms.dtc.shared.DtcNodeInfo;
 
 import com.google.gwt.core.client.GWT;
@@ -15,10 +18,14 @@ import com.google.gwt.view.client.SingleSelectionModel;
 
 public class DtcNodeData {
 
+  private static List<DtcNodeInfo> dtcFavoriteNodeList = new ArrayList<DtcNodeInfo>();
   private static List<DtcNodeInfo> dtcNodeList = new ArrayList<DtcNodeInfo>();
+
+  private static final List<DtcArdbeg.Pair<Integer, DtcNodeInfo>> favoritePairs = new ArrayList<DtcArdbeg.Pair<Integer, DtcNodeInfo>>();
 
   private static DtcNodeData instance = new DtcNodeData();
 
+  private static final ServiceDao serviceDao = new ServiceDao();
   private static final CellList<DtcNodeInfo> dtcNodeCellList = new CellList<DtcNodeInfo>(
       DtcNodeInfoCell.getInstance());
 
@@ -30,6 +37,15 @@ public class DtcNodeData {
 
   public static DtcNodeData getInstance() {
     return instance;
+  }
+
+  private static void sortFavoritePairsByVisitCount(List<Pair<Integer, DtcNodeInfo>> rows) {
+    Collections.sort(rows, new Comparator<Pair<Integer, DtcNodeInfo>>() {
+      @Override
+      public int compare(Pair<Integer, DtcNodeInfo> arg0, Pair<Integer, DtcNodeInfo> arg1) {
+        return -arg0.getKey().compareTo(arg1.getKey());
+      }
+    });
   }
 
   public DtcArdbeg owner;
@@ -59,13 +75,13 @@ public class DtcNodeData {
   }
 
   /**
-   * ¼±ÅÃµÈ ¾ÆÀÌÅÛÀÇ DtcPageTypeÀ» °¡Á®¿Â´Ù.
+   * ï¿½ï¿½ï¿½Ãµï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ DtcPageTypeï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Â´ï¿½.
    * 
    * @param path
-   *          ÀÌµ¿ÇÒ ÆäÀÌÁö °æ·Î
+   *          ï¿½Ìµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
    * 
    * @param isLeaf
-   *          True: Test, False: ³ª¸ÓÁö
+   *          True: Test, False: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
    * 
    * @return DtcPageType
    */
@@ -98,21 +114,23 @@ public class DtcNodeData {
       }
     });
 
-    List<DtcNodeInfo> testNodeList = new ArrayList<DtcNodeInfo>();
-    DtcNodeInfo tmpNode = new DtcNodeInfo();
-    tmpNode.setDescription("DTC_PROXY_URL");
-    tmpNode.setName("Favorite Test");
-    tmpNode.setPath("/");
-    tmpNode.setUpdateTime("11");
-    testNodeList.add(tmpNode);
-    dtcFavoriteNodeCellList.setRowData(testNodeList);
+    // List<DtcNodeInfo> testNodeList = new ArrayList<DtcNodeInfo>();
+    // for (int i = 0; i < 5; i++) {
+    // DtcNodeInfo tmpNode = new DtcNodeInfo();
+    // tmpNode.setDescription("DTC_PROXY_URL");
+    // tmpNode.setName("Favorite Test");
+    // tmpNode.setPath("/");
+    // tmpNode.setUpdateTime("11");
+    // testNodeList.add(tmpNode);
+    // }
+    // dtcFavoriteNodeCellList.setRowData(testNodeList);
+    // dtcFavoriteNodeCellList.setRowCount(testNodeList.size(), true);
 
     dtcNodeCellList.setSelectionModel(SELECTION_MODEL);
     dtcFavoriteNodeCellList.setSelectionModel(SELECTION_MODEL);
   }
 
-  public void refreshDtcNode(String path) {
-
+  public void refreshDtcDirectoryPageNode(String path) {
     DtcService.Util.getInstance().getDir(path, new AsyncCallback<List<DtcNodeInfo>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -129,5 +147,48 @@ public class DtcNodeData {
         dtcNodeCellList.setRowCount(dtcNodeList.size(), true);
       }
     });
+  }
+
+  public void refreshDtcHomePageNode() {
+
+    DtcService.Util.getInstance().getDir("/", new AsyncCallback<List<DtcNodeInfo>>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        caught.printStackTrace();
+        GWT.log(caught.getMessage());
+      }
+
+      @Override
+      public void onSuccess(List<DtcNodeInfo> nodeInfos) {
+        dtcNodeList.clear();
+        favoritePairs.clear();
+        dtcFavoriteNodeList.clear();
+
+        for (DtcNodeInfo nodeInfo : nodeInfos) {
+          Integer score = serviceDao.getVisitCount(nodeInfo.getName());
+          if (score > 0) {
+            favoritePairs.add(new Pair<Integer, DtcNodeInfo>(score, nodeInfo));
+          } else {
+            dtcNodeList.add(nodeInfo);
+          }
+        }
+
+        sortFavoritePairsByVisitCount(favoritePairs);
+        setFavoriteListWithPairs(favoritePairs);
+
+        dtcNodeCellList.setRowData(dtcNodeList);
+        dtcNodeCellList.setRowCount(dtcNodeList.size(), true);
+
+        dtcFavoriteNodeCellList.setRowData(dtcFavoriteNodeList);
+        dtcFavoriteNodeCellList.setRowCount(dtcFavoriteNodeList.size(),
+            true);
+      }
+    });
+  }
+
+  private void setFavoriteListWithPairs(List<Pair<Integer, DtcNodeInfo>> favoritePairs) {
+    for (Pair<Integer, DtcNodeInfo> favoritePair : favoritePairs) {
+      dtcFavoriteNodeList.add(favoritePair.getValue());
+    }
   }
 }

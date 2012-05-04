@@ -46,6 +46,18 @@ final class DtcNodeInfoCell extends AbstractCell<DtcNodeInfo> {
     image.setSize("100%", "100%");
     image.setStyleName("gwt-DtcNodeCellImageStyle");
 
+    // Button addLinkButton = new Button("Click ");
+    //
+    // addLinkButton.addClickHandler(new ClickHandler() {
+    //
+    // @Override
+    // public void onClick(ClickEvent event) {
+    //
+    // GWT.log("You clicked ");
+    //
+    // }
+    //
+    // });
     // 1. div
     sb.appendHtmlConstant(CELL_STYLE_OPENER);
 
@@ -54,6 +66,12 @@ final class DtcNodeInfoCell extends AbstractCell<DtcNodeInfo> {
     sb.append(SafeHtmlUtils.fromTrustedString(image.toString()));
     sb.appendHtmlConstant(CELL_IMAGE_STYLE_CLOSER);
     // 2
+
+    // // 2. div
+    // sb.appendHtmlConstant(CELL_IMAGE_STYLE_OPENER);
+    // sb.append(SafeHtmlUtils.fromTrustedString(addLinkButton.toString()));
+    // sb.appendHtmlConstant(CELL_IMAGE_STYLE_CLOSER);
+    // // 2
 
     // 3. div
     sb.appendHtmlConstant(CELL_BOX_STYLE_OPENER);
