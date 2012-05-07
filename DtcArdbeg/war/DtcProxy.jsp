@@ -2,13 +2,23 @@
 <%@page import="java.net.*"%>
 <%@page import="java.io.*"%>
 <%@page import="javax.xml.parsers.*"%>
-<%@page import="net.skcomms.dtc.server.DtcXmlToHtmlHandler"%>
+<%@page import="org.json.simple.parser.JSONParser"%>
+<%@page import="org.xml.sax.InputSource"%>
+<%@page import="net.skcomms.dtc.server.*"%>
 <%!final String DTC_URL = "http://10.141.6.198/";%>
+<%!public String escapeForXml(String src) {
+    return src.replaceAll("\\\\u000B", "&#11;").replaceAll("\\\\f", "&#12;");
+  }%>
 <%!public String getForwardedUrl(HttpServletRequest request) {
     int index = request.getRequestURL().toString().indexOf("/_dtcproxy_/");
     String baseUrl = request.getRequestURL().toString().substring(0, index + 12);
 
     String forwardedUrl = request.getRequestURL().toString();
+    System.out.println(forwardedUrl);
+    if (forwardedUrl.contains("/response_json.html")) {
+      System.out.println(request.getParameter("u"));
+      return request.getParameter("u");
+    }
     if (request.getQueryString() != null) {
       forwardedUrl += "?" + request.getQueryString();
     }
@@ -46,6 +56,7 @@
     SAXParserFactory sf = SAXParserFactory.newInstance();
     SAXParser sp = sf.newSAXParser();
     sp.parse(bufferInputStream, dp);
+    //sp.parse(new String(content, "windows-949"), dp);
     return dp.getHtml().toString();
   }%>
 
@@ -64,27 +75,32 @@
     writer.close();
   }
 
-  if (forwardedUrl.contains("/response_xml.html?")) {
-    response.setContentType("text/xml");
-  }
-  else if (forwardedUrl.contains("/response_json.html?")) {
-    response.setContentType("text/json");
-  }
-  
   byte[] content = readAllBytes(conn.getInputStream());
 
   String encoding = guessCharacterEncoding(content);
   response.setCharacterEncoding(encoding);
-
+  
+  System.out.println("getContentType : " + ((HttpURLConnection) conn).getContentType());
+  System.out.println("content : " + new String(content, encoding));
+  System.out.println("index:" + new String(content, encoding).indexOf(0x0b));
+  
   if (forwardedUrl.contains("/response_xml.html?")) {
     response.setContentType("text/xml");
     out.print(getHtmlFromXml(content));
   }
-  else if (forwardedUrl.contains("/response_json.html?")) {
-    response.setContentType("text/json");
-    BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
-        content), encoding));
-    //TODO: add json parsing routine
+  else if (((HttpURLConnection) conn).getContentType().startsWith("Application/json")) {
+    response.setContentType("text/xml");
+    
+    System.out.println("json:" + new String(content, "euc-kr"));
+    
+    JSONParser parser = new JSONParser();
+    DtcJsonToXmlHandler jsonHandler = new DtcJsonToXmlHandler();
+    parser.parse(escapeForXml(new String(content, encoding)), jsonHandler);
+    String xmlString = jsonHandler.toString();
+    System.out.println("xml:" + xmlString.substring(0, 1130));
+    System.out.println("xml_index:" + xmlString.indexOf(0x0b));
+    String xml = getHtmlFromXml(xmlString.getBytes());
+    out.println(xml);
   }
   else {
     BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
