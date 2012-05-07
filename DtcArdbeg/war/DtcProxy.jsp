@@ -97,9 +97,8 @@
     DtcJsonToXmlHandler jsonHandler = new DtcJsonToXmlHandler();
     parser.parse(escapeForXml(new String(content, encoding)), jsonHandler);
     String xmlString = jsonHandler.toString();
-    System.out.println("xml:" + xmlString.substring(0, 1130));
-    System.out.println("xml_index:" + xmlString.indexOf(0x0b));
-    String xml = getHtmlFromXml(xmlString.getBytes());
+    System.out.println("xml:" + xmlString);
+    String xml = getHtmlFromXml(xmlString.getBytes(encoding));
     out.println(xml);
   }
   else {
