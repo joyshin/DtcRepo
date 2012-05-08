@@ -46,8 +46,8 @@ public class DtcArdbeg implements EntryPoint {
   }
 
   private static class Pair<K, V> {
-    private K key;
-    private V value;
+    private final K key;
+    private final V value;
 
     public Pair(K key, V value) {
       this.key = key;
@@ -75,70 +75,70 @@ public class DtcArdbeg implements EntryPoint {
   private static DtcChrono dtcChrono = new DtcChrono();
 
   public native static void addDtcFormEventHandler(DtcArdbeg module, Document dtcDoc) /*-{
-    var inputForm = dtcDoc.getElementsByTagName("frame")[0].contentWindow.document
-        .getElementsByTagName("form")[0];
-    for (i = 0; i < inputForm.elements.length; i++) {
-      var inputElement = inputForm.elements[i];
-      if (inputElement.type == "text") {
-        inputElement.onkeydown = function(event) {
-          if (event.keyCode == 13) {
-            module.@net.skcomms.dtc.client.DtcArdbeg::onSubmitRequestForm()();
-            this.form.submit();
-            this.select();
-          }
-        }
-      }
-      ;
-    }
-  }-*/;
+                                                                                      var inputForm = dtcDoc.getElementsByTagName("frame")[0].contentWindow.document
+                                                                                      .getElementsByTagName("form")[0];
+                                                                                      for (i = 0; i < inputForm.elements.length; i++) {
+                                                                                      var inputElement = inputForm.elements[i];
+                                                                                      if (inputElement.type == "text") {
+                                                                                      inputElement.onkeydown = function(event) {
+                                                                                      if (event.keyCode == 13) {
+                                                                                      module.@net.skcomms.dtc.client.DtcArdbeg::onSubmitRequestForm()();
+                                                                                      this.form.submit();
+                                                                                      this.select();
+                                                                                      }
+                                                                                      }
+                                                                                      }
+                                                                                      ;
+                                                                                      }
+                                                                                      }-*/;
 
   private static native void addDtcFrameScrollEventHandler(DtcArdbeg ardbeg) /*-{
-    if ($doc.cssInserted == null) {
-      $doc.cssInserted = true;
-      $doc.styleSheets[0]
-          .insertRule("div#dtcContainer iframe { background-position: 0px 0px; }", 0);
-    }
+                                                                             if ($doc.cssInserted == null) {
+                                                                             $doc.cssInserted = true;
+                                                                             $doc.styleSheets[0]
+                                                                             .insertRule("div#dtcContainer iframe { background-position: 0px 0px; }", 0);
+                                                                             }
 
-    dtc = $doc.getElementsByTagName("iframe")[1];
-    $doc.styleSheets[0].cssRules[0].style.backgroundPositionY = "-100px";
-    dtc.contentWindow.onscroll = function() {
-      $doc.styleSheets[0].cssRules[0].style.backgroundPositionY = "-"
-          + parseInt((dtc.contentWindow.pageYOffset * 0.02 + 100)) + "px";
-      ardbeg.@net.skcomms.dtc.client.DtcArdbeg::onScrollDtcFrame()();
-    };
-  }-*/;
+                                                                             dtc = $doc.getElementsByTagName("iframe")[1];
+                                                                             $doc.styleSheets[0].cssRules[0].style.backgroundPositionY = "-100px";
+                                                                             dtc.contentWindow.onscroll = function() {
+                                                                             $doc.styleSheets[0].cssRules[0].style.backgroundPositionY = "-"
+                                                                             + parseInt((dtc.contentWindow.pageYOffset * 0.02 + 100)) + "px";
+                                                                             ardbeg.@net.skcomms.dtc.client.DtcArdbeg::onScrollDtcFrame()();
+                                                                             };
+                                                                             }-*/;
 
   public native static void addDtcResponseFrameLoadEventHandler(DtcArdbeg module, Document dtcDoc) /*-{
-    var responseFrame = dtcDoc.getElementsByTagName("frame")[1];
-    responseFrame.onload = function() {
-      var resultFrame = responseFrame.contentDocument.getElementById("xmlresult");
-      var successfulSearch = false;
+                                                                                                   var responseFrame = dtcDoc.getElementsByTagName("frame")[1];
+                                                                                                   responseFrame.onload = function() {
+                                                                                                   var resultFrame = responseFrame.contentDocument.getElementById("xmlresult");
+                                                                                                   var successfulSearch = false;
 
-      if (resultFrame != null) {
-        var codeElements = resultFrame.contentDocument.getElementsByTagName("Code");
+                                                                                                   if (resultFrame != null) {
+                                                                                                   var codeElements = resultFrame.contentDocument.getElementsByTagName("Code");
 
-        if (codeElements.length > 0 && codeElements[0].textContent == "100") {
-          successfulSearch = true;
-        }
-      } else {
-        form = responseFrame.contentDocument.forms[0];
-        var patt = /status: 100/gi;
+                                                                                                   if (codeElements.length > 0 && codeElements[0].textContent == "100") {
+                                                                                                   successfulSearch = true;
+                                                                                                   }
+                                                                                                   } else {
+                                                                                                   form = responseFrame.contentDocument.forms[0];
+                                                                                                   var patt = /status: 100/gi;
 
-        if (form.innerText.substring(0, 100).match(patt) != null) {
-          successfulSearch = true;
-        }
-      }
-      module.@net.skcomms.dtc.client.DtcArdbeg::onLoadDtcResponseFrame(Z)(successfulSearch);
-    }
-  }-*/;
+                                                                                                   if (form.innerText.substring(0, 100).match(patt) != null) {
+                                                                                                   successfulSearch = true;
+                                                                                                   }
+                                                                                                   }
+                                                                                                   module.@net.skcomms.dtc.client.DtcArdbeg::onLoadDtcResponseFrame(Z)(successfulSearch);
+                                                                                                   }
+                                                                                                   }-*/;
 
   public native static void addDtcSearchButtonEventHandler(DtcArdbeg module, Document dtcDoc) /*-{
-    var searchButton = dtcDoc.getElementsByTagName("frame")[0].contentWindow.document
-        .getElementById("div_search");
-    searchButton.onclick = function() {
-      module.@net.skcomms.dtc.client.DtcArdbeg::onSubmitRequestForm()();
-    };
-  }-*/;
+                                                                                              var searchButton = dtcDoc.getElementsByTagName("frame")[0].contentWindow.document
+                                                                                              .getElementById("div_search");
+                                                                                              searchButton.onclick = function() {
+                                                                                              module.@net.skcomms.dtc.client.DtcArdbeg::onSubmitRequestForm()();
+                                                                                              };
+                                                                                              }-*/;
 
   private static String calculateBaseUrl() {
     int queryStringStart = Document.get().getURL().indexOf('?');
@@ -170,6 +170,8 @@ public class DtcArdbeg implements EntryPoint {
   }
 
   private final CookieHandler cookieHandler = new CookieHandler();
+
+  private final DtcTestPageViewController dtcTestPageViewConroller = new DtcTestPageViewController();
 
   private final FlowPanel dtcNodePanel = new FlowPanel();
 
@@ -451,6 +453,7 @@ public class DtcArdbeg implements EntryPoint {
   }
 
   private void onLoadDtcTestPage(Document dtcFrameDoc) {
+
     for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
       observer.onDtcTestPageLoaded(dtcFrameDoc);
     }
@@ -460,6 +463,8 @@ public class DtcArdbeg implements EntryPoint {
     DtcArdbeg.addDtcFormEventHandler(DtcArdbeg.this, dtcFrameDoc);
 
     this.displayTestPage();
+    RootPanel.get("dtcContainer").remove(this.dtcFrame);
+    RootPanel.get("dtcContainer").add(this.dtcTestPageViewConroller.getLayout());
   }
 
   @Override
@@ -472,6 +477,7 @@ public class DtcArdbeg implements EntryPoint {
     this.dtcRequestFormAccessor.initialize(this);
     this.urlCopyManager.initialize(this);
     this.cookieHandler.initialize(this);
+    this.dtcTestPageViewConroller.initialize(this);
     new DtcChrono().initialize(this);
   }
 
