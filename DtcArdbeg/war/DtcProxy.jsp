@@ -14,9 +14,7 @@
     String baseUrl = request.getRequestURL().toString().substring(0, index + 12);
 
     String forwardedUrl = request.getRequestURL().toString();
-    System.out.println(forwardedUrl);
     if (forwardedUrl.contains("/response_json.html")) {
-      System.out.println(request.getParameter("u"));
       return request.getParameter("u");
     }
     if (request.getQueryString() != null) {
@@ -80,26 +78,23 @@
   String encoding = guessCharacterEncoding(content);
   response.setCharacterEncoding(encoding);
   
-  System.out.println("getContentType : " + ((HttpURLConnection) conn).getContentType());
-  System.out.println("content : " + new String(content, encoding));
-  System.out.println("index:" + new String(content, encoding).indexOf(0x0b));
-  
   if (forwardedUrl.contains("/response_xml.html?")) {
     response.setContentType("text/xml");
     out.print(getHtmlFromXml(content));
+    out.flush();
+    out.close();
   }
   else if (((HttpURLConnection) conn).getContentType().startsWith("Application/json")) {
     response.setContentType("text/xml");
-    
-    System.out.println("json:" + new String(content, "euc-kr"));
     
     JSONParser parser = new JSONParser();
     DtcJsonToXmlHandler jsonHandler = new DtcJsonToXmlHandler();
     parser.parse(escapeForXml(new String(content, encoding)), jsonHandler);
     String xmlString = jsonHandler.toString();
-    System.out.println("xml:" + xmlString);
     String xml = getHtmlFromXml(xmlString.getBytes(encoding));
     out.println(xml);
+    out.flush();
+    out.close();
   }
   else {
     BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
