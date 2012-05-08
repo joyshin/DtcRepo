@@ -30,80 +30,76 @@ public class DtcNavigationBar extends DefaultDtcArdbegObserver {
 
   private final static String NAVIGATION_DELIMITER = "/";
 
-  private final String baseUrl;
+  private final String rootPath = "/";
 
   private DtcArdbeg owner;
 
-  public DtcNavigationBar(String baseUrl) {
-    this.baseUrl = baseUrl;
+  public DtcNavigationBar() {
   }
 
-  private void addAnchor(String text, final String href) {
+  private void addAnchor(String text, final String path) {
     Anchor anchor = new Anchor(text);
 
     anchor.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         event.stopPropagation();
-        DtcNavigationBar.this.owner.setDtcFrameUrl(href);
+        owner.setDtcFramePath(path);
       }
     });
 
-    this.naviPanel.add(anchor);
+    naviPanel.add(anchor);
   }
 
   private void addLabel(String Text) {
     Label label = new Label(Text);
-    this.naviPanel.add(label);
+    naviPanel.add(label);
   }
 
   public void addPath(String url) {
-    this.naviPanel.clear();
+    naviPanel.clear();
 
     String[] nodes = DtcNavigationBar.getNavigationNodes(url);
-    String addressSource = this.baseUrl;
 
     if (nodes.length == 0) {
-      this.addLabel("Home");
+      addLabel("Home");
     }
     else {
-      addressSource = addressSource.concat("?b=");
-
-      this.addAnchor("Home", this.baseUrl);
-      this.addLabel(DtcNavigationBar.NAVIGATION_DELIMITER);
-      String nodeHistory = "";
+      addAnchor("Home", rootPath);
+      addLabel(DtcNavigationBar.NAVIGATION_DELIMITER);
+      String nodeHistory = rootPath;
       for (int i = 0; i < nodes.length - 1; i++) {
         nodeHistory = nodeHistory + nodes[i] + "/";
-        this.addAnchor(nodes[i], addressSource.concat(nodeHistory));
-        this.addLabel(DtcNavigationBar.NAVIGATION_DELIMITER);
+        addAnchor(nodes[i], nodeHistory);
+        addLabel(DtcNavigationBar.NAVIGATION_DELIMITER);
       }
-      this.addLabel(nodes[nodes.length - 1]);
+      addLabel(nodes[nodes.length - 1]);
     }
   }
 
   public void initialize(DtcArdbeg dtcArdbeg) {
     dtcArdbeg.addDtcArdbegObserver(this);
 
-    this.naviPanel.clear();
-    this.naviPanel.setSpacing(3);
-    this.owner = dtcArdbeg;
+    naviPanel.clear();
+    naviPanel.setSpacing(3);
+    owner = dtcArdbeg;
 
-    this.addAnchor("Home", this.baseUrl);
-    RootPanel.get("naviBarContainer").add(this.naviPanel);
+    addAnchor("Home", rootPath);
+    RootPanel.get("naviBarContainer").add(naviPanel);
   }
 
   @Override
   public void onDtcDirectoryLoaded(Document dtcFrameDoc) {
-    this.addPath(dtcFrameDoc.getURL());
+    addPath(dtcFrameDoc.getURL());
   }
 
   @Override
   public void onDtcHomeLoaded(Document dtcFrameDoc) {
-    this.addPath(dtcFrameDoc.getURL());
+    addPath(dtcFrameDoc.getURL());
   }
 
   @Override
   public void onDtcTestPageLoaded(Document dtcFrameDoc) {
-    this.addPath(dtcFrameDoc.getURL());
+    addPath(dtcFrameDoc.getURL());
   }
 }

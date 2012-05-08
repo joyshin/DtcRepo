@@ -3,7 +3,6 @@ package net.skcomms.dtc.client;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.skcomms.dtc.client.DtcArdbeg.DtcPageType;
 import net.skcomms.dtc.shared.DtcNodeInfo;
 
 import com.google.gwt.core.client.GWT;
@@ -32,8 +31,6 @@ public class DtcNodeData {
     return instance;
   }
 
-  public DtcArdbeg owner;
-
   public CellList<DtcNodeInfo> getDtcFavoriteNodeCellList() {
     return dtcFavoriteNodeCellList;
   }
@@ -42,59 +39,15 @@ public class DtcNodeData {
     return dtcNodeCellList;
   }
 
-  private String getHrefWithTypeAndPath(DtcPageType type, String path) {
-
-    String href = DtcArdbeg.getDtcProxyUrl();
-
-    switch (type) {
-    case HOME:
-      return href;
-    case DIRECTORY:
-      return href + "?b=" + path.substring(1);
-    case TEST:
-      return href + "?c=" + path.substring(1);
-    }
-
-    return null;
-  }
-
-  /**
-   * 선택된 아이템의 DtcPageType을 가져온다.
-   * 
-   * @param path
-   *          이동할 페이지 경로
-   * 
-   * @param isLeaf
-   *          True: Test, False: 나머지
-   * 
-   * @return DtcPageType
-   */
-  private DtcPageType getTypeOfSelected(String path, boolean isLeaf) {
-    if (isLeaf == true) {
-      return DtcPageType.TEST;
-    } else {
-      if (path.equals("/")) {
-        return DtcPageType.HOME;
-      } else {
-        return DtcPageType.DIRECTORY;
-      }
-    }
-  }
-
-  public void initialize(DtcArdbeg dtcArdbeg)
+  public void initialize(final DtcArdbeg dtcArdbeg)
   {
-    this.owner = dtcArdbeg;
-
     SELECTION_MODEL.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
       @Override
       public void onSelectionChange(SelectionChangeEvent event) {
         DtcNodeInfo selected = ((SingleSelectionModel<DtcNodeInfo>) SELECTION_MODEL)
             .getSelectedObject();
 
-        DtcPageType type = DtcNodeData.this.getTypeOfSelected(selected.getPath(),
-            selected.isLeaf());
-        String href = DtcNodeData.this.getHrefWithTypeAndPath(type, selected.getPath());
-        DtcNodeData.this.owner.setDtcFrameUrl(href);
+        dtcArdbeg.setDtcFramePath(selected.getPath());
       }
     });
 
