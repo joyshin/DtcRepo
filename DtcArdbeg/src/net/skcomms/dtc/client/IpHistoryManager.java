@@ -77,9 +77,9 @@ public class IpHistoryManager extends DefaultDtcArdbegObserver {
 
     if (select == null) {
 
-      String innerHtml = "<div style=\"float:left;\"><input type=\"text\" name=\"ip_text\" id=\"ip_text\" value=\""
-          + this.ipText + "\" style=\"width:206px;display:none;\" disabled>";
-      innerHtml += "<select name=\"ip_select\" id=\"ip_select\" style=\"width:206px;display:block; font-size:10pt\">";
+      String innerHtml = "<div><input type=\"text\" name=\"ip_text\" id=\"ip_text\" value=\""
+          + this.ipText + "\" style=\"width:226px;display:none;\" disabled>";
+      innerHtml += "<select name=\"ip_select\" id=\"ip_select\" style=\"width:226px; font-size:10pt\">";
       innerHtml += "</select></div>";
       innerHtml += "<div style=\"float:right;\"><input type=\"button\" value=\"↔\" onclick=\"javascript:fnCHANGE_IP();\"></div>";
       innerHtml += "<script type='text/javascript'>";
@@ -137,13 +137,12 @@ public class IpHistoryManager extends DefaultDtcArdbegObserver {
       return;
     }
 
-    Document requestDoc = FrameElement.as(dtcFrameDoc.getElementsByTagName("frame").getItem(0))
-        .getContentDocument();
     SelectElement select = this.getOrCreateIpSelectElement(dtcFrameDoc);
     int current = select.getSelectedIndex();
-
     select.clear();
 
+    Document requestDoc = FrameElement.as(dtcFrameDoc.getElementsByTagName("frame").getItem(0))
+        .getContentDocument();
     for (IpOption option : this.options) {
       OptionElement optionElement = requestDoc.createOptionElement();
       optionElement.setValue(option.getIp());
