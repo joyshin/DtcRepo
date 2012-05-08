@@ -20,11 +20,18 @@ public class IpHistoryManager extends DefaultDtcArdbegObserver {
 
   native static void addDtcIpSelectClickEventHandler(Document dtcFrameDoc,
       IpHistoryManager ipHistoryManager) /*-{
-    var select = dtcFrameDoc.getElementsByTagName("frame")[0].contentDocument
-        .getElementById("ip_select");
-    select.onclick = function() {
-      ipHistoryManager.@net.skcomms.dtc.client.IpHistoryManager::redrawIpOptions(Lcom/google/gwt/dom/client/Document;)(dtcFrameDoc);
-    };
+		var select = dtcFrameDoc.getElementsByTagName("frame")[0].contentDocument
+				.getElementById("ip_select");
+		if (select != null) {
+			select.onclick = function() {
+				ipHistoryManager.@net.skcomms.dtc.client.IpHistoryManager::redrawIpOptions(Lcom/google/gwt/dom/client/Document;)(dtcFrameDoc);
+			}
+		}
+  }-*/;
+
+  native static void changeIpType() /*-{
+		$doc.getElementsByTagName("iframe")[1].contentDocument
+				.getElementsByTagName("frame")[0].contentWindow.sIP_TYPE = "2";
   }-*/;
 
   private final List<IpOption> options = new ArrayList<IpOption>();
@@ -64,20 +71,27 @@ public class IpHistoryManager extends DefaultDtcArdbegObserver {
     return option;
   }
 
-  private SelectElement getOrCreateIpSelectElement(Document requestDoc) {
+  private SelectElement getOrCreateIpSelectElement(Document dtcFrameDoc) {
+    Document requestDoc = FrameElement.as(dtcFrameDoc.getElementsByTagName("frame").getItem(0))
+        .getContentDocument();
     Element select = requestDoc.getElementById("ip_select");
 
     if (select == null) {
 
-      String innerHtml = "<div><input type=\"text\" name=\"ip_text\" id=\"ip_text\" value=\""
-          + this.ipText + "\" style=\"width:226px;display:none;\" disabled>";
-      innerHtml += "<select name=\"ip_select\" id=\"ip_select\" style=\"width:226px; font-size:10pt\">";
+      String innerHtml = "<div style=\"float:left;\"><input type=\"text\" name=\"ip_text\" id=\"ip_text\" value=\""
+          + this.ipText + "\" style=\"width:206px;display:none;\" disabled>";
+      innerHtml += "<select name=\"ip_select\" id=\"ip_select\" style=\"width:206px;display:block; font-size:10pt\">";
       innerHtml += "</select></div>";
       innerHtml += "<div style=\"float:right;\"><input type=\"button\" value=\"↔\" onclick=\"javascript:fnCHANGE_IP();\"></div>";
+      innerHtml += "<script type='text/javascript'>";
+      innerHtml += " sIP_TYPE=\"2\"; </script> ";
 
       Element spanIp = requestDoc.getElementById("span_ip");
       spanIp.setInnerHTML(innerHtml);
       select = requestDoc.getElementById("ip_select");
+
+      changeIpType();
+      IpHistoryManager.addDtcIpSelectClickEventHandler(dtcFrameDoc, this);
     }
     return SelectElement.as(select);
   }
@@ -108,6 +122,7 @@ public class IpHistoryManager extends DefaultDtcArdbegObserver {
     this.updateIpHistory(dtcFrameDoc);
     this.redrawIpOptions(dtcFrameDoc);
     if (success) {
+
     }
   }
 
@@ -125,7 +140,7 @@ public class IpHistoryManager extends DefaultDtcArdbegObserver {
 
     Document requestDoc = FrameElement.as(dtcFrameDoc.getElementsByTagName("frame").getItem(0))
         .getContentDocument();
-    SelectElement select = this.getOrCreateIpSelectElement(requestDoc);
+    SelectElement select = this.getOrCreateIpSelectElement(dtcFrameDoc);
     int current = select.getSelectedIndex();
 
     select.clear();
@@ -190,5 +205,4 @@ public class IpHistoryManager extends DefaultDtcArdbegObserver {
     Date expireTime = new Date(now.getTime() + (1000 * 60 * 60 * 24 * 7));
     Cookies.setCookie(key, Long.toString(now.getTime()), expireTime);
   }
-
 }
