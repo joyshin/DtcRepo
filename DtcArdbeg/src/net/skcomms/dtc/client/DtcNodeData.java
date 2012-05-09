@@ -104,13 +104,11 @@ public class DtcNodeData {
     SELECTION_MODEL.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
       @Override
       public void onSelectionChange(SelectionChangeEvent event) {
-        DtcNodeInfo selected = ((SingleSelectionModel<DtcNodeInfo>) SELECTION_MODEL)
-            .getSelectedObject();
+        DtcNodeInfo selected = ((SingleSelectionModel<DtcNodeInfo>)
+            SELECTION_MODEL)
+                .getSelectedObject();
 
-        DtcPageType type = DtcNodeData.this.getTypeOfSelected(selected.getPath(),
-            selected.isLeaf());
-        String href = DtcNodeData.this.getHrefWithTypeAndPath(type, selected.getPath());
-        DtcNodeData.this.owner.setDtcFrameUrl(href);
+        onClickDtcNodeInfoCell(selected);
       }
     });
 
@@ -126,8 +124,41 @@ public class DtcNodeData {
     // dtcFavoriteNodeCellList.setRowData(testNodeList);
     // dtcFavoriteNodeCellList.setRowCount(testNodeList.size(), true);
 
-    dtcNodeCellList.setSelectionModel(SELECTION_MODEL);
-    dtcFavoriteNodeCellList.setSelectionModel(SELECTION_MODEL);
+    // dtcNodeCellList.setSelectionModel(SELECTION_MODEL);
+    // dtcFavoriteNodeCellList.setSelectionModel(SELECTION_MODEL);
+  }
+
+  private void moveToDtcFavoriteNodeList(DtcNodeInfo selected) {
+    serviceDao.addVisitCount(selected.getName());
+    dtcFavoriteNodeList.add(selected);
+    dtcNodeList.remove(selected);
+  }
+
+  private void moveToDtcNodeList(DtcNodeInfo selected) {
+    serviceDao.removeServiceFromCookie(selected.getName());
+    dtcFavoriteNodeList.remove(selected);
+    dtcNodeList.add(selected);
+  }
+
+  public void onClickDtcNodeInfoCell(DtcNodeInfo selected) {
+    DtcPageType type =
+        DtcNodeData.this.getTypeOfSelected(selected.getPath(),
+            selected.isLeaf());
+    String href = DtcNodeData.this.getHrefWithTypeAndPath(type,
+        selected.getPath());
+    DtcNodeData.this.owner.setDtcFrameUrl(href);
+  }
+
+  public void onClickToggleListButton(DtcNodeInfo selected) {
+
+    if (dtcFavoriteNodeList.contains(selected) == true) {
+      moveToDtcNodeList(selected);
+    } else {
+      moveToDtcFavoriteNodeList(selected);
+    }
+
+    refreshDtcNodeCellList();
+    refreshDtcFavoriteNodeCellList();
   }
 
   public void refreshDtcDirectoryPageNode(String path) {
@@ -143,10 +174,15 @@ public class DtcNodeData {
         dtcNodeList.clear();
         dtcNodeList.addAll(nodeInfos);
 
-        dtcNodeCellList.setRowData(dtcNodeList);
-        dtcNodeCellList.setRowCount(dtcNodeList.size(), true);
+        refreshDtcNodeCellList();
       }
     });
+  }
+
+  private void refreshDtcFavoriteNodeCellList() {
+    dtcFavoriteNodeCellList.setRowData(dtcFavoriteNodeList);
+    dtcFavoriteNodeCellList.setRowCount(dtcFavoriteNodeList.size(),
+        true);
   }
 
   public void refreshDtcHomePageNode() {
@@ -176,14 +212,15 @@ public class DtcNodeData {
         sortFavoritePairsByVisitCount(favoritePairs);
         setFavoriteListWithPairs(favoritePairs);
 
-        dtcNodeCellList.setRowData(dtcNodeList);
-        dtcNodeCellList.setRowCount(dtcNodeList.size(), true);
-
-        dtcFavoriteNodeCellList.setRowData(dtcFavoriteNodeList);
-        dtcFavoriteNodeCellList.setRowCount(dtcFavoriteNodeList.size(),
-            true);
+        refreshDtcNodeCellList();
+        refreshDtcFavoriteNodeCellList();
       }
     });
+  }
+
+  private void refreshDtcNodeCellList() {
+    dtcNodeCellList.setRowData(dtcNodeList);
+    dtcNodeCellList.setRowCount(dtcNodeList.size(), true);
   }
 
   private void setFavoriteListWithPairs(List<Pair<Integer, DtcNodeInfo>> favoritePairs) {

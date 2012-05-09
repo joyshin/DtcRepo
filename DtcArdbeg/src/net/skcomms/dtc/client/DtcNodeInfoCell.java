@@ -3,6 +3,9 @@ package net.skcomms.dtc.client;
 import net.skcomms.dtc.shared.DtcNodeInfo;
 
 import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.cell.client.ValueUpdater;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.Image;
@@ -14,6 +17,10 @@ final class DtcNodeInfoCell extends AbstractCell<DtcNodeInfo> {
 
   private static final String CELL_IMAGE_STYLE_OPENER = "<div style=\"width:62px; height:69px; float:left; margin:2px;\">";
   private static final String CELL_IMAGE_STYLE_CLOSER = "</div>";
+
+  private static final String CELL_BUTTON_STYLE_OPENER = "<div style=\"height:26px; float:right;  \">";
+  private static final String CELL_BUTTON_STYLE_BODY = "<button id=\"dtc_favorite_btn\" type=\"button\" >*</button>";
+  private static final String CELL_BUTTON_STYLE_CLOSER = "</div>";
 
   private static final String CELL_BOX_STYLE_OPENER = "<div style=\"width:280px; height:74px; \">";
   private static final String CELL_BOX_STYLE_CLOSER = "</div>";
@@ -31,7 +38,35 @@ final class DtcNodeInfoCell extends AbstractCell<DtcNodeInfo> {
     return instance;
   }
 
+  private final DtcNodeData dtcNodeData = DtcNodeData.getInstance();
+
   private DtcNodeInfoCell() {
+    super("click");
+
+  }
+
+  @Override
+  public void onBrowserEvent(Context context, Element parent, DtcNodeInfo
+      value, NativeEvent event,
+      ValueUpdater<DtcNodeInfo> valueUpdater) {
+    // GWT.log("value:" + value.getName());
+    // GWT.log("event:" + event.getType());
+    // GWT.log("target:" + event.getEventTarget());
+    // GWT.log("tagname:" + Element.as(event.getEventTarget()).getTagName());
+    // GWT.log("id:" + Element.as(event.getEventTarget()).getId().toString());
+    // GWT.log("parent:" + parent.toString());
+
+    if ("dtc_favorite_btn".equals(Element.as(event.getEventTarget()).getId())) {
+      // Window.alert(value.getName());
+      dtcNodeData.onClickToggleListButton(value);
+    } else {
+      // Window.alert("else :" + value.getName());
+      dtcNodeData.onClickDtcNodeInfoCell(value);
+    }
+    event.preventDefault();
+    event.stopPropagation();
+
+    super.onBrowserEvent(context, parent, value, event, valueUpdater);
   }
 
   @Override
@@ -72,6 +107,11 @@ final class DtcNodeInfoCell extends AbstractCell<DtcNodeInfo> {
     // sb.append(SafeHtmlUtils.fromTrustedString(addLinkButton.toString()));
     // sb.appendHtmlConstant(CELL_IMAGE_STYLE_CLOSER);
     // // 2
+
+    sb.appendHtmlConstant(CELL_BUTTON_STYLE_OPENER);
+    sb.append(SafeHtmlUtils
+        .fromTrustedString(CELL_BUTTON_STYLE_BODY));
+    sb.appendHtmlConstant(CELL_BUTTON_STYLE_CLOSER);
 
     // 3. div
     sb.appendHtmlConstant(CELL_BOX_STYLE_OPENER);

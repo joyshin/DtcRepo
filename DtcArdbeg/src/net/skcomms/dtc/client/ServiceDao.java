@@ -27,6 +27,10 @@ public class ServiceDao {
     }
   }
 
+  public void removeServiceFromCookie(String serviceName) {
+    Cookies.removeCookie(serviceName);
+  }
+
   public void setVisitCount(String serviceName, int visitCount) {
     Date expireDate = new Date();
     expireDate.setTime(expireDate.getTime() + 1000L * 60 * 60 * 24 * 365);

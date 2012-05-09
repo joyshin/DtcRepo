@@ -448,9 +448,9 @@ public class DtcArdbeg implements EntryPoint {
     String serviceName = directoryPath.replaceAll("/", "");
 
     this.addCssLinkIntoDtcFrame(doc);
-    // if (doc.getReferrer().equals(DtcArdbeg.DTC_PROXY_URL)) {
-    // DtcArdbeg.serviceDao.addVisitCount(serviceName);
-    // }
+    if (doc.getReferrer().equals(DtcArdbeg.BASE_URL)) {
+      DtcArdbeg.serviceDao.addVisitCount(serviceName);
+    }
 
     this.dtcArdbegNodeData.refreshDtcDirectoryPageNode("/" + directoryPath);
     this.displayDirecotyPage();
