@@ -7,16 +7,16 @@ import net.skcomms.dtc.shared.DtcRequestParameter;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.regexp.shared.MatchResult;
+import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.types.ListGridEditEvent;
-import com.smartgwt.client.types.MultipleAppearance;
 import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.widgets.Button;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.form.fields.ComboBoxItem;
 import com.smartgwt.client.widgets.form.fields.FormItem;
-import com.smartgwt.client.widgets.form.fields.SelectItem;
 import com.smartgwt.client.widgets.form.fields.TextItem;
 import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridEditorContext;
@@ -78,6 +78,42 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
   private Button searchButton;
   private VLayout vLayoutLeftBottom;
   private HLayout hLayout;
+  byte[] htmlContents;
+
+  private String currentPath;
+
+  private String createUrlParamter() {
+
+    ListGridRecord[] records = this.requestFormGrid.getRecords();
+
+    String ip = "";
+    String port = "";
+    StringBuffer params = new StringBuffer();
+
+    for (int i = 0; i < records.length; i++) {
+      String name = records[i].getAttributeAsString("name");
+      String value = records[i].getAttributeAsString("value");
+
+      GWT.log("value : " + value);
+      if (name.toLowerCase().equals("ip")) {
+        RegExp regExp = RegExp.compile("[0-9]+.[0-9]+.[0-9]+.[0-9]+");
+        MatchResult match = regExp.exec(value);
+        ip = match.getGroup(0);
+
+      } else if (name.toLowerCase().equals("port")) {
+        port = value;
+      } else {
+        params.append(name);
+        params.append("=");
+        params.append(value);
+        params.append("&");
+      }
+    }
+    String urlParam = "http://";
+    urlParam = urlParam + ip + ":" + port + "/";
+
+    return urlParam;
+  }
 
   private void drawPanel() {
     // 최 상위 레이아웃
@@ -133,7 +169,17 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
       @Override
       public void onClick(ClickEvent event) {
 
+        String urlParameter = DtcTestPageViewController.this.createUrlParamter();
+        // try {
+        // DtcTestPageViewController.this.htmlContents = DtcServiceImpl
+        // .getHtmlContents(urlParameter);
+        // } catch (IOException e) {
+        // // TODO Auto-generated catch block
+        // e.printStackTrace();
+        // // }
+
       }
+
     });
 
     // 검색관련 정보
@@ -182,9 +228,10 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
   public void onDtcTestPageLoaded(Document dtcFrameDoc) {
 
     GWT.log(dtcFrameDoc.getURL());
-    String path = dtcFrameDoc.getURL().split("c=")[1];
-    this.refreshDtcTestPage("/" + path);
+    this.currentPath = dtcFrameDoc.getURL().split("c=")[1];
+    this.refreshDtcTestPage("/" + this.currentPath);
     this.drawPanel();
+
   }
 
   @Override
@@ -202,7 +249,7 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
       }
 
       @Override
-      public void onSuccess(DtcRequestInfo requestInfo) {
+      public void onSuccess(final DtcRequestInfo requestInfo) {
         GWT.log(requestInfo.toString());
 
         List<DtcRequestParameter> params = requestInfo.getParams();
@@ -212,9 +259,10 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
           records[i] = new RequestFormRecord(i, params.get(i).getKey(), params.get(i).getValue());
         }
         DtcTestPageViewController.this.requestFormGrid.setData(records);
-        // add IP combo box
 
-        RequestFormRecord ipRrecord = new RequestFormRecord(params.size(), "IP", "");
+        // add IP combo box
+        RequestFormRecord ipRrecord = new RequestFormRecord(params.size(), "IP", requestInfo
+            .getIpInfo().getIpText());
         DtcTestPageViewController.this.requestFormGrid.addData(ipRrecord);
 
         DtcTestPageViewController.this.requestFormGrid
@@ -227,14 +275,23 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
                   // int id = record.getId();
 
                   if (record.getAttributeAsString("name").equals("IP")) {
-                    SelectItem selectItemMultipleGrid = new SelectItem();
-                    selectItemMultipleGrid.setShowTitle(false);
-                    selectItemMultipleGrid.setMultiple(true);
-                    selectItemMultipleGrid.setMultipleAppearance(MultipleAppearance.PICKLIST);
-                    selectItemMultipleGrid.setValueMap("Cat", "Dog", "Giraffe", "Goat", "Marmoset",
-                        "Mouse");
+                    ComboBoxItem cbItem = new ComboBoxItem();
+                    cbItem.setType("comboBox");
 
-                    return selectItemMultipleGrid;
+                    String[] ipList = new String[requestInfo.getIpInfo()
+                        .getOptions().size()];
+                    for (int i = 0; i < ipList.length; i++) {
+                      ipList[i] = requestInfo.getIpInfo().getOptions().get(i).getValue();
+                      // GWT.log("value " +
+                      // requestInfo.getIpInfo().getOptions().get(i).getValue());
+                      // GWT.log("key " +
+                      // requestInfo.getIpInfo().getOptions().get(i).getKey());
+                      // GWT.log("name " +
+                      // requestInfo.getIpInfo().getOptions().get(i).getName());
+                    }
+                    cbItem.setValueMap(ipList);
+
+                    return cbItem;
                   } else {
                     TextItem textItem = new TextItem();
                     textItem.setShowHint(true);

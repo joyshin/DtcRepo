@@ -29,8 +29,16 @@ public class IpInfo implements Serializable {
     return this.ipText;
   }
 
+  public List<DtcRequestParameter> getOptions() {
+    return this.options;
+  }
+
   public void setIpText(String anIpText) {
     this.ipText = anIpText;
+  }
+
+  public void setOptions(List<DtcRequestParameter> options) {
+    this.options = options;
   }
 
   @Override

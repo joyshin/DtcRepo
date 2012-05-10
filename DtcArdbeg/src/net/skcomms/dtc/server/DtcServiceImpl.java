@@ -287,7 +287,7 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
    * @return
    * @throws IOException
    */
-  static byte[] getHtmlContents(String href) throws IOException {
+  public static byte[] getHtmlContents(String href) throws IOException {
     URL url = new URL(href);
     URLConnection conn = url.openConnection();
     byte[] contents = DtcServiceImpl.readAllBytes(conn.getInputStream());
