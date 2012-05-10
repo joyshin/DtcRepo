@@ -32,7 +32,7 @@ public class DtcRequestFormAccessor extends DefaultDtcArdbegObserver {
   private static final String EMPTY = "";
 
   private static native void toggleIpElement(JavaScriptObject requestFrame) /*-{
-    requestFrame.contentWindow.fnCHANGE_IP();
+		requestFrame.contentWindow.fnCHANGE_IP();
   }-*/;
 
   private FrameElement requestFrame;
@@ -43,19 +43,19 @@ public class DtcRequestFormAccessor extends DefaultDtcArdbegObserver {
 
   public DtcRequestFormAccessor() {
 
-    this.updateRequestFormElements();
+    updateRequestFormElements();
   }
 
   private boolean containsInOptions(String value) {
-    if (!this.isAvailable) {
+    if (!isAvailable) {
       return false;
     }
 
-    if (this.ipSelectElement == null) {
+    if (ipSelectElement == null) {
       return false;
     }
 
-    NodeList<OptionElement> options = this.ipSelectElement.getOptions();
+    NodeList<OptionElement> options = ipSelectElement.getOptions();
     for (int i = 0; i < options.getLength(); i++) {
       if (options.getItem(i).getValue().equals(value)) {
         return true;
@@ -68,13 +68,13 @@ public class DtcRequestFormAccessor extends DefaultDtcArdbegObserver {
   private void enableIpInputElement(InputElementType type) {
     boolean ipTextEnabling = (type == InputElementType.TEXT);
 
-    if (this.isIpTextEnabled() != ipTextEnabling) {
-      DtcRequestFormAccessor.toggleIpElement(this.requestFrame.cast());
+    if (isIpTextEnabled() != ipTextEnabling) {
+      DtcRequestFormAccessor.toggleIpElement(requestFrame.cast());
     }
   }
 
   private InputElement findInputElementByCellText(String name) {
-    Element requestTable = this.requestFrame.getContentDocument().getElementById(
+    Element requestTable = requestFrame.getContentDocument().getElementById(
         "tblREQUEST");
     NodeList<TableRowElement> tableRows = TableElement.as(requestTable).getRows();
 
@@ -94,10 +94,10 @@ public class DtcRequestFormAccessor extends DefaultDtcArdbegObserver {
 
   private String getDtcIpRequestParameter() {
     String ipValue;
-    if (this.isIpTextEnabled()) {
-      ipValue = this.ipTextElement.getValue();
+    if (isIpTextEnabled()) {
+      ipValue = ipTextElement.getValue();
     } else {
-      ipValue = this.ipSelectElement.getValue();
+      ipValue = ipSelectElement.getValue();
     }
 
     return ipValue != null ? ipValue : DtcRequestFormAccessor.EMPTY;
@@ -105,34 +105,34 @@ public class DtcRequestFormAccessor extends DefaultDtcArdbegObserver {
 
   public String getDtcRequestParameter(String name) {
 
-    if (!this.isAvailable()) {
+    if (!isAvailable()) {
       return DtcRequestFormAccessor.EMPTY;
     }
 
     if (name.equals("IP")) {
-      return this.getDtcIpRequestParameter();
+      return getDtcIpRequestParameter();
     } else {
-      InputElement inputElement = this.findInputElementByCellText(name);
+      InputElement inputElement = findInputElementByCellText(name);
       return inputElement != null ? inputElement.getValue() : DtcRequestFormAccessor.EMPTY;
     }
   }
 
   public Map<String, String> getDtcRequestParameters() {
     Map<String, String> pairs = new HashMap<String, String>();
-    if (!this.isAvailable()) {
+    if (!isAvailable()) {
       return pairs;
     }
 
-    List<String> names = this.getParameterNames();
+    List<String> names = getParameterNames();
     for (String name : names) {
-      pairs.put(name, this.getDtcRequestParameter(name));
+      pairs.put(name, getDtcRequestParameter(name));
     }
 
     return pairs;
   }
 
   String getParameterFromDtcFrame(Document dtcFrameDoc, String name) {
-    return this.getParameterMapFromDtcFrame(dtcFrameDoc).get(name);
+    return getParameterMapFromDtcFrame(dtcFrameDoc).get(name);
   }
 
   Map<String, String> getParameterMapFromDtcFrame(Document dtcFrameDoc) {
@@ -155,7 +155,7 @@ public class DtcRequestFormAccessor extends DefaultDtcArdbegObserver {
   }
 
   private List<String> getParameterNames() {
-    Element requestTable = this.requestFrame.getContentDocument().getElementById("tblREQUEST");
+    Element requestTable = requestFrame.getContentDocument().getElementById("tblREQUEST");
     NodeList<TableRowElement> tableRows = TableElement.as(requestTable).getRows();
 
     List<String> names = new ArrayList<String>();
@@ -172,52 +172,52 @@ public class DtcRequestFormAccessor extends DefaultDtcArdbegObserver {
   }
 
   public boolean isAvailable() {
-    return this.isAvailable;
+    return isAvailable;
   }
 
   private boolean isIpTextEnabled() {
-    return this.ipTextElement.getStyle().getDisplay().equals(Display.BLOCK.getCssName());
+    return ipTextElement.getStyle().getDisplay().equals(Display.BLOCK.getCssName());
   }
 
   @Override
-  public void onDtcDirectoryLoaded(Document dtcFrameDoc) {
-    this.update();
+  public void onDtcDirectoryLoaded(String path) {
+    update();
   }
 
   @Override
-  public void onDtcHomeLoaded(Document dtcFrameDoc) {
-    this.update();
+  public void onDtcHomeLoaded(String path) {
+    update();
   }
 
   @Override
   public void onDtcTestPageLoaded(Document dtcFrameDoc) {
-    this.update();
-    this.setUrlParameters(dtcFrameDoc);
+    update();
+    setUrlParameters(dtcFrameDoc);
   }
 
   private void setAvailable(boolean available) {
-    this.isAvailable = available;
+    isAvailable = available;
   }
 
   private void setDtcIpRequestParameter(String value) {
-    if (this.containsInOptions(value)) {
-      this.ipSelectElement.setValue(value);
-      this.enableIpInputElement(InputElementType.SELECT);
+    if (containsInOptions(value)) {
+      ipSelectElement.setValue(value);
+      enableIpInputElement(InputElementType.SELECT);
     } else {
-      this.ipTextElement.setValue(value);
-      this.enableIpInputElement(InputElementType.TEXT);
+      ipTextElement.setValue(value);
+      enableIpInputElement(InputElementType.TEXT);
     }
   }
 
   public void setDtcRequestParameter(String name, String value) {
-    if (!this.isAvailable()) {
+    if (!isAvailable()) {
       return;
     }
 
     if (name.equals("IP")) {
-      this.setDtcIpRequestParameter(value);
+      setDtcIpRequestParameter(value);
     } else {
-      InputElement inputElement = this.findInputElementByCellText(name);
+      InputElement inputElement = findInputElementByCellText(name);
       if (inputElement != null) {
         inputElement.setValue(value);
       }
@@ -225,47 +225,47 @@ public class DtcRequestFormAccessor extends DefaultDtcArdbegObserver {
   }
 
   public void setDtcRequestParameters(Map<String, String> paramValues) {
-    if (!this.isAvailable()) {
+    if (!isAvailable()) {
       return;
     }
 
     Set<Entry<String, String>> entries = paramValues.entrySet();
     for (Entry<String, String> entry : entries) {
-      this.setDtcRequestParameter(entry.getKey(), entry.getValue());
+      setDtcRequestParameter(entry.getKey(), entry.getValue());
     }
   }
 
   private void setUrlParameters(Document dtcFrameDoc) {
     String ardbegParam = Window.Location.getParameter("c");
-    String dtcFrameParam = this.getParameterFromDtcFrame(dtcFrameDoc, "c");
+    String dtcFrameParam = getParameterFromDtcFrame(dtcFrameDoc, "c");
     if (ardbegParam != null && ardbegParam.equals(dtcFrameParam)) {
       Set<Entry<String, List<String>>> paramValues = Window.Location.getParameterMap().entrySet();
       for (Entry<String, List<String>> entry : paramValues) {
-        this.setDtcRequestParameter(entry.getKey(), entry.getValue().get(0));
+        setDtcRequestParameter(entry.getKey(), entry.getValue().get(0));
       }
     }
   }
 
   public void update() {
-    this.updateRequestFormElements();
+    updateRequestFormElements();
   }
 
   private void updateRequestFormElements() {
     Element dtcFrame = Document.get().getElementsByTagName("iframe").getItem(1);
     Document doc = IFrameElement.as(dtcFrame).getContentDocument();
     if (doc.getElementsByTagName("frame").getLength() == 0) {
-      this.setAvailable(false);
+      setAvailable(false);
       return;
     }
 
-    this.requestFrame = FrameElement.as(doc.getElementsByTagName("frame").getItem(0));
-    this.ipTextElement = InputElement.as(this.requestFrame.getContentDocument()
+    requestFrame = FrameElement.as(doc.getElementsByTagName("frame").getItem(0));
+    ipTextElement = InputElement.as(requestFrame.getContentDocument()
         .getElementById("ip_text"));
-    Element element = this.requestFrame.getContentDocument().getElementById("ip_select");
+    Element element = requestFrame.getContentDocument().getElementById("ip_select");
     if (element != null) {
-      this.ipSelectElement = SelectElement.as(element);
+      ipSelectElement = SelectElement.as(element);
     }
 
-    this.setAvailable(true);
+    setAvailable(true);
   }
 }

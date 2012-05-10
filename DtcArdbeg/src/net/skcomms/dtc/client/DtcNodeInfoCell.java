@@ -31,7 +31,14 @@ final class DtcNodeInfoCell extends AbstractCell<DtcNodeInfo> {
     return instance;
   }
 
+  private final Image image;
+
   private DtcNodeInfoCell() {
+    image = new Image();
+    image
+        .setUrl("https://encrypted-tbn2.google.com/images?q=tbn:ANd9GcScwAPeLjzjxfXlOmzXBIZZ65qTSKib647JumG-J8f2o1CBOhYD");
+    image.setSize("100%", "100%");
+    image.setStyleName("gwt-DtcNodeCellImageStyle");
   }
 
   @Override
@@ -39,12 +46,6 @@ final class DtcNodeInfoCell extends AbstractCell<DtcNodeInfo> {
     if (dtcNodeInfo == null) {
       return;
     }
-
-    Image image = new Image();
-    image
-        .setUrl("https://encrypted-tbn2.google.com/images?q=tbn:ANd9GcScwAPeLjzjxfXlOmzXBIZZ65qTSKib647JumG-J8f2o1CBOhYD");
-    image.setSize("100%", "100%");
-    image.setStyleName("gwt-DtcNodeCellImageStyle");
 
     // 1. div
     sb.appendHtmlConstant(CELL_STYLE_OPENER);

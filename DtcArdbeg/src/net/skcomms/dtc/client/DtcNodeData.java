@@ -31,6 +31,8 @@ public class DtcNodeData {
     return instance;
   }
 
+  DtcArdbeg owner;
+
   public CellList<DtcNodeInfo> getDtcFavoriteNodeCellList() {
     return dtcFavoriteNodeCellList;
   }
@@ -41,6 +43,8 @@ public class DtcNodeData {
 
   public void initialize(final DtcArdbeg dtcArdbeg)
   {
+    owner = dtcArdbeg;
+
     SELECTION_MODEL.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
       @Override
       public void onSelectionChange(SelectionChangeEvent event) {
@@ -64,7 +68,7 @@ public class DtcNodeData {
     dtcFavoriteNodeCellList.setSelectionModel(SELECTION_MODEL);
   }
 
-  public void refreshDtcNode(String path) {
+  public void refreshDtcNode(final String path) {
 
     DtcService.Util.getInstance().getDir(path, new AsyncCallback<List<DtcNodeInfo>>() {
       @Override
@@ -80,6 +84,14 @@ public class DtcNodeData {
 
         dtcNodeCellList.setRowData(dtcNodeList);
         dtcNodeCellList.setRowCount(dtcNodeList.size(), true);
+
+        System.out.println("Callback : " + path);
+        if (path.equals("/")) {
+          owner.onLoadDtcHomePage(path);
+        }
+        else {
+          owner.onLoadDtcServiceDirectoryPage(path);
+        }
       }
     });
   }

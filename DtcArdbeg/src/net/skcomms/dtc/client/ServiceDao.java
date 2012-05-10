@@ -12,11 +12,13 @@ import com.google.gwt.user.client.Cookies;
  * 
  */
 public class ServiceDao {
+
   /**
    * @param serviceName
    */
+
   public void addVisitCount(String serviceName) {
-    this.setVisitCount(serviceName, this.getVisitCount(serviceName) + 1);
+    setVisitCount(serviceName, getVisitCount(serviceName) + 1);
   }
 
   public int getVisitCount(String serviceName) {

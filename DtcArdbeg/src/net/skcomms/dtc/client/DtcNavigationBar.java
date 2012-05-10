@@ -17,13 +17,13 @@ import com.google.gwt.user.client.ui.RootPanel;
  */
 public class DtcNavigationBar extends DefaultDtcArdbegObserver {
 
-  static String[] getNavigationNodes(String url) {
-    int valueStartIndex = url.lastIndexOf("?");
+  static String[] getNavigationNodes(String path) {
+    int valueStartIndex = path.lastIndexOf("?");
     if (valueStartIndex == -1) {
-      return new String[0];
+      return ("Home" + path).split("/");
     }
-    String valueSource = url.substring(valueStartIndex + 3);
-    return valueSource.split("/");
+    String valueSource = path.substring(valueStartIndex + 3);
+    return ("Home/" + valueSource).split("/");
   }
 
   private final HorizontalPanel naviPanel = new HorizontalPanel();
@@ -61,20 +61,15 @@ public class DtcNavigationBar extends DefaultDtcArdbegObserver {
 
     String[] nodes = DtcNavigationBar.getNavigationNodes(url);
 
-    if (nodes.length == 0) {
-      addLabel("Home");
-    }
-    else {
-      addAnchor("Home", rootPath);
-      addLabel(DtcNavigationBar.NAVIGATION_DELIMITER);
-      String nodeHistory = rootPath;
-      for (int i = 0; i < nodes.length - 1; i++) {
+    String nodeHistory = rootPath;
+    for (int i = 0; i < nodes.length - 1; i++) {
+      if (i > 0) {
         nodeHistory = nodeHistory + nodes[i] + "/";
-        addAnchor(nodes[i], nodeHistory);
-        addLabel(DtcNavigationBar.NAVIGATION_DELIMITER);
       }
-      addLabel(nodes[nodes.length - 1]);
+      addAnchor(nodes[i], nodeHistory);
+      addLabel(DtcNavigationBar.NAVIGATION_DELIMITER);
     }
+    addLabel(nodes[nodes.length - 1]);
   }
 
   public void initialize(DtcArdbeg dtcArdbeg) {
@@ -84,18 +79,18 @@ public class DtcNavigationBar extends DefaultDtcArdbegObserver {
     naviPanel.setSpacing(3);
     owner = dtcArdbeg;
 
-    addAnchor("Home", rootPath);
+    addLabel("Home");
     RootPanel.get("naviBarContainer").add(naviPanel);
   }
 
   @Override
-  public void onDtcDirectoryLoaded(Document dtcFrameDoc) {
-    addPath(dtcFrameDoc.getURL());
+  public void onDtcDirectoryLoaded(String path) {
+    addPath(path);
   }
 
   @Override
-  public void onDtcHomeLoaded(Document dtcFrameDoc) {
-    addPath(dtcFrameDoc.getURL());
+  public void onDtcHomeLoaded(String path) {
+    addPath(path);
   }
 
   @Override

@@ -22,59 +22,59 @@ public class DtcChrono extends DefaultDtcArdbegObserver {
 
     private long startTime;
 
-    private Style chronoStyle;
+    private final Style chronoStyle;
 
-    private Text elapsedTimeText;
+    private final Text elapsedTimeText;
 
-    private Text searchTimeText;
+    private final Text searchTimeText;
 
     public ChronoAnimation(Style aChronoStyle, Text aSearchTimeText, Text anElapsedTimeText) {
-      this.chronoStyle = aChronoStyle;
-      this.searchTimeText = aSearchTimeText;
-      this.elapsedTimeText = anElapsedTimeText;
+      chronoStyle = aChronoStyle;
+      searchTimeText = aSearchTimeText;
+      elapsedTimeText = anElapsedTimeText;
 
     }
 
     private void changeColor(String value) {
-      this.chronoStyle.setColor(value);
+      chronoStyle.setColor(value);
     }
 
     @Override
     protected void onCancel() {
-      this.updateTimeText();
-      this.changeColor("grey");
+      updateTimeText();
+      changeColor("grey");
     }
 
     @Override
     protected void onComplete() {
-      this.updateTimeText();
-      this.changeColor("grey");
+      updateTimeText();
+      changeColor("grey");
     }
 
     @Override
     protected void onStart() {
-      this.searchTimeText.setData(ChronoAnimation.getCurrentTimeString());
-      this.startTime = new Date().getTime();
-      this.changeColor("red");
+      searchTimeText.setData(ChronoAnimation.getCurrentTimeString());
+      startTime = new Date().getTime();
+      changeColor("red");
     }
 
     @Override
     protected void onUpdate(double progress) {
-      this.updateTimeText();
+      updateTimeText();
     }
 
     private void updateTimeText() {
       long currentTime = new Date().getTime();
-      this.elapsedTimeText.setData(" " + Long.toString(currentTime - this.startTime) + " ms");
+      elapsedTimeText.setData(" " + Long.toString(currentTime - startTime) + " ms");
     }
   }
 
   public native static void addDtcSearchButtonEventHandler(DtcChrono chrono, Document dtcDoc) /*-{
-    var searchButton = dtcDoc.getElementsByTagName("frame")[0].contentWindow.document
-        .getElementById("div_search");
-    searchButton.onclick = function() {
-      chrono.@net.skcomms.dtc.client.DtcArdbeg::onSubmitRequestForm()();
-    };
+		var searchButton = dtcDoc.getElementsByTagName("frame")[0].contentWindow.document
+				.getElementById("div_search");
+		searchButton.onclick = function() {
+			chrono.@net.skcomms.dtc.client.DtcArdbeg::onSubmitRequestForm()();
+		};
   }-*/;
 
   ChronoAnimation chronoAnimation;
@@ -94,33 +94,33 @@ public class DtcChrono extends DefaultDtcArdbegObserver {
     chronoStyle.setFontWeight(Style.FontWeight.BOLD);
     chronoStyle.setColor("gray");
 
-    this.chronoAnimation = new ChronoAnimation(chronoStyle, searchTimeText, elapsedTimeText);
+    chronoAnimation = new ChronoAnimation(chronoStyle, searchTimeText, elapsedTimeText);
 
     RootPanel.get("chronoContainer").getElement().appendChild(chronoElement);
   }
 
   public void end() {
-    this.chronoAnimation.cancel();
+    chronoAnimation.cancel();
   }
 
   public void initialize(DtcArdbeg dtcArdbeg) {
     dtcArdbeg.addDtcArdbegObserver(this);
-    this.createChrono(dtcArdbeg.getDtcFrameDoc());
+    createChrono(dtcArdbeg.getDtcFrameDoc());
   }
 
   @Override
-  public void onDtcDirectoryLoaded(Document dtcFrameDoc) {
+  public void onDtcDirectoryLoaded(String path) {
     RootPanel.get("chronoContainer").setVisible(false);
   }
 
   @Override
-  public void onDtcHomeLoaded(Document dtcFrameDoc) {
+  public void onDtcHomeLoaded(String path) {
     RootPanel.get("chronoContainer").setVisible(false);
   }
 
   @Override
   public void onDtcResponseFrameLoaded(Document dtcFrameDoc, boolean success) {
-    this.end();
+    end();
   }
 
   @Override
@@ -130,10 +130,10 @@ public class DtcChrono extends DefaultDtcArdbegObserver {
 
   @Override
   public void onSubmittingDtcRequest() {
-    this.start();
+    start();
   }
 
   public void start() {
-    this.chronoAnimation.run(10000);
+    chronoAnimation.run(10000);
   }
 }

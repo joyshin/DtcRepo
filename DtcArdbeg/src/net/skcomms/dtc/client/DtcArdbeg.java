@@ -24,7 +24,6 @@ import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.Label;
@@ -281,10 +280,7 @@ public class DtcArdbeg implements EntryPoint {
 
         switch (type) {
         case HOME:
-          DtcArdbeg.this.onLoadDtcHomePage(doc);
-          break;
         case DIRECTORY:
-          DtcArdbeg.this.onLoadDtcServiceDirectoryPage(doc);
           break;
         case TEST:
           DtcArdbeg.this.onLoadDtcTestPage(doc);
@@ -373,16 +369,16 @@ public class DtcArdbeg implements EntryPoint {
     return rows;
   }
 
-  private void displayDirecotyPage() {
-    RootPanel.get("dtcContainer").setVisible(false);
+  void displayDirectoryPage() {
     RootPanel.get("favoriteNodeContainer").setVisible(false);
     RootPanel.get("nodeContainer").setVisible(true);
+    RootPanel.get("dtcContainer").setVisible(false);
   }
 
-  private void displayHomePage() {
-    RootPanel.get("dtcContainer").setVisible(false);
-    RootPanel.get("nodeContainer").setVisible(true);
+  void displayHomePage() {
     RootPanel.get("favoriteNodeContainer").setVisible(true);
+    RootPanel.get("nodeContainer").setVisible(true);
+    RootPanel.get("dtcContainer").setVisible(false);
   }
 
   private void displayTestPage() {
@@ -459,15 +455,11 @@ public class DtcArdbeg implements EntryPoint {
 
   }
 
-  private void onLoadDtcHomePage(Document doc) {
+  void onLoadDtcHomePage(String path) {
     for (DtcArdbegObserver observer : dtcArdbegObservers) {
-      observer.onDtcHomeLoaded(doc);
+      observer.onDtcHomeLoaded(path);
     }
 
-    addCssLinkIntoDtcFrame(doc);
-    removeComaparePageAnchor(doc);
-
-    dtcArdbegNodeData.refreshDtcNode("/");
     displayHomePage();
   }
 
@@ -477,25 +469,21 @@ public class DtcArdbeg implements EntryPoint {
     }
   }
 
-  private void onLoadDtcServiceDirectoryPage(Document doc) {
+  void onLoadDtcServiceDirectoryPage(String path) {
     for (DtcArdbegObserver observer : dtcArdbegObservers) {
-      observer.onDtcDirectoryLoaded(doc);
+      observer.onDtcDirectoryLoaded(path);
     }
 
-    int index = doc.getURL().indexOf("?b=");
-    String directoryPath = doc.getURL().substring(index + 3);
-    String serviceName = directoryPath.replaceAll("/", "");
+    displayDirectoryPage();
 
-    addCssLinkIntoDtcFrame(doc);
-    if (doc.getReferrer().equals(DtcArdbeg.DTC_PROXY_URL)) {
+    String[] nodes = path.split("/");
+    if (nodes.length == 2) {
+      String serviceName = nodes[1];
       DtcArdbeg.serviceDao.addVisitCount(serviceName);
     }
-
-    dtcArdbegNodeData.refreshDtcNode("/" + directoryPath);
-    displayDirecotyPage();
   }
 
-  private void onLoadDtcTestPage(Document dtcFrameDoc) {
+  void onLoadDtcTestPage(Document dtcFrameDoc) {
     for (DtcArdbegObserver observer : dtcArdbegObservers) {
       observer.onDtcTestPageLoaded(dtcFrameDoc);
     }
@@ -554,28 +542,9 @@ public class DtcArdbeg implements EntryPoint {
     DtcPageType type = DtcArdbeg.getTypeOfSelected(path, !path.endsWith("/"));
     String href = DtcArdbeg.getHrefWithTypeAndPath(type, path);
     dtcFrame.setUrl(href);
-  }
 
-  void sortDtcNodes() {
-    DtcService.Util.getInstance().getDir("/", new AsyncCallback<List<DtcNodeInfo>>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        caught.printStackTrace();
-        GWT.log(caught.getMessage());
-      }
-
-      @Override
-      public void onSuccess(List<DtcNodeInfo> nodeInfos) {
-        Document doc = DtcArdbeg.this.getDtcFrameDoc();
-        Element oldTableBody = doc.getElementsByTagName("tbody").getItem(0);
-
-        List<Pair<Integer, Node>> rows = DtcArdbeg.this.createTableRows(nodeInfos);
-        DtcArdbeg.sortServicesByVisitCount(rows);
-        DtcArdbeg.this.applyStylesToDtcDirectoryNodes(rows);
-        Element sortedBody = DtcArdbeg.this.createSortedTableBody(doc, rows);
-
-        oldTableBody.getParentNode().replaceChild(sortedBody, oldTableBody);
-      }
-    });
+    if (type != DtcPageType.TEST) {
+      dtcArdbegNodeData.refreshDtcNode(path);
+    }
   }
 }

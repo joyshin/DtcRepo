@@ -12,11 +12,11 @@ import com.google.gwt.dom.client.Document;
 public class DefaultDtcArdbegObserver implements DtcArdbegObserver {
 
   @Override
-  public void onDtcDirectoryLoaded(Document dtcFrameDoc) {
+  public void onDtcDirectoryLoaded(String path) {
   }
 
   @Override
-  public void onDtcHomeLoaded(Document dtcFrameDoc) {
+  public void onDtcHomeLoaded(String path) {
   }
 
   @Override
