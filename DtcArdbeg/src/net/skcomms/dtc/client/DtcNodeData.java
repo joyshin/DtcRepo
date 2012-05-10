@@ -12,26 +12,18 @@ import net.skcomms.dtc.shared.DtcNodeInfo;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SelectionModel;
-import com.google.gwt.view.client.SingleSelectionModel;
 
 public class DtcNodeData {
 
-  private static List<DtcNodeInfo> dtcFavoriteNodeList = new ArrayList<DtcNodeInfo>();
-  private static List<DtcNodeInfo> dtcNodeList = new ArrayList<DtcNodeInfo>();
-
-  private static final List<DtcArdbeg.Pair<Integer, DtcNodeInfo>> favoritePairs = new ArrayList<DtcArdbeg.Pair<Integer, DtcNodeInfo>>();
+  private final List<DtcNodeInfo> dtcFavoriteNodeList = new ArrayList<DtcNodeInfo>();
+  private final List<DtcNodeInfo> dtcNodeList = new ArrayList<DtcNodeInfo>();
 
   private static DtcNodeData instance = new DtcNodeData();
 
   private static final ServiceDao serviceDao = new ServiceDao();
+
   private static final CellList<DtcNodeInfo> dtcNodeCellList = new CellList<DtcNodeInfo>(
       DtcNodeInfoCell.getInstance());
-
-  private static final SelectionModel<DtcNodeInfo> SELECTION_MODEL =
-      new SingleSelectionModel<DtcNodeInfo>();
-
   private static final CellList<DtcNodeInfo> dtcFavoriteNodeCellList = new CellList<DtcNodeInfo>(
       DtcNodeInfoCell.getInstance());
 
@@ -47,6 +39,8 @@ public class DtcNodeData {
       }
     });
   }
+
+  private final List<DtcArdbeg.Pair<Integer, DtcNodeInfo>> favoritePairs = new ArrayList<DtcArdbeg.Pair<Integer, DtcNodeInfo>>();
 
   public DtcArdbeg owner;
 
@@ -100,32 +94,6 @@ public class DtcNodeData {
   public void initialize(DtcArdbeg dtcArdbeg)
   {
     this.owner = dtcArdbeg;
-
-    SELECTION_MODEL.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-      @Override
-      public void onSelectionChange(SelectionChangeEvent event) {
-        DtcNodeInfo selected = ((SingleSelectionModel<DtcNodeInfo>)
-            SELECTION_MODEL)
-                .getSelectedObject();
-
-        onClickDtcNodeInfoCell(selected);
-      }
-    });
-
-    // List<DtcNodeInfo> testNodeList = new ArrayList<DtcNodeInfo>();
-    // for (int i = 0; i < 5; i++) {
-    // DtcNodeInfo tmpNode = new DtcNodeInfo();
-    // tmpNode.setDescription("DTC_PROXY_URL");
-    // tmpNode.setName("Favorite Test");
-    // tmpNode.setPath("/");
-    // tmpNode.setUpdateTime("11");
-    // testNodeList.add(tmpNode);
-    // }
-    // dtcFavoriteNodeCellList.setRowData(testNodeList);
-    // dtcFavoriteNodeCellList.setRowCount(testNodeList.size(), true);
-
-    // dtcNodeCellList.setSelectionModel(SELECTION_MODEL);
-    // dtcFavoriteNodeCellList.setSelectionModel(SELECTION_MODEL);
   }
 
   private void moveToDtcFavoriteNodeList(DtcNodeInfo selected) {

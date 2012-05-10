@@ -8,6 +8,7 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Image;
 
 final class DtcNodeInfoCell extends AbstractCell<DtcNodeInfo> {
@@ -42,25 +43,20 @@ final class DtcNodeInfoCell extends AbstractCell<DtcNodeInfo> {
 
   private DtcNodeInfoCell() {
     super("click");
-
   }
 
   @Override
   public void onBrowserEvent(Context context, Element parent, DtcNodeInfo
       value, NativeEvent event,
       ValueUpdater<DtcNodeInfo> valueUpdater) {
-    // GWT.log("value:" + value.getName());
-    // GWT.log("event:" + event.getType());
-    // GWT.log("target:" + event.getEventTarget());
-    // GWT.log("tagname:" + Element.as(event.getEventTarget()).getTagName());
-    // GWT.log("id:" + Element.as(event.getEventTarget()).getId().toString());
-    // GWT.log("parent:" + parent.toString());
 
     if ("dtc_favorite_btn".equals(Element.as(event.getEventTarget()).getId())) {
-      // Window.alert(value.getName());
-      dtcNodeData.onClickToggleListButton(value);
+      if (value.isDirectory() == false) {
+        dtcNodeData.onClickToggleListButton(value);
+      } else {
+        Window.alert("누르지마!!");
+      }
     } else {
-      // Window.alert("else :" + value.getName());
       dtcNodeData.onClickDtcNodeInfoCell(value);
     }
     event.preventDefault();
@@ -81,18 +77,6 @@ final class DtcNodeInfoCell extends AbstractCell<DtcNodeInfo> {
     image.setSize("100%", "100%");
     image.setStyleName("gwt-DtcNodeCellImageStyle");
 
-    // Button addLinkButton = new Button("Click ");
-    //
-    // addLinkButton.addClickHandler(new ClickHandler() {
-    //
-    // @Override
-    // public void onClick(ClickEvent event) {
-    //
-    // GWT.log("You clicked ");
-    //
-    // }
-    //
-    // });
     // 1. div
     sb.appendHtmlConstant(CELL_STYLE_OPENER);
 
@@ -101,12 +85,6 @@ final class DtcNodeInfoCell extends AbstractCell<DtcNodeInfo> {
     sb.append(SafeHtmlUtils.fromTrustedString(image.toString()));
     sb.appendHtmlConstant(CELL_IMAGE_STYLE_CLOSER);
     // 2
-
-    // // 2. div
-    // sb.appendHtmlConstant(CELL_IMAGE_STYLE_OPENER);
-    // sb.append(SafeHtmlUtils.fromTrustedString(addLinkButton.toString()));
-    // sb.appendHtmlConstant(CELL_IMAGE_STYLE_CLOSER);
-    // // 2
 
     sb.appendHtmlConstant(CELL_BUTTON_STYLE_OPENER);
     sb.append(SafeHtmlUtils
