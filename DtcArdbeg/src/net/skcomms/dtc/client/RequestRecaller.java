@@ -1,6 +1,5 @@
 package net.skcomms.dtc.client;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,9 +10,8 @@ import com.google.gwt.dom.client.FrameElement;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.dom.client.NodeCollection;
 import com.google.gwt.dom.client.SelectElement;
-import com.google.gwt.user.client.Cookies;
 
-public class CookieHandler extends DefaultDtcArdbegObserver {
+public class RequestRecaller extends DefaultDtcArdbegObserver {
 
   private static final String EMPTY_STRING = "";
 
@@ -21,7 +19,7 @@ public class CookieHandler extends DefaultDtcArdbegObserver {
 
   private static final char FORM_FIELD_DELIMETER = 0x0C;
 
-  private static String findCookieKey(NodeCollection<Element> nodeCollection) {
+  private static String findKey(NodeCollection<Element> nodeCollection) {
     String nameAttr;
     for (int i = 0; i < nodeCollection.getLength(); i++) {
       nameAttr = nodeCollection.getItem(i).getAttribute("name");
@@ -29,26 +27,25 @@ public class CookieHandler extends DefaultDtcArdbegObserver {
         return nodeCollection.getItem(i).getAttribute("value");
       }
     }
-    return CookieHandler.EMPTY_STRING;
+    return RequestRecaller.EMPTY_STRING;
   }
 
-  private static Map<String, String> getLastParametersFromCookie(String cookieKey) {
-    String cookie = Cookies.getCookie(cookieKey);
-    // GWT.log("getCookie: " + cookieKey + " : " + cookie);
+  private static Map<String, String> getLastParameters(String key) {
+    String data = PersistenceManager.getInstance().getItem(key);
 
     Map<String, String> map = new HashMap<String, String>();
 
-    if (cookie == null) {
+    if (data == null) {
       return map;
     }
 
-    String[] formFields = cookie.split(Character.toString(CookieHandler.FORM_FIELD_DELIMETER));
+    String[] formFields = data.split(Character.toString(RequestRecaller.FORM_FIELD_DELIMETER));
     if (formFields == null) {
       return map;
     }
 
     for (String element : formFields) {
-      String[] pair = element.split(Character.toString(CookieHandler.FORM_VALUE_DELIMETER));
+      String[] pair = element.split(Character.toString(RequestRecaller.FORM_VALUE_DELIMETER));
       if (pair.length == 2) {
         // GWT.log("Name :" + pair[0] + " Value :" + pair[1]);
         map.put(pair[0], pair[1]);
@@ -86,14 +83,14 @@ public class CookieHandler extends DefaultDtcArdbegObserver {
     dtcArdbeg.addDtcArdbegObserver(this);
   }
 
-  public void loadAndSetRequestParameters(Document doc) {
-    NodeCollection<Element> nodeCollection = this.getFormControlElements(doc);
+  public void recall(Document doc) {
+    NodeCollection<Element> nodeCollection = getFormControlElements(doc);
     if (nodeCollection == null) {
       return;
     }
 
-    String cookieKey = CookieHandler.findCookieKey(nodeCollection);
-    Map<String, String> params = CookieHandler.getLastParametersFromCookie(cookieKey);
+    String key = RequestRecaller.findKey(nodeCollection);
+    Map<String, String> params = RequestRecaller.getLastParameters(key);
     for (int i = 0; i < nodeCollection.getLength(); i++) {
       String name = nodeCollection.getItem(i).getAttribute("name");
       String value = params.get(name);
@@ -111,32 +108,32 @@ public class CookieHandler extends DefaultDtcArdbegObserver {
 
   @Override
   public void onDtcResponseFrameLoaded(Document dtcFrameDoc, boolean success) {
-    this.storeRequestParametersIntoCookie(dtcFrameDoc);
+    persist(dtcFrameDoc);
     if (success) {
     }
   }
 
   @Override
   public void onDtcTestPageLoaded(Document dtcFrameDoc) {
-    this.loadAndSetRequestParameters(dtcFrameDoc);
+    recall(dtcFrameDoc);
   }
 
   @Override
   public void onSubmittingDtcRequest() {
   }
 
-  public void storeRequestParametersIntoCookie(Document dtcFrameDoc) {
-    NodeCollection<Element> nodeCollection = this.getFormControlElements(dtcFrameDoc);
+  public void persist(Document dtcFrameDoc) {
+    NodeCollection<Element> nodeCollection = getFormControlElements(dtcFrameDoc);
     if (nodeCollection == null) {
       return;
     }
 
-    String cookieKey = CookieHandler.EMPTY_STRING;
-    StringBuilder cookieValue = new StringBuilder();
+    String key = RequestRecaller.EMPTY_STRING;
+    StringBuilder data = new StringBuilder();
     for (int i = 0; i < nodeCollection.getLength(); i++) {
       String name = nodeCollection.getItem(i).getAttribute("name");
       if (name.equals("c")) {
-        cookieKey = nodeCollection.getItem(i).getAttribute("value");
+        key = nodeCollection.getItem(i).getAttribute("value");
       } else {
         String value = null;
         if (name.matches("REQUEST[0-9]+") || name.equals("ip_text") || name.equals("port")) {
@@ -148,17 +145,13 @@ public class CookieHandler extends DefaultDtcArdbegObserver {
         } else {
           continue;
         }
-        cookieValue.append(name);
-        cookieValue.append(CookieHandler.FORM_VALUE_DELIMETER);
-        cookieValue.append(value);
-        cookieValue.append(CookieHandler.FORM_FIELD_DELIMETER);
+        data.append(name);
+        data.append(RequestRecaller.FORM_VALUE_DELIMETER);
+        data.append(value);
+        data.append(RequestRecaller.FORM_FIELD_DELIMETER);
       }
     }
 
-    Date now = new Date();
-    long nowLong = now.getTime();
-    nowLong = nowLong + (1000 * 60 * 60 * 24 * 7);
-    now.setTime(nowLong);
-    Cookies.setCookie(cookieKey, cookieValue.toString(), now);
+    PersistenceManager.getInstance().setItem(key, data.toString());
   }
 }

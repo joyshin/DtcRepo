@@ -70,8 +70,6 @@ public class DtcArdbeg implements EntryPoint {
 
   private final static String DTC_PROXY_URL = DtcArdbeg.BASE_URL + "_dtcproxy_/";
 
-  private static ServiceDao serviceDao = new ServiceDao();
-
   private static DtcChrono dtcChrono = new DtcChrono();
 
   public native static void addDtcFormEventHandler(DtcArdbeg module, Document dtcDoc) /*-{
@@ -175,7 +173,7 @@ public class DtcArdbeg implements EntryPoint {
     });
   }
 
-  private final CookieHandler cookieHandler = new CookieHandler();
+  private final RequestRecaller cookieHandler = new RequestRecaller();
 
   private final FlowPanel dtcNodePanel = new FlowPanel();
 
@@ -235,8 +233,6 @@ public class DtcArdbeg implements EntryPoint {
         if (doc == null) {
           return;
         }
-
-        DtcArdbeg.addDtcFrameScrollEventHandler(DtcArdbeg.this);
 
         DtcPageType type = DtcArdbeg.this.getPageType(doc.getURL());
 
@@ -328,7 +324,7 @@ public class DtcArdbeg implements EntryPoint {
       cell.setInnerText(nodeInfo.getUpdateTime());
       row.appendChild(cell);
 
-      Integer score = DtcArdbeg.serviceDao.getVisitCount(nodeInfo.getName());
+      Integer score = PersistenceManager.getInstance().getVisitCount(nodeInfo.getName());
       rows.add(new Pair<Integer, Node>(score, row));
     }
     return rows;
@@ -448,9 +444,7 @@ public class DtcArdbeg implements EntryPoint {
     String serviceName = directoryPath.replaceAll("/", "");
 
     addCssLinkIntoDtcFrame(doc);
-    if (doc.getReferrer().equals(DtcArdbeg.DTC_PROXY_URL)) {
-      DtcArdbeg.serviceDao.addVisitCount(serviceName);
-    }
+    PersistenceManager.getInstance().addVisitCount(serviceName);
 
     dtcArdbegNodeData.refreshDtcNode("/" + directoryPath);
     displayDirecotyPage();
