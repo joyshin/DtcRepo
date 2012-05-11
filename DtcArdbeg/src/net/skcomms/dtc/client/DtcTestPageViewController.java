@@ -1,5 +1,6 @@
 package net.skcomms.dtc.client;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import net.skcomms.dtc.shared.DtcRequestInfo;
@@ -10,11 +11,17 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.smartgwt.client.data.DSCallback;
+import com.smartgwt.client.data.DSRequest;
+import com.smartgwt.client.data.DSResponse;
+import com.smartgwt.client.types.FormMethod;
 import com.smartgwt.client.types.ListGridEditEvent;
 import com.smartgwt.client.types.Overflow;
+import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Button;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
+import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.ComboBoxItem;
 import com.smartgwt.client.widgets.form.fields.FormItem;
 import com.smartgwt.client.widgets.form.fields.TextItem;
@@ -32,14 +39,16 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
     public RequestFormRecord() {
     }
 
-    public RequestFormRecord(int id, String name, ComboBoxItem value) {
+    public RequestFormRecord(int id, String key, String name, ComboBoxItem value) {
       this.setId(id);
+      this.setKey(key);
       this.setName(name);
       this.setValue(value);
     }
 
-    public RequestFormRecord(int id, String name, String value) {
+    public RequestFormRecord(int id, String key, String name, String value) {
       this.setId(id);
+      this.setKey(key);
       this.setName(name);
       this.setValue(value);
     }
@@ -54,6 +63,11 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
 
     private void setId(int id) {
       this.setAttribute("ID", id);
+    }
+
+    private void setKey(String key) {
+      this.setAttribute("key", key);
+
     }
 
     private void setName(String name) {
@@ -78,8 +92,6 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
   private Button searchButton;
   private VLayout vLayoutLeftBottom;
   private HLayout hLayout;
-  byte[] htmlContents;
-
   private String currentPath;
 
   private String createUrlParamter() {
@@ -103,16 +115,29 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
       } else if (name.toLowerCase().equals("port")) {
         port = value;
       } else {
+        params.append('&');
         params.append(name);
-        params.append("=");
+        params.append('=');
         params.append(value);
-        params.append("&");
       }
     }
-    String urlParam = "http://";
-    urlParam = urlParam + ip + ":" + port + "/";
 
-    return urlParam;
+    StringBuffer urlParam = new StringBuffer();
+    String serviceName = this.currentPath.split("/")[0] + "D";
+    String apiNum = this.currentPath.split("/")[1].split("\\.")[0];
+
+    urlParam.append("http://");
+    urlParam.append(ip);
+    urlParam.append(':');
+    urlParam.append(port);
+    urlParam.append('/');
+    urlParam.append(serviceName.toUpperCase());
+    urlParam.append('/');
+    urlParam.append(apiNum);
+    urlParam.append("?Dummy1=1&Dummy2=1&Dummy3=1&Dummy4=1");
+    urlParam.append(params.toString());
+
+    return urlParam.toString();
   }
 
   private void drawPanel() {
@@ -151,7 +176,7 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
     this.requestFormGrid.setLeaveScrollbarGap(false);
 
     // 입력폼 내부 필드 - name
-    this.nameField = new ListGridField("name", "Name", 120);
+    this.nameField = new ListGridField("key", "Name", 120);
     this.nameField.setCanEdit(false);
 
     // 입력폼 내부 필드 - value
@@ -166,20 +191,40 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
     this.searchButton.setTop(45);
 
     this.searchButton.addClickHandler(new ClickHandler() {
+
       @Override
       public void onClick(ClickEvent event) {
 
-        String urlParameter = DtcTestPageViewController.this.createUrlParamter();
-        // try {
-        // DtcTestPageViewController.this.htmlContents = DtcServiceImpl
-        // .getHtmlContents(urlParameter);
-        // } catch (IOException e) {
-        // // TODO Auto-generated catch block
-        // e.printStackTrace();
-        // // }
+        // String urlParameter =
+        // URL.encode(DtcTestPageViewController.this.createUrlParamter());
 
+        List<FormItem> formItems = DtcTestPageViewController.this.makeFormItem();
+
+        FormItem[] items = new FormItem[formItems.size()];
+        for (int i = 0; i < formItems.size(); i++) {
+          items[i] = formItems.get(i);
+        }
+
+        DynamicForm submitForm = new DynamicForm();
+        // submitForm.setTarget("response");
+        // submitForm.setAction("response.html");
+        // submitForm.setFields(formItems.toArray(new FormItem[] {}));
+        submitForm.setFields(items);
+
+        submitForm.setMethod(FormMethod.POST);
+        // submitForm.submitForm();
+        submitForm.saveData();
+        submitForm.submit(new DSCallback() {
+
+          @Override
+          public void execute(DSResponse response, Object rawData,
+              DSRequest request) {
+            System.out.println("Response: " + response.getHttpResponseCode());
+            SC.say("back");
+            System.out.println("BACK...........");
+          }
+        });
       }
-
     });
 
     // 검색관련 정보
@@ -220,6 +265,22 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
 
   }
 
+  private List<FormItem> makeFormItem() {
+
+    List<FormItem> formItems = new ArrayList<FormItem>();
+    FormItem path = new FormItem();
+    path.setAttribute("c", this.currentPath);
+    formItems.add(path);
+
+    for (ListGridRecord record : this.requestFormGrid.getRecords()) {
+      FormItem item = new FormItem();
+      item.setAttribute(record.getAttribute("name"), record.getAttribute("value"));
+      formItems.add(item);
+    }
+
+    return formItems;
+  }
+
   @Override
   public void onDtcResponseFrameLoaded(Document dtcFrameDoc, boolean success) {
   }
@@ -256,13 +317,14 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
         RequestFormRecord[] records = new RequestFormRecord[params.size()];
 
         for (int i = 0; i < params.size(); i++) {
-          records[i] = new RequestFormRecord(i, params.get(i).getKey(), params.get(i).getValue());
+          records[i] = new RequestFormRecord(i, params.get(i).getKey(), params.get(i).getName(),
+              params.get(i).getValue());
         }
         DtcTestPageViewController.this.requestFormGrid.setData(records);
 
         // add IP combo box
-        RequestFormRecord ipRrecord = new RequestFormRecord(params.size(), "IP", requestInfo
-            .getIpInfo().getIpText());
+        RequestFormRecord ipRrecord = new RequestFormRecord(params.size(), "IP", "ip_select",
+            requestInfo.getIpInfo().getIpText());
         DtcTestPageViewController.this.requestFormGrid.addData(ipRrecord);
 
         DtcTestPageViewController.this.requestFormGrid
@@ -274,13 +336,19 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
                   RequestFormRecord record = (RequestFormRecord) context.getEditedRecord();
                   // int id = record.getId();
 
-                  if (record.getAttributeAsString("name").equals("IP")) {
+                  if (record.getAttributeAsString("key").equals("IP")) {
                     ComboBoxItem cbItem = new ComboBoxItem();
+
                     cbItem.setType("comboBox");
 
                     String[] ipList = new String[requestInfo.getIpInfo()
                         .getOptions().size()];
                     for (int i = 0; i < ipList.length; i++) {
+                      cbItem.setAttribute("key", requestInfo.getIpInfo().getOptions().get(i)
+                          .getKey());
+                      cbItem.setAttribute("name", requestInfo.getIpInfo().getOptions().get(i)
+                          .getName());
+
                       ipList[i] = requestInfo.getIpInfo().getOptions().get(i).getValue();
                       // GWT.log("value " +
                       // requestInfo.getIpInfo().getOptions().get(i).getValue());
