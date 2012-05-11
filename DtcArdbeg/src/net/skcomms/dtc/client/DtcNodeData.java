@@ -44,6 +44,32 @@ public class DtcNodeData {
 
   public DtcArdbeg owner;
 
+  private void categorizeNodesByVisitCount(List<DtcNodeInfo> nodeInfos) {
+    dtcNodeList.clear();
+    favoritePairs.clear();
+
+    for (DtcNodeInfo nodeInfo : nodeInfos) {
+      Integer score = serviceDao.getVisitCount(nodeInfo.getName());
+      if (score > 0) {
+        favoritePairs.add(new Pair<Integer, DtcNodeInfo>(score, nodeInfo));
+      } else {
+        dtcNodeList.add(nodeInfo);
+      }
+    }
+  }
+
+  public void changeNodeListOf(DtcNodeInfo selected) {
+
+    if (isDtcFavoriteNode(selected) == true) {
+      moveToDtcNodeList(selected);
+    } else {
+      moveToDtcFavoriteNodeList(selected);
+    }
+
+    setDtcNodeCellList();
+    setDtcFavoriteNodeCellList();
+  }
+
   public CellList<DtcNodeInfo> getDtcFavoriteNodeCellList() {
     return dtcFavoriteNodeCellList;
   }
@@ -91,9 +117,22 @@ public class DtcNodeData {
     }
   }
 
+  public void goToPageBasedOn(DtcNodeInfo selected) {
+    DtcPageType type =
+        DtcNodeData.this.getTypeOfSelected(selected.getPath(),
+            selected.isLeaf());
+    String href = DtcNodeData.this.getHrefWithTypeAndPath(type,
+        selected.getPath());
+    DtcNodeData.this.owner.setDtcFrameUrl(href);
+  }
+
   public void initialize(DtcArdbeg dtcArdbeg)
   {
     this.owner = dtcArdbeg;
+  }
+
+  private boolean isDtcFavoriteNode(DtcNodeInfo selected) {
+    return dtcFavoriteNodeList.contains(selected);
   }
 
   private void moveToDtcFavoriteNodeList(DtcNodeInfo selected) {
@@ -108,27 +147,6 @@ public class DtcNodeData {
     dtcNodeList.add(selected);
   }
 
-  public void onClickDtcNodeInfoCell(DtcNodeInfo selected) {
-    DtcPageType type =
-        DtcNodeData.this.getTypeOfSelected(selected.getPath(),
-            selected.isLeaf());
-    String href = DtcNodeData.this.getHrefWithTypeAndPath(type,
-        selected.getPath());
-    DtcNodeData.this.owner.setDtcFrameUrl(href);
-  }
-
-  public void onClickToggleListButton(DtcNodeInfo selected) {
-
-    if (dtcFavoriteNodeList.contains(selected) == true) {
-      moveToDtcNodeList(selected);
-    } else {
-      moveToDtcFavoriteNodeList(selected);
-    }
-
-    refreshDtcNodeCellList();
-    refreshDtcFavoriteNodeCellList();
-  }
-
   public void refreshDtcDirectoryPageNode(String path) {
     DtcService.Util.getInstance().getDir(path, new AsyncCallback<List<DtcNodeInfo>>() {
       @Override
@@ -139,18 +157,10 @@ public class DtcNodeData {
 
       @Override
       public void onSuccess(List<DtcNodeInfo> nodeInfos) {
-        dtcNodeList.clear();
-        dtcNodeList.addAll(nodeInfos);
-
-        refreshDtcNodeCellList();
+        setDtcNodeList(nodeInfos);
+        setDtcNodeCellList();
       }
     });
-  }
-
-  private void refreshDtcFavoriteNodeCellList() {
-    dtcFavoriteNodeCellList.setRowData(dtcFavoriteNodeList);
-    dtcFavoriteNodeCellList.setRowCount(dtcFavoriteNodeList.size(),
-        true);
   }
 
   public void refreshDtcHomePageNode() {
@@ -164,36 +174,40 @@ public class DtcNodeData {
 
       @Override
       public void onSuccess(List<DtcNodeInfo> nodeInfos) {
-        dtcNodeList.clear();
-        favoritePairs.clear();
-        dtcFavoriteNodeList.clear();
+        categorizeNodesByVisitCount(nodeInfos);
+        sortDtcFavoriteNodeList();
 
-        for (DtcNodeInfo nodeInfo : nodeInfos) {
-          Integer score = serviceDao.getVisitCount(nodeInfo.getName());
-          if (score > 0) {
-            favoritePairs.add(new Pair<Integer, DtcNodeInfo>(score, nodeInfo));
-          } else {
-            dtcNodeList.add(nodeInfo);
-          }
-        }
-
-        sortFavoritePairsByVisitCount(favoritePairs);
-        setFavoriteListWithPairs(favoritePairs);
-
-        refreshDtcNodeCellList();
-        refreshDtcFavoriteNodeCellList();
+        setDtcNodeCellList();
+        setDtcFavoriteNodeCellList();
       }
     });
   }
 
-  private void refreshDtcNodeCellList() {
+  private void setDtcFavoriteNodeCellList() {
+    dtcFavoriteNodeCellList.setRowData(dtcFavoriteNodeList);
+    dtcFavoriteNodeCellList.setRowCount(dtcFavoriteNodeList.size(),
+        true);
+  }
+
+  private void setDtcNodeCellList() {
     dtcNodeCellList.setRowData(dtcNodeList);
     dtcNodeCellList.setRowCount(dtcNodeList.size(), true);
   }
 
-  private void setFavoriteListWithPairs(List<Pair<Integer, DtcNodeInfo>> favoritePairs) {
+  private void setDtcNodeList(List<DtcNodeInfo> nodeInfos) {
+    dtcNodeList.clear();
+    dtcNodeList.addAll(nodeInfos);
+  }
+
+  private void setFavoriteListWith(List<Pair<Integer, DtcNodeInfo>> favoritePairs) {
     for (Pair<Integer, DtcNodeInfo> favoritePair : favoritePairs) {
       dtcFavoriteNodeList.add(favoritePair.getValue());
     }
+  }
+
+  private void sortDtcFavoriteNodeList() {
+    dtcFavoriteNodeList.clear();
+    sortFavoritePairsByVisitCount(favoritePairs);
+    setFavoriteListWith(favoritePairs);
   }
 }

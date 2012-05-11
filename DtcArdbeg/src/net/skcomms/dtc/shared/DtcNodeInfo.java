@@ -39,7 +39,7 @@ public class DtcNodeInfo implements Serializable {
     return this.updateTime;
   }
 
-  public boolean isDirectory() {
+  public boolean isDirectoryPageNode() {
     int idx = this.path.indexOf("/", 1);
 
     if (0 < idx && idx < (this.path.length() - 1)) {
