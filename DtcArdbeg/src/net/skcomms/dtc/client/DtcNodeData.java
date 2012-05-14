@@ -1,45 +1,79 @@
 package net.skcomms.dtc.client;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import net.skcomms.dtc.client.DtcArdbeg.DtcPageType;
+import net.skcomms.dtc.client.DtcArdbeg.Pair;
 import net.skcomms.dtc.shared.DtcNodeInfo;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SelectionModel;
-import com.google.gwt.view.client.SingleSelectionModel;
 
 public class DtcNodeData {
 
-  private static List<DtcNodeInfo> dtcNodeList = new ArrayList<DtcNodeInfo>();
+  private final List<DtcNodeInfo> dtcFavoriteNodeList = new ArrayList<DtcNodeInfo>();
+  private final List<DtcNodeInfo> dtcNodeList = new ArrayList<DtcNodeInfo>();
 
   private static DtcNodeData instance = new DtcNodeData();
 
   private static final CellList<DtcNodeInfo> dtcNodeCellList = new CellList<DtcNodeInfo>(
       DtcNodeInfoCell.getInstance());
-
-  private static final SelectionModel<DtcNodeInfo> SELECTION_MODEL =
-      new SingleSelectionModel<DtcNodeInfo>();
-
   private static final CellList<DtcNodeInfo> dtcFavoriteNodeCellList = new CellList<DtcNodeInfo>(
       DtcNodeInfoCell.getInstance());
 
   public static DtcNodeData getInstance() {
-    return instance;
+    return DtcNodeData.instance;
   }
+
+  private static void sortFavoritePairsByVisitCount(List<Pair<Integer, DtcNodeInfo>> rows) {
+    Collections.sort(rows, new Comparator<Pair<Integer, DtcNodeInfo>>() {
+      @Override
+      public int compare(Pair<Integer, DtcNodeInfo> arg0, Pair<Integer, DtcNodeInfo> arg1) {
+        return -arg0.getKey().compareTo(arg1.getKey());
+      }
+    });
+  }
+
+  private final List<DtcArdbeg.Pair<Integer, DtcNodeInfo>> favoritePairs = new ArrayList<DtcArdbeg.Pair<Integer, DtcNodeInfo>>();
 
   public DtcArdbeg owner;
 
+  private void categorizeNodesByVisitCount(List<DtcNodeInfo> nodeInfos) {
+    this.dtcNodeList.clear();
+    this.favoritePairs.clear();
+
+    for (DtcNodeInfo nodeInfo : nodeInfos) {
+      Integer score = PersistenceManager.getInstance().getVisitCount(nodeInfo.getName());
+      if (score > 0) {
+        this.favoritePairs.add(new Pair<Integer, DtcNodeInfo>(score, nodeInfo));
+      } else {
+        this.dtcNodeList.add(nodeInfo);
+      }
+    }
+  }
+
+  public void changeNodeListOf(DtcNodeInfo selected) {
+
+    if (this.isDtcFavoriteNode(selected)) {
+      this.moveToDtcNodeList(selected);
+    } else {
+      this.moveToDtcFavoriteNodeList(selected);
+    }
+
+    this.setDtcNodeCellList();
+    this.setDtcFavoriteNodeCellList();
+  }
+
   public CellList<DtcNodeInfo> getDtcFavoriteNodeCellList() {
-    return dtcFavoriteNodeCellList;
+    return DtcNodeData.dtcFavoriteNodeCellList;
   }
 
   public CellList<DtcNodeInfo> getDtcNodeCellList() {
-    return dtcNodeCellList;
+    return DtcNodeData.dtcNodeCellList;
   }
 
   private String getHrefWithTypeAndPath(DtcPageType type, String path) {
@@ -58,17 +92,6 @@ public class DtcNodeData {
     return null;
   }
 
-  /**
-   * 선택된 아이템의 DtcPageType을 가져온다.
-   * 
-   * @param path
-   *          이동할 페이지 경로
-   * 
-   * @param isLeaf
-   *          True: Test, False: 나머지
-   * 
-   * @return DtcPageType
-   */
   private DtcPageType getTypeOfSelected(String path, boolean isLeaf) {
     if (isLeaf == true) {
       return DtcPageType.TEST;
@@ -81,38 +104,37 @@ public class DtcNodeData {
     }
   }
 
+  public void goToPageBasedOn(DtcNodeInfo selected) {
+    DtcPageType type =
+        DtcNodeData.this.getTypeOfSelected(selected.getPath(),
+            selected.isLeaf());
+    String href = DtcNodeData.this.getHrefWithTypeAndPath(type,
+        selected.getPath());
+    DtcNodeData.this.owner.setDtcFrameUrl(href);
+  }
+
   public void initialize(DtcArdbeg dtcArdbeg)
   {
     this.owner = dtcArdbeg;
-
-    SELECTION_MODEL.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-      @Override
-      public void onSelectionChange(SelectionChangeEvent event) {
-        DtcNodeInfo selected = ((SingleSelectionModel<DtcNodeInfo>) SELECTION_MODEL)
-            .getSelectedObject();
-
-        DtcPageType type = DtcNodeData.this.getTypeOfSelected(selected.getPath(),
-            selected.isLeaf());
-        String href = DtcNodeData.this.getHrefWithTypeAndPath(type, selected.getPath());
-        DtcNodeData.this.owner.setDtcFrameUrl(href);
-      }
-    });
-
-    List<DtcNodeInfo> testNodeList = new ArrayList<DtcNodeInfo>();
-    DtcNodeInfo tmpNode = new DtcNodeInfo();
-    tmpNode.setDescription("DTC_PROXY_URL");
-    tmpNode.setName("Favorite Test");
-    tmpNode.setPath("/");
-    tmpNode.setUpdateTime("11");
-    testNodeList.add(tmpNode);
-    dtcFavoriteNodeCellList.setRowData(testNodeList);
-
-    dtcNodeCellList.setSelectionModel(SELECTION_MODEL);
-    dtcFavoriteNodeCellList.setSelectionModel(SELECTION_MODEL);
   }
 
-  public void refreshDtcNode(String path) {
+  private boolean isDtcFavoriteNode(DtcNodeInfo selected) {
+    return this.dtcFavoriteNodeList.contains(selected);
+  }
 
+  private void moveToDtcFavoriteNodeList(DtcNodeInfo selected) {
+    PersistenceManager.getInstance().addVisitCount(selected.getName());
+    this.dtcFavoriteNodeList.add(selected);
+    this.dtcNodeList.remove(selected);
+  }
+
+  private void moveToDtcNodeList(DtcNodeInfo selected) {
+    PersistenceManager.getInstance().removeItem(selected.getName());
+    this.dtcFavoriteNodeList.remove(selected);
+    this.dtcNodeList.add(selected);
+  }
+
+  public void refreshDtcDirectoryPageNode(String path) {
     DtcService.Util.getInstance().getDir(path, new AsyncCallback<List<DtcNodeInfo>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -122,12 +144,57 @@ public class DtcNodeData {
 
       @Override
       public void onSuccess(List<DtcNodeInfo> nodeInfos) {
-        dtcNodeList.clear();
-        dtcNodeList.addAll(nodeInfos);
-
-        dtcNodeCellList.setRowData(dtcNodeList);
-        dtcNodeCellList.setRowCount(dtcNodeList.size(), true);
+        DtcNodeData.this.setDtcNodeList(nodeInfos);
+        DtcNodeData.this.setDtcNodeCellList();
       }
     });
+  }
+
+  public void refreshDtcHomePageNode() {
+
+    DtcService.Util.getInstance().getDir("/", new AsyncCallback<List<DtcNodeInfo>>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        caught.printStackTrace();
+        GWT.log(caught.getMessage());
+      }
+
+      @Override
+      public void onSuccess(List<DtcNodeInfo> nodeInfos) {
+        DtcNodeData.this.categorizeNodesByVisitCount(nodeInfos);
+        DtcNodeData.this.sortDtcFavoriteNodeList();
+
+        DtcNodeData.this.setDtcNodeCellList();
+        DtcNodeData.this.setDtcFavoriteNodeCellList();
+      }
+    });
+  }
+
+  private void setDtcFavoriteNodeCellList() {
+    DtcNodeData.dtcFavoriteNodeCellList.setRowData(this.dtcFavoriteNodeList);
+    DtcNodeData.dtcFavoriteNodeCellList.setRowCount(this.dtcFavoriteNodeList.size(),
+        true);
+  }
+
+  private void setDtcNodeCellList() {
+    DtcNodeData.dtcNodeCellList.setRowData(this.dtcNodeList);
+    DtcNodeData.dtcNodeCellList.setRowCount(this.dtcNodeList.size(), true);
+  }
+
+  private void setDtcNodeList(List<DtcNodeInfo> nodeInfos) {
+    this.dtcNodeList.clear();
+    this.dtcNodeList.addAll(nodeInfos);
+  }
+
+  private void setFavoriteListWith(List<Pair<Integer, DtcNodeInfo>> favoritePairs) {
+    for (Pair<Integer, DtcNodeInfo> favoritePair : favoritePairs) {
+      this.dtcFavoriteNodeList.add(favoritePair.getValue());
+    }
+  }
+
+  private void sortDtcFavoriteNodeList() {
+    this.dtcFavoriteNodeList.clear();
+    DtcNodeData.sortFavoritePairsByVisitCount(this.favoritePairs);
+    this.setFavoriteListWith(this.favoritePairs);
   }
 }

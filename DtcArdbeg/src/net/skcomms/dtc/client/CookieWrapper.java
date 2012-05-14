@@ -18,6 +18,11 @@ public class CookieWrapper implements ClientStorage {
   }
 
   @Override
+  public void removeItem(String key) {
+    Cookies.removeCookie(key);
+  }
+
+  @Override
   public void setItem(String key, String data) {
     Date expireDate = new Date();
     expireDate.setTime(expireDate.getTime() + 1000L * 60 * 60 * 24 * 365);

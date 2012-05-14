@@ -14,7 +14,7 @@ public class PersistenceManager {
   private static final PersistenceManager INSTANCE = new PersistenceManager();
 
   public static PersistenceManager getInstance() {
-    return INSTANCE;
+    return PersistenceManager.INSTANCE;
   }
 
   private final ClientStorage clientStorage;
@@ -22,38 +22,45 @@ public class PersistenceManager {
   private PersistenceManager() {
     if (LocalStorageWrapper.isSupported()) {
       System.out.println("use Local Storage");
-      clientStorage = new LocalStorageWrapper();
+      this.clientStorage = new LocalStorageWrapper();
     }
     else {
-      clientStorage = new CookieWrapper();
+      this.clientStorage = new CookieWrapper();
     }
   }
 
   public void addVisitCount(String serviceName) {
-    setVisitCount(serviceName, getVisitCount(serviceName) + 1);
+    this.setVisitCount(serviceName, this.getVisitCount(serviceName) + 1);
   }
 
   public String getItem(String key) {
-    return clientStorage.getItem(key);
+    return this.clientStorage.getItem(key);
   }
 
   public List<String> getItemKeys() {
-    return clientStorage.getItemKeys();
+    return this.clientStorage.getItemKeys();
   }
 
   public int getVisitCount(String serviceName) {
-    if (clientStorage.getItem(serviceName) == null) {
+    if (this.clientStorage.getItem(serviceName) == null) {
       return 0;
     } else {
-      return Integer.parseInt(clientStorage.getItem(serviceName));
+      return Integer.parseInt(this.clientStorage.getItem(serviceName));
     }
   }
 
+  /**
+   * @param name
+   */
+  public void removeItem(String key) {
+    this.clientStorage.removeItem(key);
+  }
+
   public void setItem(String key, String data) {
-    clientStorage.setItem(key, data);
+    this.clientStorage.setItem(key, data);
   }
 
   public void setVisitCount(String serviceName, int visitCount) {
-    clientStorage.setItem(serviceName, Integer.toString(visitCount));
+    this.clientStorage.setItem(serviceName, Integer.toString(visitCount));
   }
 }

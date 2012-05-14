@@ -8,6 +8,8 @@ public interface ClientStorage {
 
   List<String> getItemKeys();
 
+  void removeItem(String key);
+
   void setItem(String key, String data);
 
 }

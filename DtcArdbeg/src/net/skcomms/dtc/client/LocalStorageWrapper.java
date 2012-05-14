@@ -26,6 +26,11 @@ public class LocalStorageWrapper implements ClientStorage {
   }
 
   @Override
+  public void removeItem(String key) {
+    Storage.getLocalStorageIfSupported().removeItem(key);
+  }
+
+  @Override
   public void setItem(String key, String data) {
     Storage.getLocalStorageIfSupported().setItem(key, data);
   }
