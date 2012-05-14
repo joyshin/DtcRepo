@@ -78,8 +78,7 @@ final class DtcNodeInfoCell extends AbstractCell<DtcNodeInfo> {
     }
 
     Image image = new Image();
-    image
-        .setUrl(DtcNodeInfoCell.CELL_IMAGE_URL);
+    image.setUrl(DtcNodeInfoCell.CELL_IMAGE_URL);
     image.setSize("100%", "100%");
     image.setStyleName("gwt-DtcNodeCellImageStyle");
 

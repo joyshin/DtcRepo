@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import net.skcomms.dtc.client.DtcArdbeg.DtcPageType;
 import net.skcomms.dtc.client.DtcArdbeg.Pair;
 import net.skcomms.dtc.shared.DtcNodeInfo;
 
@@ -29,7 +28,7 @@ public class DtcNodeData {
     return DtcNodeData.instance;
   }
 
-  private static void sortFavoritePairsByVisitCount(List<Pair<Integer, DtcNodeInfo>> rows) {
+  private static void sortFavoritesByVisitCount(List<Pair<Integer, DtcNodeInfo>> rows) {
     Collections.sort(rows, new Comparator<Pair<Integer, DtcNodeInfo>>() {
       @Override
       public int compare(Pair<Integer, DtcNodeInfo> arg0, Pair<Integer, DtcNodeInfo> arg1) {
@@ -40,7 +39,10 @@ public class DtcNodeData {
 
   private final List<DtcArdbeg.Pair<Integer, DtcNodeInfo>> favoritePairs = new ArrayList<DtcArdbeg.Pair<Integer, DtcNodeInfo>>();
 
-  public DtcArdbeg owner;
+  DtcArdbeg owner;
+
+  private DtcNodeData() {
+  }
 
   private void categorizeNodesByVisitCount(List<DtcNodeInfo> nodeInfos) {
     this.dtcNodeList.clear();
@@ -76,45 +78,11 @@ public class DtcNodeData {
     return DtcNodeData.dtcNodeCellList;
   }
 
-  private String getHrefWithTypeAndPath(DtcPageType type, String path) {
-
-    String href = DtcArdbeg.getDtcProxyUrl();
-
-    switch (type) {
-    case HOME:
-      return href;
-    case DIRECTORY:
-      return href + "?b=" + path.substring(1);
-    case TEST:
-      return href + "?c=" + path.substring(1);
-    }
-
-    return null;
-  }
-
-  private DtcPageType getTypeOfSelected(String path, boolean isLeaf) {
-    if (isLeaf == true) {
-      return DtcPageType.TEST;
-    } else {
-      if (path.equals("/")) {
-        return DtcPageType.HOME;
-      } else {
-        return DtcPageType.DIRECTORY;
-      }
-    }
-  }
-
   public void goToPageBasedOn(DtcNodeInfo selected) {
-    DtcPageType type =
-        DtcNodeData.this.getTypeOfSelected(selected.getPath(),
-            selected.isLeaf());
-    String href = DtcNodeData.this.getHrefWithTypeAndPath(type,
-        selected.getPath());
-    DtcNodeData.this.owner.setDtcFrameUrl(href);
+    DtcNodeData.this.owner.setDtcFramePath(selected.getPath());
   }
 
-  public void initialize(DtcArdbeg dtcArdbeg)
-  {
+  public void initialize(DtcArdbeg dtcArdbeg) {
     this.owner = dtcArdbeg;
   }
 
@@ -134,7 +102,7 @@ public class DtcNodeData {
     this.dtcNodeList.add(selected);
   }
 
-  public void refreshDtcDirectoryPageNode(String path) {
+  public void refreshDtcDirectoryPageNode(final String path) {
     DtcService.Util.getInstance().getDir(path, new AsyncCallback<List<DtcNodeInfo>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -146,6 +114,13 @@ public class DtcNodeData {
       public void onSuccess(List<DtcNodeInfo> nodeInfos) {
         DtcNodeData.this.setDtcNodeList(nodeInfos);
         DtcNodeData.this.setDtcNodeCellList();
+
+        System.out.println("Callback : " + path);
+        if (path.equals("/")) {
+        }
+        else {
+          DtcNodeData.this.owner.fireDtcServiceDirectoryPageLoaded(path);
+        }
       }
     });
   }
@@ -166,6 +141,7 @@ public class DtcNodeData {
 
         DtcNodeData.this.setDtcNodeCellList();
         DtcNodeData.this.setDtcFavoriteNodeCellList();
+        DtcNodeData.this.owner.fireDtcHomePageLoaded();
       }
     });
   }
@@ -186,15 +162,15 @@ public class DtcNodeData {
     this.dtcNodeList.addAll(nodeInfos);
   }
 
-  private void setFavoriteListWith(List<Pair<Integer, DtcNodeInfo>> favoritePairs) {
+  private void setFavoriteListFrom(List<Pair<Integer, DtcNodeInfo>> favoritePairs) {
+    this.dtcFavoriteNodeList.clear();
     for (Pair<Integer, DtcNodeInfo> favoritePair : favoritePairs) {
       this.dtcFavoriteNodeList.add(favoritePair.getValue());
     }
   }
 
   private void sortDtcFavoriteNodeList() {
-    this.dtcFavoriteNodeList.clear();
-    DtcNodeData.sortFavoritePairsByVisitCount(this.favoritePairs);
-    this.setFavoriteListWith(this.favoritePairs);
+    DtcNodeData.sortFavoritesByVisitCount(this.favoritePairs);
+    this.setFavoriteListFrom(this.favoritePairs);
   }
 }

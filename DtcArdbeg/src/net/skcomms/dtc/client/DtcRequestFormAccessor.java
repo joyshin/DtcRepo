@@ -180,12 +180,12 @@ public class DtcRequestFormAccessor extends DefaultDtcArdbegObserver {
   }
 
   @Override
-  public void onDtcDirectoryLoaded(Document dtcFrameDoc) {
+  public void onDtcDirectoryLoaded(String path) {
     this.update();
   }
 
   @Override
-  public void onDtcHomeLoaded(Document dtcFrameDoc) {
+  public void onDtcHomeLoaded() {
     this.update();
   }
 

@@ -22,11 +22,11 @@ public class DtcChrono extends DefaultDtcArdbegObserver {
 
     private long startTime;
 
-    private Style chronoStyle;
+    private final Style chronoStyle;
 
-    private Text elapsedTimeText;
+    private final Text elapsedTimeText;
 
-    private Text searchTimeText;
+    private final Text searchTimeText;
 
     public ChronoAnimation(Style aChronoStyle, Text aSearchTimeText, Text anElapsedTimeText) {
       this.chronoStyle = aChronoStyle;
@@ -109,12 +109,12 @@ public class DtcChrono extends DefaultDtcArdbegObserver {
   }
 
   @Override
-  public void onDtcDirectoryLoaded(Document dtcFrameDoc) {
+  public void onDtcDirectoryLoaded(String path) {
     RootPanel.get("chronoContainer").setVisible(false);
   }
 
   @Override
-  public void onDtcHomeLoaded(Document dtcFrameDoc) {
+  public void onDtcHomeLoaded() {
     RootPanel.get("chronoContainer").setVisible(false);
   }
 

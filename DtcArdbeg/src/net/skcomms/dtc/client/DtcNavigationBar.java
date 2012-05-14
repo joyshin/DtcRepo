@@ -17,35 +17,34 @@ import com.google.gwt.user.client.ui.RootPanel;
  */
 public class DtcNavigationBar extends DefaultDtcArdbegObserver {
 
-  static String[] getNavigationNodes(String url) {
-    int valueStartIndex = url.lastIndexOf("?");
+  static String[] getNavigationNodes(String path) {
+    int valueStartIndex = path.lastIndexOf("?");
     if (valueStartIndex == -1) {
-      return new String[0];
+      return ("Home" + path).split("/");
     }
-    String valueSource = url.substring(valueStartIndex + 3);
-    return valueSource.split("/");
+    String valueSource = path.substring(valueStartIndex + 3);
+    return ("Home/" + valueSource).split("/");
   }
 
   private final HorizontalPanel naviPanel = new HorizontalPanel();
 
   private final static String NAVIGATION_DELIMITER = "/";
 
-  private final String baseUrl;
+  private final String rootPath = "/";
 
   private DtcArdbeg owner;
 
-  public DtcNavigationBar(String baseUrl) {
-    this.baseUrl = baseUrl;
+  public DtcNavigationBar() {
   }
 
-  private void addAnchor(String text, final String href) {
+  private void addAnchor(String text, final String path) {
     Anchor anchor = new Anchor(text);
 
     anchor.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         event.stopPropagation();
-        DtcNavigationBar.this.owner.setDtcFrameUrl(href);
+        DtcNavigationBar.this.owner.setDtcFramePath(path);
       }
     });
 
@@ -61,24 +60,16 @@ public class DtcNavigationBar extends DefaultDtcArdbegObserver {
     this.naviPanel.clear();
 
     String[] nodes = DtcNavigationBar.getNavigationNodes(url);
-    String addressSource = this.baseUrl;
 
-    if (nodes.length == 0) {
-      this.addLabel("Home");
-    }
-    else {
-      addressSource = addressSource.concat("?b=");
-
-      this.addAnchor("Home", this.baseUrl);
-      this.addLabel(DtcNavigationBar.NAVIGATION_DELIMITER);
-      String nodeHistory = "";
-      for (int i = 0; i < nodes.length - 1; i++) {
+    String nodeHistory = this.rootPath;
+    for (int i = 0; i < nodes.length - 1; i++) {
+      if (i > 0) {
         nodeHistory = nodeHistory + nodes[i] + "/";
-        this.addAnchor(nodes[i], addressSource.concat(nodeHistory));
-        this.addLabel(DtcNavigationBar.NAVIGATION_DELIMITER);
       }
-      this.addLabel(nodes[nodes.length - 1]);
+      this.addAnchor(nodes[i], nodeHistory);
+      this.addLabel(DtcNavigationBar.NAVIGATION_DELIMITER);
     }
+    this.addLabel(nodes[nodes.length - 1]);
   }
 
   public void initialize(DtcArdbeg dtcArdbeg) {
@@ -88,18 +79,18 @@ public class DtcNavigationBar extends DefaultDtcArdbegObserver {
     this.naviPanel.setSpacing(3);
     this.owner = dtcArdbeg;
 
-    this.addAnchor("Home", this.baseUrl);
+    this.addLabel("Home");
     RootPanel.get("naviBarContainer").add(this.naviPanel);
   }
 
   @Override
-  public void onDtcDirectoryLoaded(Document dtcFrameDoc) {
-    this.addPath(dtcFrameDoc.getURL());
+  public void onDtcDirectoryLoaded(String path) {
+    this.addPath(path);
   }
 
   @Override
-  public void onDtcHomeLoaded(Document dtcFrameDoc) {
-    this.addPath(dtcFrameDoc.getURL());
+  public void onDtcHomeLoaded() {
+    this.addPath("/");
   }
 
   @Override

@@ -4,9 +4,9 @@ import com.google.gwt.dom.client.Document;
 
 public interface DtcArdbegObserver {
 
-  void onDtcDirectoryLoaded(Document dtcFrameDoc);
+  void onDtcDirectoryLoaded(String path);
 
-  void onDtcHomeLoaded(Document dtcFrameDoc);
+  void onDtcHomeLoaded();
 
   void onDtcResponseFrameLoaded(Document dtcFrameDoc, boolean success);
 
