@@ -42,6 +42,16 @@
         <url-pattern>/dtcardbeg/dtcservice</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>dtcUserConfigServiceServlet</servlet-name>
+        <servlet-class>net.skcomms.dtc.server.DtcUserConfigServiceImpl</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>dtcUserConfigServiceServlet</servlet-name>
+        <url-pattern>/dtcardbeg/dtcuserconfigservice</url-pattern>
+    </servlet-mapping>
+
 	<servlet>
 		<servlet-name>dtcProxyServlet</servlet-name>
 		<jsp-file>/DtcProxy.jsp</jsp-file>
@@ -67,6 +77,14 @@
 	<servlet-mapping>
 		<servlet-name>DtcService</servlet-name>
 		<url-pattern>/dtcardbeg/DtcService</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<servlet-name>DtcUserConfigService</servlet-name>
+		<servlet-class>net.skcomms.dtc.server.DtcUserConfigServiceImpl</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>DtcUserConfigService</servlet-name>
+		<url-pattern>/dtcardbeg/DtcUserConfigService</url-pattern>
 	</servlet-mapping>
 
 </web-app>

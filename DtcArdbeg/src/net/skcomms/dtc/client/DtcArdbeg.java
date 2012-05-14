@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.skcomms.dtc.shared.DtcNodeInfo;
+import net.skcomms.dtc.shared.UserConfig;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -512,6 +513,32 @@ public class DtcArdbeg implements EntryPoint {
     this.urlCopyManager.initialize(this);
     this.cookieHandler.initialize(this);
     new DtcChrono().initialize(this);
+
+    UserConfig userConfig = new UserConfig("sccu");
+    userConfig.setVisitCount("9porker", 9999);
+    /*
+     * DtcUserConfigService.Util.getInstance().setUserConfig("sccu", userConfig,
+     * new AsyncCallback<Void>() {
+     * 
+     * @Override public void onFailure(Throwable caught) { // TODO
+     * Auto-generated method stub System.out.println(caught.toString()); }
+     * 
+     * @Override public void onSuccess(Void result) {
+     * System.out.println("UserConfig saved successfully!!"); }
+     * 
+     * });
+     */
+    /*
+     * DtcUserConfigService.Util.getInstance().getUserConfig("sccu", new
+     * AsyncCallback<UserConfig>() {
+     * 
+     * @Override public void onFailure(Throwable caught) {
+     * System.out.println("Fail.."); }
+     * 
+     * @Override public void onSuccess(UserConfig result) {
+     * System.out.println("userID: " + result.getUserId() + "\nservice : " +
+     * result.getService() + "\nvisitCount : " + result.getVisitCount()); } });
+     */
   }
 
   private void onScrollDtcFrame() {
