@@ -8,20 +8,20 @@ import net.skcomms.dtc.shared.DtcRequestParameter;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.Response;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.smartgwt.client.data.DSCallback;
-import com.smartgwt.client.data.DSRequest;
-import com.smartgwt.client.data.DSResponse;
-import com.smartgwt.client.types.FormMethod;
 import com.smartgwt.client.types.ListGridEditEvent;
 import com.smartgwt.client.types.Overflow;
-import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Button;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
-import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.ComboBoxItem;
 import com.smartgwt.client.widgets.form.fields.FormItem;
 import com.smartgwt.client.widgets.form.fields.TextItem;
@@ -94,6 +94,26 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
   private HLayout hLayout;
   private String currentPath;
 
+  private String createRequest()
+  {
+    StringBuffer requestData = new StringBuffer();
+    String testURL = "c" + ":" + this.currentPath;
+    String process = "process:1";
+    requestData.append(URL.encode(testURL));
+    requestData.append("\n");
+    requestData.append(URL.encode(process));
+    requestData.append("\n");
+
+    for (ListGridRecord record : this.requestFormGrid.getRecords()) {
+      String request = record.getAttribute("name") + ":" + record.getAttribute("value");
+      requestData.append(URL.encode(request));
+      requestData.append("\n");
+    }
+    GWT.log("Request: " + requestData.toString());
+
+    return requestData.toString();
+  }
+
   private String createUrlParamter() {
 
     ListGridRecord[] records = this.requestFormGrid.getRecords();
@@ -141,7 +161,6 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
   }
 
   private void drawPanel() {
-    // 최 상위 레이아웃
 
     this.layout = new HLayout();
     this.layout.setWidth100();
@@ -149,7 +168,6 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
     this.layout.setMembersMargin(20);
     this.layout.setBackgroundColor("gray");
 
-    // 입력 폼, 검색버튼, 검색정보를 포함
     this.vLayoutLeft = new VLayout();
     this.vLayoutLeft.setShowEdges(true);
     this.vLayoutLeft.setWidth(400);
@@ -161,7 +179,6 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
     // vLayout.addMember(new BlueBox((String) null, "30%", "height 30%"));
     // layout.addMember(vLayout);
 
-    // 입력폼
     this.requestFormGrid = new ListGrid();
     this.requestFormGrid.setWidth(400);
     this.requestFormGrid.setShowAllRecords(true);
@@ -175,16 +192,13 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
     this.requestFormGrid.setOverflow(Overflow.VISIBLE);
     this.requestFormGrid.setLeaveScrollbarGap(false);
 
-    // 입력폼 내부 필드 - name
     this.nameField = new ListGridField("key", "Name", 120);
     this.nameField.setCanEdit(false);
 
-    // 입력폼 내부 필드 - value
     this.valueField = new ListGridField("value", "Value", 280);
 
     this.requestFormGrid.setFields(this.nameField, this.valueField);
 
-    // 검색 버튼
     this.searchButton = new Button("Search");
     this.searchButton.setWidth(120);
     this.searchButton.setLeft(60);
@@ -194,40 +208,46 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
 
       @Override
       public void onClick(ClickEvent event) {
+        // TODO Auto-generated method stub
+        String requestData = createRequest();
+        String targetURL = URL.encode(DtcArdbeg.getDtcProxyUrl() + "response_xml.html");
 
-        // String urlParameter =
-        // URL.encode(DtcTestPageViewController.this.createUrlParamter());
+        RequestBuilder request = new RequestBuilder(RequestBuilder.POST, targetURL);
 
-        List<FormItem> formItems = DtcTestPageViewController.this.makeFormItem();
-
-        FormItem[] items = new FormItem[formItems.size()];
-        for (int i = 0; i < formItems.size(); i++) {
-          items[i] = formItems.get(i);
-        }
-
-        DynamicForm submitForm = new DynamicForm();
-        // submitForm.setTarget("response");
-        // submitForm.setAction("response.html");
-        // submitForm.setFields(formItems.toArray(new FormItem[] {}));
-        submitForm.setFields(items);
-
-        submitForm.setMethod(FormMethod.POST);
-        // submitForm.submitForm();
-        submitForm.saveData();
-        submitForm.submit(new DSCallback() {
+        request.setHeader("Accept", "text/html,application/xhtml+xml,application/xml");
+        request.setHeader("Content-Type", "application/x-www-form-urlencoded");
+        request.setHeader("Host", "dtc.skcomms.net");
+        request.setHeader("Origin", "http://dtc.skcomms.net");
+        request.setHeader("Content-Length", Integer.toString(requestData.length()));
+        request.setHeader("Cache-Control", "max-age=0");
+        request.setRequestData(requestData);
+        request.setCallback(new RequestCallback() {
 
           @Override
-          public void execute(DSResponse response, Object rawData,
-              DSRequest request) {
-            System.out.println("Response: " + response.getHttpResponseCode());
-            SC.say("back");
-            System.out.println("BACK...........");
+          public void onError(Request request, Throwable exception) {
+            // TODO Auto-generated method stub
+            GWT.log(exception.getMessage());
           }
+
+          @Override
+          public void onResponseReceived(Request request, Response response) {
+            // TODO Auto-generated method stub
+            GWT.log(response.getHeadersAsString());
+            GWT.log(response.getText());
+
+          }
+
         });
+
+        try {
+          request.send();
+        } catch (RequestException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
       }
     });
 
-    // 검색관련 정보
     this.vLayoutLeftBottom = new VLayout();
     this.vLayoutLeftBottom.setShowEdges(true);
     this.vLayoutLeftBottom.setWidth(400);
@@ -239,7 +259,6 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
     this.vLayoutLeft.addMember(this.searchButton);
     this.vLayoutLeft.addMember(this.vLayoutLeftBottom);
 
-    // 검색 결과 레이아웃
     this.hLayout = new HLayout();
     this.hLayout.setShowEdges(true);
     this.hLayout.setHeight(150);
@@ -253,7 +272,6 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
     this.layout.draw();
     this.layout.setVisible(true);
 
-    // 검색 결과
   }
 
   public HLayout getLayout() {
@@ -270,11 +288,17 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
     List<FormItem> formItems = new ArrayList<FormItem>();
     FormItem path = new FormItem();
     path.setAttribute("c", this.currentPath);
+    path.setName("c");
+    path.setValue(this.currentPath);
     formItems.add(path);
 
     for (ListGridRecord record : this.requestFormGrid.getRecords()) {
+
       FormItem item = new FormItem();
       item.setAttribute(record.getAttribute("name"), record.getAttribute("value"));
+      item.setName(record.getAttribute("name"));
+      item.setValue(record.getAttribute("value"));
+      // GWT.log(item.getName() + ":" + item.getValue().toString());
       formItems.add(item);
     }
 
@@ -297,6 +321,7 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
 
   @Override
   public void onSubmittingDtcRequest() {
+
   }
 
   public void refreshDtcTestPage(String path) {
