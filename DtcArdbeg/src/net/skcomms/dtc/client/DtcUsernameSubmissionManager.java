@@ -40,6 +40,7 @@ public class DtcUsernameSubmissionManager {
         loginDialog.setText("Login");
         loginDialog.add(loginPanel);
         loginDialog.center();
+        usernameText.setFocus(true);
 
         usernameText.addKeyDownHandler(new KeyDownHandler() {
 

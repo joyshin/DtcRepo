@@ -115,7 +115,6 @@ public class DtcNodeData {
         DtcNodeData.this.setDtcNodeList(nodeInfos);
         DtcNodeData.this.setDtcNodeCellList();
 
-        owner.hideSplash();
         System.out.println("Callback : " + path);
         if (path.equals("/")) {
         }
@@ -144,7 +143,6 @@ public class DtcNodeData {
         DtcNodeData.this.setDtcNodeCellList();
         DtcNodeData.this.setDtcFavoriteNodeCellList();
         DtcNodeData.this.owner.fireDtcHomePageLoaded();
-        owner.hideSplash();
       }
     });
   }

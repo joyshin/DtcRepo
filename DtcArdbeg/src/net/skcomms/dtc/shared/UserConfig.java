@@ -52,27 +52,33 @@ public class UserConfig implements Serializable {
   }
 
   public UserConfig(String anUserId) {
-    userId = anUserId;
+    this.userId = anUserId;
   }
 
   public String getService() {
-    return service;
+    return this.service;
   }
 
   public String getUserId() {
-    return userId;
+    return this.userId;
   }
 
   public Integer getVisitCount() {
-    return visitCount;
+    return this.visitCount;
   }
 
   public void setVisitCount(String aService, int count) {
-    service = aService;
-    visitCount = count;
+    this.service = aService;
+    this.visitCount = count;
+  }
+
+  @Override
+  public String toString() {
+    return "{userId:" + this.userId + ", service:" + this.service + ", visitCount:"
+        + this.visitCount + "}";
   }
 
   public UserConfigView UserConfigView() {
-    return userConfigView;
+    return this.userConfigView;
   }
 }

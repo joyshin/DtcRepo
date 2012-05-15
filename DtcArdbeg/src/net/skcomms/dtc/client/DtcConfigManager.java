@@ -8,7 +8,7 @@ public class DtcConfigManager {
   private static final DtcConfigManager INSTANCE = new DtcConfigManager();
 
   public static DtcConfigManager getInstance() {
-    return INSTANCE;
+    return DtcConfigManager.INSTANCE;
   }
 
   private UserConfig userConfig;
@@ -19,7 +19,7 @@ public class DtcConfigManager {
   public void setUsername(String userId) {
     if (userId == null || userId.isEmpty()) {
       System.out.println("Empty ID");
-      userConfig = UserConfig.EMPTY_CONFIG;
+      this.userConfig = UserConfig.EMPTY_CONFIG;
     } else {
       System.out.println("IDIDIDIDIDIDIDID");
       DtcUserConfigService.Util.getInstance().getUserConfig(userId,
@@ -27,13 +27,13 @@ public class DtcConfigManager {
             @Override
             public void onFailure(Throwable caught) {
               System.out.println(caught.toString());
-              userConfig = UserConfig.EMPTY_CONFIG;
+              DtcConfigManager.this.userConfig = UserConfig.EMPTY_CONFIG;
             }
 
             @Override
             public void onSuccess(UserConfig result) {
-              System.out.println("okokokokokokokokok");
-              userConfig = result;
+              System.out.println("UserConfig:" + result);
+              DtcConfigManager.this.userConfig = result;
             }
           });
     }

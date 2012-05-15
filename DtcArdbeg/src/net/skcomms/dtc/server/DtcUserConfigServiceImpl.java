@@ -14,6 +14,8 @@
  *******************************************************************************/
 package net.skcomms.dtc.server;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
@@ -35,26 +37,25 @@ public class DtcUserConfigServiceImpl extends RemoteServiceServlet implements Dt
 
   @Override
   public UserConfig getUserConfig(String userId) {
-    EntityManager em = emf.createEntityManager();
+    EntityManager em = this.emf.createEntityManager();
     Query query = em.createQuery("select x from UserConfig x where x.userId = :userId");
     query.setParameter("userId", userId);
-    return (UserConfig) query.getSingleResult();
-    // CriteriaBuilder cb = em.getCriteriaBuilder();
-    // CriteriaQuery<UserConfig> query = cb.createQuery(UserConfig.class);
-    // Root<UserConfig> root = query.from(UserConfig.class);
-    // Predicate condition = cb.equal(root.get(UserConfig_.userId), userId);
-    // query.where(condition);
-    // TypedQuery<UserConfig> q = em.createQuery(query);
-    // List<UserConfig> resultList = q.getResultList();
-    // System.out.println("UserConfigs:" + resultList.toString());
-    // return resultList.get(0);
+    List<UserConfig> results = query.getResultList();
+
+    if (results.isEmpty()) {
+      return new UserConfig(userId);
+    } else if (results.size() == 1) {
+      return results.get(0);
+    } else {
+      throw new IllegalStateException("Duplicate rows for username:" + userId);
+    }
   }
 
   @Override
   public void init(ServletConfig config) throws ServletException {
     System.out.println("init() called.");
     super.init(config);
-    WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext())
+    WebApplicationContextUtils.getRequiredWebApplicationContext(this.getServletContext())
         .getAutowireCapableBeanFactory().autowireBean(this);
   }
 
@@ -66,7 +67,7 @@ public class DtcUserConfigServiceImpl extends RemoteServiceServlet implements Dt
 
   @Override
   public void setUserConfig(String userId, UserConfig userConfig) {
-    EntityManager em = emf.createEntityManager();
+    EntityManager em = this.emf.createEntityManager();
     em.getTransaction().begin();
     em.persist(userConfig);
     em.getTransaction().commit();
