@@ -13,6 +13,16 @@ h1 {
 	font-size: 16pt;
 }
 
+#loading {
+	display: block;
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	background-color: #000;
+	filter:alpha(opacity=60);
+	opacity:0.6;
+}
+
 /** Most GWT widgets already have a style name defined */
 .gwt-DialogBox {
 	width: 600px;

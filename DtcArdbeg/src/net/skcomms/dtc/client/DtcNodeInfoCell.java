@@ -21,7 +21,7 @@ final class DtcNodeInfoCell extends AbstractCell<DtcNodeInfo> {
   private static final String CELL_IMAGE_STYLE_CLOSER = "</div>";
 
   private static final String CELL_BUTTON_ID = "dtc_favorite_btn";
-  private static final String CELL_BUTTON_IMAGE_SRC = "http://files.softicons.com/download/toolbar-icons/vista-arrow-icons-by-icons-land/png/24x24/UpDown1Yellow.png";
+  private static final String CELL_BUTTON_IMAGE_SRC = "UpDownArrow.png";
   private static final String CELL_BUTTON_STYLE_OPENER = "<div style=\"height:26px; float:right;  \">";
   private static final String CELL_BUTTON_STYLE_BODY = "<img id=\""
       + DtcNodeInfoCell.CELL_BUTTON_ID + "\" src=\""
