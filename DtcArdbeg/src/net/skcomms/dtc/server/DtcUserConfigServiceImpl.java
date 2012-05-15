@@ -14,15 +14,9 @@
  *******************************************************************************/
 package net.skcomms.dtc.server;
 
-import java.util.List;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.Query;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
@@ -42,16 +36,18 @@ public class DtcUserConfigServiceImpl extends RemoteServiceServlet implements Dt
   @Override
   public UserConfig getUserConfig(String userId) {
     EntityManager em = emf.createEntityManager();
-    CriteriaBuilder cb = em.getCriteriaBuilder();
-    CriteriaQuery<UserConfig> query = cb.createQuery(UserConfig.class);
-    Root<UserConfig> root = query.from(UserConfig.class);
-    Predicate condition = cb.equal(root.get(UserConfig_.userId), userId);
-    query.where(condition);
-    TypedQuery<UserConfig> q = em.createQuery(query);
-    List<UserConfig> resultList = q.getResultList();
-    System.out.println("UserConfigs:" + resultList.toString());
-
-    return resultList.get(0);
+    Query query = em.createQuery("select x from UserConfig x where x.userId = :userId");
+    query.setParameter("userId", userId);
+    return (UserConfig) query.getSingleResult();
+    // CriteriaBuilder cb = em.getCriteriaBuilder();
+    // CriteriaQuery<UserConfig> query = cb.createQuery(UserConfig.class);
+    // Root<UserConfig> root = query.from(UserConfig.class);
+    // Predicate condition = cb.equal(root.get(UserConfig_.userId), userId);
+    // query.where(condition);
+    // TypedQuery<UserConfig> q = em.createQuery(query);
+    // List<UserConfig> resultList = q.getResultList();
+    // System.out.println("UserConfigs:" + resultList.toString());
+    // return resultList.get(0);
   }
 
   @Override
