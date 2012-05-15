@@ -20,6 +20,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.types.ListGridEditEvent;
 import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.widgets.Button;
+import com.smartgwt.client.widgets.HTMLFlow;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.form.fields.ComboBoxItem;
@@ -91,27 +92,39 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
   private ListGridField valueField;
   private Button searchButton;
   private VLayout vLayoutLeftBottom;
-  private HLayout hLayout;
+  private HLayout hLayoutRight;
   private String currentPath;
+  final HTMLFlow htmlFlow = new HTMLFlow();
 
   private String createRequest()
   {
     StringBuffer requestData = new StringBuffer();
-    String testURL = "c" + ":" + this.currentPath;
-    String process = "process:1";
-    requestData.append(URL.encode(testURL));
-    requestData.append("\n");
-    requestData.append(URL.encode(process));
-    requestData.append("\n");
+    String testURL = "c" + "=" + this.currentPath;
+    String process = "process=1";
+    requestData.append(testURL);
+    requestData.append("&");
+    requestData.append(process);
+    requestData.append("&");
 
     for (ListGridRecord record : this.requestFormGrid.getRecords()) {
-      String request = record.getAttribute("name") + ":" + record.getAttribute("value");
-      requestData.append(URL.encode(request));
-      requestData.append("\n");
+
+      String request = "";
+      if (record.getAttribute("name").toLowerCase().equals("ip_select")) {
+        RegExp regExp = RegExp.compile("[0-9]+.[0-9]+.[0-9]+.[0-9]+");
+        MatchResult match = regExp.exec(record.getAttribute("value"));
+        request = record.getAttribute("name") + "=" + match.getGroup(0);
+      } else {
+        request = record.getAttribute("name") + "=" + record.getAttribute("value");
+      }
+
+      requestData.append(request);
+      requestData.append("&");
+      GWT.log("request: " + request);
     }
+    requestData.deleteCharAt(requestData.length() - 1);
     GWT.log("Request: " + requestData.toString());
 
-    return requestData.toString();
+    return URL.encode(requestData.toString());
   }
 
   private String createUrlParamter() {
@@ -209,8 +222,9 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
       @Override
       public void onClick(ClickEvent event) {
         // TODO Auto-generated method stub
-        String requestData = createRequest();
-        String targetURL = URL.encode(DtcArdbeg.getDtcProxyUrl() + "response_xml.html");
+        String requestData = DtcTestPageViewController.this.createRequest();
+        GWT.log("createRequest : " + requestData);
+        String targetURL = URL.encode(DtcArdbeg.getDtcProxyUrl() + "response.html");
 
         RequestBuilder request = new RequestBuilder(RequestBuilder.POST, targetURL);
 
@@ -232,11 +246,18 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
           @Override
           public void onResponseReceived(Request request, Response response) {
             // TODO Auto-generated method stub
-            GWT.log(response.getHeadersAsString());
             GWT.log(response.getText());
+            String rawUrl = response.getText();
+            RegExp regExp = RegExp.compile("src=\"([^\"]*)");
+            MatchResult match = regExp.exec(rawUrl);
+            String responseUrl = match.getGroup(0);
+            GWT.log("responseUrl: " + responseUrl);
+            DtcTestPageViewController.this.htmlFlow.setContentsURL(DtcArdbeg.getDtcProxyUrl()
+                + responseUrl.split("/")[1]);
+
+            // DtcTestPageViewController.this.htmlFlow.setContents(response.getText());
 
           }
-
         });
 
         try {
@@ -259,15 +280,22 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
     this.vLayoutLeft.addMember(this.searchButton);
     this.vLayoutLeft.addMember(this.vLayoutLeftBottom);
 
-    this.hLayout = new HLayout();
-    this.hLayout.setShowEdges(true);
-    this.hLayout.setHeight(150);
-    this.hLayout.setMembersMargin(5);
-    this.hLayout.setLayoutMargin(10);
-    this.hLayout.setBackgroundColor("yellow");
+    this.hLayoutRight = new HLayout();
+    this.hLayoutRight.setShowEdges(true);
+    this.hLayoutRight.setHeight(150);
+    this.hLayoutRight.setMembersMargin(5);
+    this.hLayoutRight.setLayoutMargin(10);
+    this.hLayoutRight.setBackgroundColor("yellow");
+
+    this.htmlFlow.setTop(40);
+    this.htmlFlow.setWidth100();
+    this.htmlFlow.setStyleName("response_panel");
+    this.htmlFlow.setContentsURL(URL.encode(DtcArdbeg.getDtcProxyUrl() + "response.html"));
+
+    this.hLayoutRight.addMember(this.htmlFlow);
 
     this.layout.addMember(this.vLayoutLeft);
-    this.layout.addMember(this.hLayout);
+    this.layout.addMember(this.hLayoutRight);
     this.layout.setLayoutMargin(10);
     this.layout.draw();
     this.layout.setVisible(true);

@@ -59,9 +59,14 @@
     conn.setDoOutput(true);
 
     DataOutputStream writer = new DataOutputStream(conn.getOutputStream());
-    writer.write(readAllBytes(request.getInputStream()));
+    byte[] tempData = readAllBytes(request.getInputStream());
+    writer.write(tempData);
     writer.flush();
     writer.close();
+    for(int i=0 ; i<tempData.length ; i++) {
+      if(tempData[i] == '\r')
+        System.out.println("find:::");  
+    }    
   }
 
   if (forwardedUrl.contains("/response_xml.html?")) {
