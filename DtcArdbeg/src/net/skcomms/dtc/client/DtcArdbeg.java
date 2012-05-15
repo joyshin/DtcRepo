@@ -229,8 +229,6 @@ public class DtcArdbeg implements EntryPoint {
 
   private final DtcNodeData dtcArdbegNodeData = DtcNodeData.getInstance();
 
-  Element loadingElement = null;
-
   private void addCssLinkIntoDtcFrame(Document doc) {
     LinkElement link = doc.createLinkElement();
     link.setType("text/css");
@@ -440,7 +438,7 @@ public class DtcArdbeg implements EntryPoint {
   }
 
   private void hideSplash() {
-    this.loadingElement.setAttribute("style", "display:none;");
+    RootPanel.get("loading").setVisible(false);
   }
 
   private void initializeDtcFrame() {
@@ -453,8 +451,6 @@ public class DtcArdbeg implements EntryPoint {
     this.displayHomePage();
 
     RootPanel.get("dtcContainer").add(this.dtcFrame);
-
-    this.loadingElement = RootPanel.get("loading").getElement();
 
     this.setDtcFramePath("/");
   }
@@ -563,6 +559,6 @@ public class DtcArdbeg implements EntryPoint {
   }
 
   private void showSplash() {
-    this.loadingElement.setAttribute("style", "display:block;");
+    RootPanel.get("loading").setVisible(true);
   }
 }
