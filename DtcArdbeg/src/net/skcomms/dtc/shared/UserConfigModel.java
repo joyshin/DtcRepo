@@ -29,11 +29,7 @@ public class UserConfigModel implements Serializable {
     }
   }
 
-  public static final UserConfigModel EMPTY_CONFIG;
-
-  static {
-    EMPTY_CONFIG = new UserConfigModel();
-  }
+  public static final UserConfigModel EMPTY_CONFIG = new UserConfigModel();
 
   @Id
   @GeneratedValue(generator = "increment")
@@ -63,6 +59,10 @@ public class UserConfigModel implements Serializable {
     return this.userId;
   }
 
+  public UserConfigView getView() {
+    return this.userConfigView;
+  }
+
   public Integer getVisitCount() {
     return this.visitCount;
   }
@@ -76,9 +76,5 @@ public class UserConfigModel implements Serializable {
   public String toString() {
     return "{userId:" + this.userId + ", service:" + this.service + ", visitCount:"
         + this.visitCount + "}";
-  }
-
-  public UserConfigView UserConfigView() {
-    return this.userConfigView;
   }
 }
