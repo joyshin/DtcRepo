@@ -10,7 +10,7 @@ import java.io.Serializable;
  * 
  */
 @SuppressWarnings("serial")
-public class DtcNodeInfo implements Serializable {
+public class DtcNodeMetaModel implements Serializable {
 
   private String description;
 

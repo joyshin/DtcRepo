@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.google.gwt.storage.client.Storage;
 
-public class LocalStorageWrapper implements ClientStorage {
+public class LocalStorageModel implements ClientStorageModel {
 
   public static boolean isSupported() {
     return Storage.isLocalStorageSupported();

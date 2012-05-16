@@ -2,7 +2,7 @@ package net.skcomms.dtc.client;
 
 import java.util.List;
 
-public interface ClientStorage {
+public interface ClientStorageModel {
 
   String getItem(String key);
 

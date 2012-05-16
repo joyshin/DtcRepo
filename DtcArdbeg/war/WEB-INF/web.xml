@@ -22,16 +22,6 @@
     </listener>
     
 	<!-- Servlets -->
-	<servlet>
-		<servlet-name>greetServlet</servlet-name>
-		<servlet-class>net.skcomms.dtc.server.GreetingServiceImpl</servlet-class>
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>greetServlet</servlet-name>
-		<url-pattern>/dtcardbeg/greet</url-pattern>
-	</servlet-mapping>
-
     <servlet>
         <servlet-name>dtcServiceServlet</servlet-name>
         <servlet-class>net.skcomms.dtc.server.DtcServiceImpl</servlet-class>

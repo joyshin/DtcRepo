@@ -6,7 +6,7 @@ package net.skcomms.dtc.shared;
 import java.io.Serializable;
 
 @SuppressWarnings("serial")
-public class DtcRequestParameter implements Serializable {
+public class DtcRequestParameterModel implements Serializable {
 
   private String key;
 
@@ -14,10 +14,10 @@ public class DtcRequestParameter implements Serializable {
 
   private String value;
 
-  public DtcRequestParameter() {
+  public DtcRequestParameterModel() {
   }
 
-  public DtcRequestParameter(String aKey, String aName, String aValue) {
+  public DtcRequestParameterModel(String aKey, String aName, String aValue) {
     this.key = aKey;
     this.name = aName;
     this.value = aValue;

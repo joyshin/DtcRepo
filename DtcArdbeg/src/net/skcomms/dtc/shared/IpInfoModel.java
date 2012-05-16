@@ -12,9 +12,9 @@ import java.util.List;
  * 
  */
 @SuppressWarnings("serial")
-public class IpInfo implements Serializable {
+public class IpInfoModel implements Serializable {
 
-  private List<DtcRequestParameter> options = new ArrayList<DtcRequestParameter>();
+  private List<DtcRequestParameterModel> options = new ArrayList<DtcRequestParameterModel>();
   private String ipText = "";
 
   /**
@@ -22,7 +22,7 @@ public class IpInfo implements Serializable {
    * @param text
    */
   public void addOption(String value, String text) {
-    this.options.add(new DtcRequestParameter(value, "", text));
+    this.options.add(new DtcRequestParameterModel(value, "", text));
   }
 
   public String getIpText() {

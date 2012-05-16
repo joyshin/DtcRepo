@@ -6,8 +6,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import net.skcomms.dtc.shared.DtcNodeInfo;
-import net.skcomms.dtc.shared.UserConfig;
+import net.skcomms.dtc.shared.DtcNodeMetaModel;
+import net.skcomms.dtc.shared.UserConfigModel;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -70,7 +70,7 @@ public class DtcArdbeg implements EntryPoint {
 
   private final static String DTC_PROXY_URL = DtcArdbeg.BASE_URL + "_dtcproxy_/";
 
-  private static DtcChrono dtcChrono = new DtcChrono();
+  private static DtcChronoView dtcChrono = new DtcChronoView();
 
   public native static void addDtcFormEventHandler(DtcArdbeg module, Document dtcDoc) /*-{
     var inputForm = dtcDoc.getElementsByTagName("frame")[0].contentWindow.document
@@ -206,7 +206,7 @@ public class DtcArdbeg implements EntryPoint {
     });
   }
 
-  private final RequestRecaller requestRecaller = new RequestRecaller();
+  private final LastRequestLoaderController requestRecaller = new LastRequestLoaderController();
 
   private final FlowPanel dtcNodePanel = new FlowPanel();
 
@@ -214,20 +214,20 @@ public class DtcArdbeg implements EntryPoint {
 
   private final Frame dtcFrame = new Frame();
 
-  private final DtcNavigationBar navigationBar = new DtcNavigationBar();
+  private final DtcNavigationBarView navigationBar = new DtcNavigationBarView();
 
   final DtcRequestFormAccessor dtcRequestFormAccessor = new DtcRequestFormAccessor();
 
-  private final DtcUrlCopyManager urlCopyManager = new DtcUrlCopyManager();
+  private final DtcUrlCopyController urlCopyManager = new DtcUrlCopyController();
 
-  private final DtcUsernameSubmissionManager usernameSubmissionManager = new DtcUsernameSubmissionManager();
+  private final DtcUserSignInView usernameSubmissionManager = new DtcUserSignInView();
 
-  private final IpHistoryManager ipHistoryManager = new IpHistoryManager(
+  private final IpHistoryController ipHistoryManager = new IpHistoryController(
       this.dtcRequestFormAccessor);
 
   private final List<DtcArdbegObserver> dtcArdbegObservers = new ArrayList<DtcArdbegObserver>();
 
-  private final DtcNodeData dtcArdbegNodeData = DtcNodeData.getInstance();
+  private final DtcNodeModel dtcArdbegNodeData = DtcNodeModel.getInstance();
 
   private void addCssLinkIntoDtcFrame(Document doc) {
     LinkElement link = doc.createLinkElement();
@@ -315,11 +315,11 @@ public class DtcArdbeg implements EntryPoint {
     return newTableBody;
   }
 
-  private List<Pair<Integer, Node>> createTableRows(List<DtcNodeInfo> nodeInfos) {
+  private List<Pair<Integer, Node>> createTableRows(List<DtcNodeMetaModel> nodeInfos) {
     Document doc = IFrameElement.as(this.dtcFrame.getElement()).getContentDocument();
     List<Pair<Integer, Node>> rows = new ArrayList<Pair<Integer, Node>>();
 
-    for (DtcNodeInfo nodeInfo : nodeInfos) {
+    for (DtcNodeMetaModel nodeInfo : nodeInfos) {
       TableRowElement row = doc.createTRElement();
       TableCellElement cell = doc.createTDElement();
       if (nodeInfo.isLeaf()) {
@@ -507,9 +507,9 @@ public class DtcArdbeg implements EntryPoint {
     this.urlCopyManager.initialize(this);
     this.usernameSubmissionManager.initialize();
     this.requestRecaller.initialize(this);
-    new DtcChrono().initialize(this);
+    new DtcChronoView().initialize(this);
 
-    UserConfig userConfig = new UserConfig("sccu");
+    UserConfigModel userConfig = new UserConfigModel("sccu");
     userConfig.setVisitCount("9porker", 9999);
   }
 

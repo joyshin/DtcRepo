@@ -15,7 +15,7 @@ import com.google.gwt.user.client.ui.RootPanel;
  * @author jujang@sk.com
  * 
  */
-public class DtcNavigationBar extends DefaultDtcArdbegObserver {
+public class DtcNavigationBarView extends DefaultDtcArdbegObserver {
 
   static String[] getNavigationNodes(String path) {
     int valueStartIndex = path.lastIndexOf("?");
@@ -34,7 +34,7 @@ public class DtcNavigationBar extends DefaultDtcArdbegObserver {
 
   private DtcArdbeg owner;
 
-  public DtcNavigationBar() {
+  public DtcNavigationBarView() {
   }
 
   private void addAnchor(String text, final String path) {
@@ -44,7 +44,7 @@ public class DtcNavigationBar extends DefaultDtcArdbegObserver {
       @Override
       public void onClick(ClickEvent event) {
         event.stopPropagation();
-        DtcNavigationBar.this.owner.setDtcFramePath(path);
+        DtcNavigationBarView.this.owner.setDtcFramePath(path);
       }
     });
 
@@ -59,7 +59,7 @@ public class DtcNavigationBar extends DefaultDtcArdbegObserver {
   public void addPath(String url) {
     this.naviPanel.clear();
 
-    String[] nodes = DtcNavigationBar.getNavigationNodes(url);
+    String[] nodes = DtcNavigationBarView.getNavigationNodes(url);
 
     String nodeHistory = this.rootPath;
     for (int i = 0; i < nodes.length - 1; i++) {
@@ -67,7 +67,7 @@ public class DtcNavigationBar extends DefaultDtcArdbegObserver {
         nodeHistory = nodeHistory + nodes[i] + "/";
       }
       this.addAnchor(nodes[i], nodeHistory);
-      this.addLabel(DtcNavigationBar.NAVIGATION_DELIMITER);
+      this.addLabel(DtcNavigationBarView.NAVIGATION_DELIMITER);
     }
     this.addLabel(nodes[nodes.length - 1]);
   }

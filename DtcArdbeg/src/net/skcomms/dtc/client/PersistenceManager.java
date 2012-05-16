@@ -17,15 +17,15 @@ public class PersistenceManager {
     return PersistenceManager.INSTANCE;
   }
 
-  private final ClientStorage clientStorage;
+  private final ClientStorageModel clientStorage;
 
   private PersistenceManager() {
-    if (LocalStorageWrapper.isSupported()) {
+    if (LocalStorageModel.isSupported()) {
       System.out.println("use Local Storage");
-      this.clientStorage = new LocalStorageWrapper();
+      this.clientStorage = new LocalStorageModel();
     }
     else {
-      this.clientStorage = new CookieWrapper();
+      this.clientStorage = new CookieStorageModel();
     }
   }
 

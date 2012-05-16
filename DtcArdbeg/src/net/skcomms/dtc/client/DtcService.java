@@ -16,8 +16,8 @@ package net.skcomms.dtc.client;
 
 import java.util.List;
 
-import net.skcomms.dtc.shared.DtcNodeInfo;
-import net.skcomms.dtc.shared.DtcRequestInfo;
+import net.skcomms.dtc.shared.DtcNodeMetaModel;
+import net.skcomms.dtc.shared.DtcRequestInfoModel;
 import net.skcomms.dtc.shared.DtcServiceVerifier;
 
 import com.google.gwt.core.client.GWT;
@@ -51,8 +51,8 @@ public interface DtcService extends RemoteService {
    * @throws IllegalArgumentException
    *           디렉토리 경로가 유효하지 않은 경우.
    */
-  List<DtcNodeInfo> getDir(String path) throws IllegalArgumentException;
+  List<DtcNodeMetaModel> getDir(String path) throws IllegalArgumentException;
 
-  DtcRequestInfo getDtcRequestPageInfo(String path);
+  DtcRequestInfoModel getDtcRequestPageInfo(String path);
 
 }

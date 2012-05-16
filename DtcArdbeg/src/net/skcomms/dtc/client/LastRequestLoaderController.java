@@ -11,7 +11,7 @@ import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.dom.client.NodeCollection;
 import com.google.gwt.dom.client.SelectElement;
 
-public class RequestRecaller extends DefaultDtcArdbegObserver {
+public class LastRequestLoaderController extends DefaultDtcArdbegObserver {
 
   private static final String EMPTY_STRING = "";
 
@@ -27,7 +27,7 @@ public class RequestRecaller extends DefaultDtcArdbegObserver {
         return nodeCollection.getItem(i).getAttribute("value");
       }
     }
-    return RequestRecaller.EMPTY_STRING;
+    return LastRequestLoaderController.EMPTY_STRING;
   }
 
   private static Map<String, String> getLastParameters(String key) {
@@ -39,13 +39,13 @@ public class RequestRecaller extends DefaultDtcArdbegObserver {
       return map;
     }
 
-    String[] formFields = data.split(Character.toString(RequestRecaller.FORM_FIELD_DELIMETER));
+    String[] formFields = data.split(Character.toString(LastRequestLoaderController.FORM_FIELD_DELIMETER));
     if (formFields == null) {
       return map;
     }
 
     for (String element : formFields) {
-      String[] pair = element.split(Character.toString(RequestRecaller.FORM_VALUE_DELIMETER));
+      String[] pair = element.split(Character.toString(LastRequestLoaderController.FORM_VALUE_DELIMETER));
       if (pair.length == 2) {
         // GWT.log("Name :" + pair[0] + " Value :" + pair[1]);
         map.put(pair[0], pair[1]);
@@ -89,8 +89,8 @@ public class RequestRecaller extends DefaultDtcArdbegObserver {
       return;
     }
 
-    String key = RequestRecaller.findKey(nodeCollection);
-    Map<String, String> params = RequestRecaller.getLastParameters(key);
+    String key = LastRequestLoaderController.findKey(nodeCollection);
+    Map<String, String> params = LastRequestLoaderController.getLastParameters(key);
     for (int i = 0; i < nodeCollection.getLength(); i++) {
       String name = nodeCollection.getItem(i).getAttribute("name");
       String value = params.get(name);
@@ -128,7 +128,7 @@ public class RequestRecaller extends DefaultDtcArdbegObserver {
       return;
     }
 
-    String key = RequestRecaller.EMPTY_STRING;
+    String key = LastRequestLoaderController.EMPTY_STRING;
     StringBuilder data = new StringBuilder();
     for (int i = 0; i < nodeCollection.getLength(); i++) {
       String name = nodeCollection.getItem(i).getAttribute("name");
@@ -146,9 +146,9 @@ public class RequestRecaller extends DefaultDtcArdbegObserver {
           continue;
         }
         data.append(name);
-        data.append(RequestRecaller.FORM_VALUE_DELIMETER);
+        data.append(LastRequestLoaderController.FORM_VALUE_DELIMETER);
         data.append(value);
-        data.append(RequestRecaller.FORM_FIELD_DELIMETER);
+        data.append(LastRequestLoaderController.FORM_FIELD_DELIMETER);
       }
     }
 

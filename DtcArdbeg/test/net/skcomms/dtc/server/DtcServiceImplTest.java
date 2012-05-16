@@ -15,8 +15,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import net.skcomms.dtc.shared.DtcNodeInfo;
-import net.skcomms.dtc.shared.DtcRequestInfo;
+import net.skcomms.dtc.shared.DtcNodeMetaModel;
+import net.skcomms.dtc.shared.DtcRequestInfoModel;
 import net.skcomms.dtc.shared.DtcServiceVerifier;
 
 import org.junit.Assert;
@@ -34,8 +34,8 @@ public class DtcServiceImplTest {
   @Test
   public void testExtractItemsFrom() throws IOException, ParseException {
     byte[] contents = DtcServiceImpl.getHtmlContents("http://dtc.skcomms.net/");
-    List<DtcNodeInfo> items = DtcServiceImpl.createDtcNodeInfosFrom(contents);
-    for (DtcNodeInfo item : items) {
+    List<DtcNodeMetaModel> items = DtcServiceImpl.createDtcNodeInfosFrom(contents);
+    for (DtcNodeMetaModel item : items) {
       Assert.assertNotNull(item.getName());
       Assert.assertNotNull(item.getDescription());
       Assert.assertNotNull(item.getUpdateTime());
@@ -62,7 +62,7 @@ public class DtcServiceImplTest {
     contents = DtcServiceImpl.getHtmlContents("http://dtc.skcomms.net/?b=kshop2s/");
     items = DtcServiceImpl.createDtcNodeInfosFrom(contents);
 
-    for (DtcNodeInfo item : items) {
+    for (DtcNodeMetaModel item : items) {
       Assert.assertNotNull(item.getName());
       Assert.assertNotNull(item.getDescription());
       Assert.assertNotNull(item.getUpdateTime());
@@ -93,7 +93,7 @@ public class DtcServiceImplTest {
     URL url = new URL(href);
     URLConnection conn = url.openConnection();
     byte[] contents = DtcServiceImpl.readAllBytes(conn.getInputStream());
-    DtcRequestInfo requestInfo = DtcServiceImpl.createDtcRequestInfoFrom(contents);
+    DtcRequestInfoModel requestInfo = DtcServiceImpl.createDtcRequestInfoFrom(contents);
     System.out.println(requestInfo.getParams().toString());
     System.out.println(requestInfo.getIpInfo());
 

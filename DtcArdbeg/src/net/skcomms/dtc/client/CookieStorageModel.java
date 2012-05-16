@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.google.gwt.user.client.Cookies;
 
-public class CookieWrapper implements ClientStorage {
+public class CookieStorageModel implements ClientStorageModel {
 
   @Override
   public String getItem(String key) {

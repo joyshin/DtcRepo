@@ -11,31 +11,31 @@ import java.util.List;
  * 
  */
 @SuppressWarnings("serial")
-public class DtcRequestInfo implements Serializable {
+public class DtcRequestInfoModel implements Serializable {
 
-  private List<DtcRequestParameter> params;
+  private List<DtcRequestParameterModel> params;
 
-  private IpInfo ipInfo;
+  private IpInfoModel ipInfo;
 
   /**
    * @return
    */
-  public IpInfo getIpInfo() {
+  public IpInfoModel getIpInfo() {
     return this.ipInfo;
   }
 
-  public List<DtcRequestParameter> getParams() {
+  public List<DtcRequestParameterModel> getParams() {
     return this.params;
   }
 
   /**
    * @param ipInfo
    */
-  public void setIpInfo(IpInfo ipInfo) {
+  public void setIpInfo(IpInfoModel ipInfo) {
     this.ipInfo = ipInfo;
   }
 
-  public void setParams(List<DtcRequestParameter> params) {
+  public void setParams(List<DtcRequestParameterModel> params) {
     this.params = params;
   }
 

@@ -4,7 +4,7 @@ import java.util.Date;
 
 import com.google.gwt.i18n.client.NumberFormat;
 
-public class IpOption {
+public class IpOptionModel {
 
   enum Origin {
     DTC, COOKIE;
@@ -18,7 +18,7 @@ public class IpOption {
 
   private Origin origin;
 
-  public IpOption(String anIp, String aText, Origin anOrigin) {
+  public IpOptionModel(String anIp, String aText, Origin anOrigin) {
     this.ip = anIp;
     text = aText;
     origin = anOrigin;
@@ -30,11 +30,11 @@ public class IpOption {
       return true;
     }
 
-    if (!(other instanceof IpOption)) {
+    if (!(other instanceof IpOptionModel)) {
       return false;
     }
 
-    IpOption o = (IpOption) other;
+    IpOptionModel o = (IpOptionModel) other;
     return this.ip.equals(o.getIp());
   }
 

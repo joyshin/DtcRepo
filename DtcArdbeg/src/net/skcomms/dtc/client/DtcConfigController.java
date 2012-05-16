@@ -3,21 +3,22 @@ package net.skcomms.dtc.client;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.skcomms.dtc.shared.UserConfig;
+import net.skcomms.dtc.shared.UserConfigModel;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
-public class DtcConfigManager {
-  private static final DtcConfigManager INSTANCE = new DtcConfigManager();
+public class DtcConfigController {
+  private static final DtcConfigController INSTANCE = new DtcConfigController();
 
-  public static DtcConfigManager getInstance() {
-    return DtcConfigManager.INSTANCE;
+  public static DtcConfigController getInstance() {
+    return DtcConfigController.INSTANCE;
   }
 
-  private UserConfig userConfig;
+  private UserConfigModel userConfig;
+  
   private final List<DtcUserConfigObserver> observers = new ArrayList<DtcUserConfigObserver>();
 
-  private DtcConfigManager() {
+  private DtcConfigController() {
   }
 
   public void addUserConfigObserver(DtcUserConfigObserver observer) {
@@ -37,20 +38,20 @@ public class DtcConfigManager {
   public void setUsername(String userId) {
     if (userId == null || userId.isEmpty()) {
       System.out.println("Empty ID");
-      userConfig = UserConfig.EMPTY_CONFIG;
+      userConfig = UserConfigModel.EMPTY_CONFIG;
     } else {
       System.out.println("IDIDIDIDIDIDIDID");
       DtcUserConfigService.Util.getInstance().getUserConfig(userId,
-          new AsyncCallback<UserConfig>() {
+          new AsyncCallback<UserConfigModel>() {
             @Override
             public void onFailure(Throwable caught) {
               System.out.println(caught.toString());
-              userConfig = UserConfig.EMPTY_CONFIG;
+              userConfig = UserConfigModel.EMPTY_CONFIG;
               notifyObservers();
             }
 
             @Override
-            public void onSuccess(UserConfig result) {
+            public void onSuccess(UserConfigModel result) {
               System.out.println("UserConfig:" + result);
               userConfig = result;
               notifyObservers();
@@ -58,4 +59,6 @@ public class DtcConfigManager {
           });
     }
   }
+  
+
 }

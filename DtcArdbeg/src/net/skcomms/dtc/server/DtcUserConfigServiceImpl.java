@@ -23,7 +23,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
 import net.skcomms.dtc.client.DtcUserConfigService;
-import net.skcomms.dtc.shared.UserConfig;
+import net.skcomms.dtc.shared.UserConfigModel;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -36,14 +36,14 @@ public class DtcUserConfigServiceImpl extends RemoteServiceServlet implements Dt
   private EntityManagerFactory emf;
 
   @Override
-  public UserConfig getUserConfig(String userId) {
+  public UserConfigModel getUserConfig(String userId) {
     EntityManager em = this.emf.createEntityManager();
     Query query = em.createQuery("select x from UserConfig x where x.userId = :userId");
     query.setParameter("userId", userId);
-    List<UserConfig> results = query.getResultList();
+    List<UserConfigModel> results = query.getResultList();
 
     if (results.isEmpty()) {
-      return new UserConfig(userId);
+      return new UserConfigModel(userId);
     } else if (results.size() == 1) {
       return results.get(0);
     } else {
@@ -66,7 +66,7 @@ public class DtcUserConfigServiceImpl extends RemoteServiceServlet implements Dt
   }
 
   @Override
-  public void setUserConfig(String userId, UserConfig userConfig) {
+  public void setUserConfig(String userId, UserConfigModel userConfig) {
     EntityManager em = this.emf.createEntityManager();
     em.getTransaction().begin();
     em.persist(userConfig);

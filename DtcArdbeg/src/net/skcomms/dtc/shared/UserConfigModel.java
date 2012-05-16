@@ -13,26 +13,26 @@ import org.hibernate.annotations.GenericGenerator;
 @SuppressWarnings("serial")
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = "userId") })
-public class UserConfig implements Serializable {
+public class UserConfigModel implements Serializable {
 
   public class UserConfigView {
     public String getService() {
-      return UserConfig.this.getService();
+      return UserConfigModel.this.getService();
     }
 
     public String getUserId() {
-      return UserConfig.this.getUserId();
+      return UserConfigModel.this.getUserId();
     }
 
     public int getVisitCount() {
-      return UserConfig.this.getVisitCount();
+      return UserConfigModel.this.getVisitCount();
     }
   }
 
-  public static final UserConfig EMPTY_CONFIG;
+  public static final UserConfigModel EMPTY_CONFIG;
 
   static {
-    EMPTY_CONFIG = new UserConfig();
+    EMPTY_CONFIG = new UserConfigModel();
   }
 
   @Id
@@ -48,10 +48,10 @@ public class UserConfig implements Serializable {
 
   private final transient UserConfigView userConfigView = new UserConfigView();
 
-  public UserConfig() {
+  public UserConfigModel() {
   }
 
-  public UserConfig(String anUserId) {
+  public UserConfigModel(String anUserId) {
     this.userId = anUserId;
   }
 

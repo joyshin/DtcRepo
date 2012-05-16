@@ -14,7 +14,7 @@
  *******************************************************************************/
 package net.skcomms.dtc.client;
 
-import net.skcomms.dtc.shared.UserConfig;
+import net.skcomms.dtc.shared.UserConfigModel;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -36,7 +36,7 @@ public interface DtcUserConfigService extends RemoteService {
     }
   }
 
-  UserConfig getUserConfig(String userId);
+  UserConfigModel getUserConfig(String userId);
 
-  void setUserConfig(String userId, UserConfig userConfig);
+  void setUserConfig(String userId, UserConfigModel userConfig);
 }

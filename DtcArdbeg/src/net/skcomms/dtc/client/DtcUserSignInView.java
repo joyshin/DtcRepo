@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-public class DtcUsernameSubmissionManager {
+public class DtcUserSignInView {
   public void initialize() {
     Button loginButton = new Button("login");
     RootPanel.get("loginContainer").add(loginButton);
@@ -50,7 +50,7 @@ public class DtcUsernameSubmissionManager {
               loginDialog.hide();
               RootPanel.get("usernameContainer").clear();
               RootPanel.get("usernameContainer").add(new HTML(usernameText.getValue()));
-              DtcConfigManager.getInstance().setUsername(usernameText.getValue());
+              DtcConfigController.getInstance().setUsername(usernameText.getValue());
             }
           }
         });
@@ -62,7 +62,7 @@ public class DtcUsernameSubmissionManager {
             loginDialog.hide();
             RootPanel.get("usernameContainer").clear();
             RootPanel.get("usernameContainer").add(new HTML(usernameText.getValue()));
-            DtcConfigManager.getInstance().setUsername(usernameText.getValue());
+            DtcConfigController.getInstance().setUsername(usernameText.getValue());
           }
         });
 

@@ -11,7 +11,7 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.user.client.ui.RootPanel;
 
-public class DtcChrono extends DefaultDtcArdbegObserver {
+public class DtcChronoView extends DefaultDtcArdbegObserver {
 
   private static class ChronoAnimation extends Animation {
 
@@ -69,7 +69,7 @@ public class DtcChrono extends DefaultDtcArdbegObserver {
     }
   }
 
-  public native static void addDtcSearchButtonEventHandler(DtcChrono chrono, Document dtcDoc) /*-{
+  public native static void addDtcSearchButtonEventHandler(DtcChronoView chrono, Document dtcDoc) /*-{
     var searchButton = dtcDoc.getElementsByTagName("frame")[0].contentWindow.document
         .getElementById("div_search");
     searchButton.onclick = function() {

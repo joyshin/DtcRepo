@@ -13,7 +13,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-public class DtcUrlCopyManager {
+public class DtcUrlCopyController {
 
   private DtcArdbeg module;
 
@@ -51,7 +51,7 @@ public class DtcUrlCopyManager {
     closeButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        DtcUrlCopyManager.this.dialogBox.hide();
+        DtcUrlCopyController.this.dialogBox.hide();
       }
     });
   }
@@ -69,12 +69,12 @@ public class DtcUrlCopyManager {
           sb.append(Window.Location.getHref().substring(0, Window.Location.getHref().indexOf('?')));
         }
 
-        if (DtcUrlCopyManager.this.module.getDtcFrameSrc().indexOf('?') != -1) {
-          sb.append(DtcUrlCopyManager.this.module.getDtcFrameSrc().substring(
-              DtcUrlCopyManager.this.module.getDtcFrameSrc().indexOf('?')));
+        if (DtcUrlCopyController.this.module.getDtcFrameSrc().indexOf('?') != -1) {
+          sb.append(DtcUrlCopyController.this.module.getDtcFrameSrc().substring(
+              DtcUrlCopyController.this.module.getDtcFrameSrc().indexOf('?')));
         }
 
-        Map<String, String> params = DtcUrlCopyManager.this.module.getDtcRequestParameters();
+        Map<String, String> params = DtcUrlCopyController.this.module.getDtcRequestParameters();
         for (Entry<String, String> entry : params.entrySet()) {
           sb.append('&');
           sb.append(entry.getKey());
@@ -82,9 +82,9 @@ public class DtcUrlCopyManager {
           sb.append(entry.getValue());
         }
 
-        DtcUrlCopyManager.this.textUrl.setText(URL.encode(sb.toString()));
-        DtcUrlCopyManager.this.dialogBox.center();
-        DtcUrlCopyManager.this.textUrl.selectAll();
+        DtcUrlCopyController.this.textUrl.setText(URL.encode(sb.toString()));
+        DtcUrlCopyController.this.dialogBox.center();
+        DtcUrlCopyController.this.textUrl.selectAll();
       }
     });
   }
