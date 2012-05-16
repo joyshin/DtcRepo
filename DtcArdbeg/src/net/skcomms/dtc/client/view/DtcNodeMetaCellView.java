@@ -1,5 +1,6 @@
-package net.skcomms.dtc.client;
+package net.skcomms.dtc.client.view;
 
+import net.skcomms.dtc.client.model.DtcNodeModel;
 import net.skcomms.dtc.shared.DtcNodeMetaModel;
 
 import com.google.gwt.cell.client.AbstractCell;
@@ -11,7 +12,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Image;
 
-final class DtcNodeMetaCellView extends AbstractCell<DtcNodeMetaModel> {
+public final class DtcNodeMetaCellView extends AbstractCell<DtcNodeMetaModel> {
   private static final DtcNodeMetaCellView instance = new DtcNodeMetaCellView();
   private static final String CELL_STYLE_OPENER = "<div style=\"position: relative; width:280px; height:74px; border: 1px solid; border-radius: 15px; float: left; \">";
   private static final String CELL_STYLE_CLOSER = "</div>";

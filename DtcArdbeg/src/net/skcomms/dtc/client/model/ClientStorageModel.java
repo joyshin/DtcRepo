@@ -1,4 +1,4 @@
-package net.skcomms.dtc.client;
+package net.skcomms.dtc.client.model;
 
 import java.util.List;
 

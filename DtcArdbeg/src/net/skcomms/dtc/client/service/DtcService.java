@@ -12,31 +12,47 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package net.skcomms.dtc.client;
+package net.skcomms.dtc.client.service;
 
-import net.skcomms.dtc.shared.UserConfigModel;
+import java.util.List;
+
+import net.skcomms.dtc.shared.DtcNodeMetaModel;
+import net.skcomms.dtc.shared.DtcRequestInfoModel;
+import net.skcomms.dtc.shared.DtcServiceVerifier;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
-@RemoteServiceRelativePath("dtcuserconfigservice")
-public interface DtcUserConfigService extends RemoteService {
+@RemoteServiceRelativePath("dtcservice")
+public interface DtcService extends RemoteService {
+
   /**
    * Utility class for simplifying access to the instance of async service.
    */
   public static class Util {
-    private static DtcUserConfigServiceAsync instance;
+    private static DtcServiceAsync instance;
 
-    public static DtcUserConfigServiceAsync getInstance() {
-      if (instance == null) {
-        instance = GWT.create(DtcUserConfigService.class);
+    public static DtcServiceAsync getInstance() {
+      if (Util.instance == null) {
+        Util.instance = GWT.create(DtcService.class);
       }
-      return instance;
+      return Util.instance;
     }
   }
 
-  UserConfigModel getUserConfig(String userId);
+  /**
+   * 디렉토리 리스트를 가져온다.
+   * 
+   * @param path
+   *          디렉토리 경로. 경로의 유효성은
+   *          {@link DtcServiceVerifier#isValidDirectoryPath(String)}을 참고.
+   * @return 디렉토리 아이템 리스트.
+   * @throws IllegalArgumentException
+   *           디렉토리 경로가 유효하지 않은 경우.
+   */
+  List<DtcNodeMetaModel> getDir(String path) throws IllegalArgumentException;
 
-  void setUserConfig(String userId, UserConfigModel userConfig);
+  DtcRequestInfoModel getDtcRequestPageInfo(String path);
+
 }

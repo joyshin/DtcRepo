@@ -1,7 +1,10 @@
 /**
  * 
  */
-package net.skcomms.dtc.client;
+package net.skcomms.dtc.client.view;
+
+import net.skcomms.dtc.client.DefaultDtcArdbegObserver;
+import net.skcomms.dtc.client.DtcArdbeg;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.dom.client.ClickEvent;

@@ -1,8 +1,10 @@
-package net.skcomms.dtc.client;
+package net.skcomms.dtc.client.controller;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import net.skcomms.dtc.client.DtcUserConfigObserver;
+import net.skcomms.dtc.client.service.DtcUserConfigService;
 import net.skcomms.dtc.shared.UserConfigModel;
 import net.skcomms.dtc.shared.UserConfigModel.UserConfigView;
 

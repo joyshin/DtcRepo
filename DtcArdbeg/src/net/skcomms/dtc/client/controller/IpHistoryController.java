@@ -1,10 +1,15 @@
-package net.skcomms.dtc.client;
+package net.skcomms.dtc.client.controller;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import net.skcomms.dtc.client.IpOptionModel.Origin;
+import net.skcomms.dtc.client.DefaultDtcArdbegObserver;
+import net.skcomms.dtc.client.DtcArdbeg;
+import net.skcomms.dtc.client.DtcRequestFormAccessor;
+import net.skcomms.dtc.client.PersistenceManager;
+import net.skcomms.dtc.client.model.IpOptionModel;
+import net.skcomms.dtc.client.model.IpOptionModel.Origin;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
@@ -23,7 +28,7 @@ public class IpHistoryController extends DefaultDtcArdbegObserver {
         .getElementById("ip_select");
     if (select != null) {
       select.onclick = function() {
-        ipHistoryManager.@net.skcomms.dtc.client.IpHistoryController::redrawIpOptions(Lcom/google/gwt/dom/client/Document;)(dtcFrameDoc);
+        ipHistoryManager.@net.skcomms.dtc.client.controller.IpHistoryController::redrawIpOptions(Lcom/google/gwt/dom/client/Document;)(dtcFrameDoc);
       }
     }
   }-*/;

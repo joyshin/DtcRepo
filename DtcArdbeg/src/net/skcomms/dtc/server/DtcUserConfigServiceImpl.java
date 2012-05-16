@@ -22,7 +22,7 @@ import javax.persistence.Query;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
-import net.skcomms.dtc.client.DtcUserConfigService;
+import net.skcomms.dtc.client.service.DtcUserConfigService;
 import net.skcomms.dtc.shared.UserConfigModel;
 
 import org.springframework.beans.factory.annotation.Autowired;

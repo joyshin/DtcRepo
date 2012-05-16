@@ -1,6 +1,9 @@
-package net.skcomms.dtc.client;
+package net.skcomms.dtc.client.view;
 
 import java.util.Date;
+
+import net.skcomms.dtc.client.DefaultDtcArdbegObserver;
+import net.skcomms.dtc.client.DtcArdbeg;
 
 import com.google.gwt.animation.client.Animation;
 import com.google.gwt.dom.client.DivElement;

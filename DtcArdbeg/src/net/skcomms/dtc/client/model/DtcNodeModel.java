@@ -1,11 +1,15 @@
-package net.skcomms.dtc.client;
+package net.skcomms.dtc.client.model;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import net.skcomms.dtc.client.DtcArdbeg;
+import net.skcomms.dtc.client.PersistenceManager;
 import net.skcomms.dtc.client.DtcArdbeg.Pair;
+import net.skcomms.dtc.client.service.DtcService;
+import net.skcomms.dtc.client.view.DtcNodeMetaCellView;
 import net.skcomms.dtc.shared.DtcNodeMetaModel;
 
 import com.google.gwt.core.client.GWT;

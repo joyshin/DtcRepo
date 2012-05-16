@@ -1,7 +1,9 @@
-package net.skcomms.dtc.client;
+package net.skcomms.dtc.client.controller;
 
 import java.util.Map;
 import java.util.Map.Entry;
+
+import net.skcomms.dtc.client.DtcArdbeg;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;

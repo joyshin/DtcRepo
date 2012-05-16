@@ -1,4 +1,4 @@
-package net.skcomms.dtc.client;
+package net.skcomms.dtc.client.model;
 
 import java.util.Date;
 
@@ -6,7 +6,7 @@ import com.google.gwt.i18n.client.NumberFormat;
 
 public class IpOptionModel {
 
-  enum Origin {
+  public enum Origin {
     DTC, COOKIE;
   }
 
@@ -20,8 +20,8 @@ public class IpOptionModel {
 
   public IpOptionModel(String anIp, String aText, Origin anOrigin) {
     this.ip = anIp;
-    text = aText;
-    origin = anOrigin;
+    this.text = aText;
+    this.origin = anOrigin;
   }
 
   @Override
@@ -39,36 +39,37 @@ public class IpOptionModel {
   }
 
   public String getDecoratedText() {
-    String timeDesc = getTimeDescription();
-    if (timeDesc.equals(""))
+    String timeDesc = this.getTimeDescription();
+    if (timeDesc.equals("")) {
       return timeDesc;
-    else
+    } else {
       return " : " + timeDesc;
+    }
   }
 
   public String getIp() {
-    return ip;
+    return this.ip;
   }
 
   public Date getLastSuccessTime() {
-    return lastSuccessTime;
+    return this.lastSuccessTime;
   }
 
   public Origin getOrigin() {
-    return origin;
+    return this.origin;
   }
 
   public String getText() {
-    return text;
+    return this.text;
   }
 
   private String getTimeDescription() {
-    if (lastSuccessTime == null) {
+    if (this.lastSuccessTime == null) {
       return "";
     }
 
     long now = new Date().getTime();
-    long lastTime = lastSuccessTime.getTime();
+    long lastTime = this.lastSuccessTime.getTime();
     double elapsed = (now - lastTime) / 1000;
 
     NumberFormat format = NumberFormat.getFormat("#");
@@ -101,7 +102,7 @@ public class IpOptionModel {
 
   @Override
   public int hashCode() {
-    return ip.hashCode();
+    return this.ip.hashCode();
   }
 
   public void setLastSuccessTime(Date lastSuccessTime) {

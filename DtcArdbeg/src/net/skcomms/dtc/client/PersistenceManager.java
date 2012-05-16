@@ -5,6 +5,10 @@ package net.skcomms.dtc.client;
 
 import java.util.List;
 
+import net.skcomms.dtc.client.model.ClientStorageModel;
+import net.skcomms.dtc.client.model.CookieStorageModel;
+import net.skcomms.dtc.client.model.LocalStorageModel;
+
 /**
  * @author jujang@sk.com
  * 

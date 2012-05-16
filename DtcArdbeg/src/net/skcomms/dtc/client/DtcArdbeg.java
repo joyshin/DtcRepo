@@ -6,6 +6,13 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
+import net.skcomms.dtc.client.controller.DtcUrlCopyController;
+import net.skcomms.dtc.client.controller.IpHistoryController;
+import net.skcomms.dtc.client.controller.LastRequestLoaderController;
+import net.skcomms.dtc.client.model.DtcNodeModel;
+import net.skcomms.dtc.client.view.DtcChronoView;
+import net.skcomms.dtc.client.view.DtcNavigationBarView;
+import net.skcomms.dtc.client.view.DtcUserSignInView;
 import net.skcomms.dtc.shared.DtcNodeMetaModel;
 import net.skcomms.dtc.shared.UserConfigModel;
 
@@ -237,7 +244,7 @@ public class DtcArdbeg implements EntryPoint {
     doc.getBody().appendChild(link);
   }
 
-  void addDtcArdbegObserver(DtcArdbegObserver observer) {
+  public void addDtcArdbegObserver(DtcArdbegObserver observer) {
     this.dtcArdbegObservers.add(observer);
   }
 
@@ -380,7 +387,7 @@ public class DtcArdbeg implements EntryPoint {
     RootPanel.get("dtcContainer").setVisible(true);
   }
 
-  void fireDtcHomePageLoaded() {
+  public void fireDtcHomePageLoaded() {
     for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
       observer.onDtcHomeLoaded();
     }
@@ -389,7 +396,7 @@ public class DtcArdbeg implements EntryPoint {
     this.displayHomePage();
   }
 
-  void fireDtcServiceDirectoryPageLoaded(String path) {
+  public void fireDtcServiceDirectoryPageLoaded(String path) {
     for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
       observer.onDtcDirectoryLoaded(path);
     }
@@ -404,7 +411,7 @@ public class DtcArdbeg implements EntryPoint {
     }
   }
 
-  Document getDtcFrameDoc() {
+  public Document getDtcFrameDoc() {
     return IFrameElement.as(DtcArdbeg.this.dtcFrame.getElement()).getContentDocument();
   }
 

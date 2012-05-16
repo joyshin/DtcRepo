@@ -1,7 +1,12 @@
-package net.skcomms.dtc.client;
+package net.skcomms.dtc.client.controller;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import net.skcomms.dtc.client.DefaultDtcArdbegObserver;
+import net.skcomms.dtc.client.DomExplorerHelper;
+import net.skcomms.dtc.client.DtcArdbeg;
+import net.skcomms.dtc.client.PersistenceManager;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.skcomms.dtc.client;
+package net.skcomms.dtc.client.service;
 
 import java.util.List;
 
