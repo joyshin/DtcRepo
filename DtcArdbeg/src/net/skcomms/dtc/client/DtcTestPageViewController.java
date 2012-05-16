@@ -17,10 +17,11 @@ import com.google.gwt.http.client.URL;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.smartgwt.client.types.ContentsType;
 import com.smartgwt.client.types.ListGridEditEvent;
 import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.widgets.Button;
-import com.smartgwt.client.widgets.HTMLFlow;
+import com.smartgwt.client.widgets.HTMLPane;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.form.fields.ComboBoxItem;
@@ -94,7 +95,7 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
   private VLayout vLayoutLeftBottom;
   private HLayout hLayoutRight;
   private String currentPath;
-  final HTMLFlow htmlFlow = new HTMLFlow();
+  final HTMLPane htmlPane = new HTMLPane();
 
   private String createRequest()
   {
@@ -177,13 +178,16 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
 
     this.layout = new HLayout();
     this.layout.setWidth100();
-    this.layout.setHeight100();
+    // this.layout.setWidth(1000);
+    this.layout.setHeight(800);
+    // this.layout.setHeight100();
     this.layout.setMembersMargin(20);
     this.layout.setBackgroundColor("gray");
 
     this.vLayoutLeft = new VLayout();
     this.vLayoutLeft.setShowEdges(true);
     this.vLayoutLeft.setWidth(400);
+    this.vLayoutLeft.setHeight100();
     this.vLayoutLeft.setMembersMargin(5);
     this.vLayoutLeft.setLayoutMargin(10);
     this.vLayoutLeft.setBackgroundColor("cyan");
@@ -252,9 +256,9 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
             MatchResult match = regExp.exec(rawUrl);
             String responseUrl = match.getGroup(0);
             GWT.log("responseUrl: " + responseUrl);
-            DtcTestPageViewController.this.htmlFlow.setContentsURL(DtcArdbeg.getDtcProxyUrl()
-                + responseUrl.split("/")[1]);
 
+            DtcTestPageViewController.this.htmlPane.setContentsURL(DtcArdbeg.getDtcProxyUrl()
+                + responseUrl.split("/")[1]);
             // DtcTestPageViewController.this.htmlFlow.setContents(response.getText());
 
           }
@@ -272,7 +276,7 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
     this.vLayoutLeftBottom = new VLayout();
     this.vLayoutLeftBottom.setShowEdges(true);
     this.vLayoutLeftBottom.setWidth(400);
-    this.vLayoutLeftBottom.setHeight(250);
+    this.vLayoutLeftBottom.setHeight(100);
     this.vLayoutLeftBottom.setMembersMargin(5);
     this.vLayoutLeftBottom.setLayoutMargin(0);
 
@@ -282,17 +286,19 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
 
     this.hLayoutRight = new HLayout();
     this.hLayoutRight.setShowEdges(true);
-    this.hLayoutRight.setHeight(150);
+    this.hLayoutRight.setHeight100();
     this.hLayoutRight.setMembersMargin(5);
     this.hLayoutRight.setLayoutMargin(10);
     this.hLayoutRight.setBackgroundColor("yellow");
 
-    this.htmlFlow.setTop(40);
-    this.htmlFlow.setWidth100();
-    this.htmlFlow.setStyleName("response_panel");
-    this.htmlFlow.setContentsURL(URL.encode(DtcArdbeg.getDtcProxyUrl() + "response.html"));
+    this.htmlPane.setTop(40);
+    this.htmlPane.setWidth100();
+    this.htmlPane.setStyleName("response_panel");
+    this.htmlPane.setShowEdges(true);
+    this.htmlPane.setContentsType(ContentsType.PAGE);
+    this.htmlPane.setContentsURL(DtcArdbeg.getDtcProxyUrl() + "response.html");
 
-    this.hLayoutRight.addMember(this.htmlFlow);
+    this.hLayoutRight.addMember(this.htmlPane);
 
     this.layout.addMember(this.vLayoutLeft);
     this.layout.addMember(this.hLayoutRight);
