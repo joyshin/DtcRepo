@@ -13,9 +13,10 @@ import net.skcomms.dtc.client.controller.LastRequestLoaderController;
 import net.skcomms.dtc.client.model.DtcNodeModel;
 import net.skcomms.dtc.client.view.DtcChronoView;
 import net.skcomms.dtc.client.view.DtcNavigationBarView;
+import net.skcomms.dtc.client.view.DtcUrlCopyButtonView;
+import net.skcomms.dtc.client.view.DtcUrlCopyDialogBoxView;
 import net.skcomms.dtc.client.view.DtcUserSignInView;
 import net.skcomms.dtc.shared.DtcNodeMetaModel;
-import net.skcomms.dtc.shared.UserConfigModel;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -228,8 +229,6 @@ public class DtcArdbeg implements EntryPoint {
 
   final DtcRequestFormAccessor dtcRequestFormAccessor = new DtcRequestFormAccessor();
 
-  private final DtcUrlCopyController urlCopyManager = new DtcUrlCopyController();
-
   private final DtcUserSignInView usernameSubmissionManager = new DtcUserSignInView();
 
   private final IpHistoryController ipHistoryManager = new IpHistoryController(
@@ -428,6 +427,13 @@ public class DtcArdbeg implements EntryPoint {
     return this.dtcRequestFormAccessor.getDtcRequestParameters();
   }
 
+  /**
+   * @return
+   */
+  public String getHref() {
+    return Window.Location.getHref();
+  }
+
   protected DtcPageType getPageType(String url) {
     if (url.equals(DtcArdbeg.DTC_PROXY_URL)) {
       return DtcPageType.HOME;
@@ -489,6 +495,14 @@ public class DtcArdbeg implements EntryPoint {
 
   }
 
+  private void initializeUrlCopy() {
+    DtcUrlCopyButtonView button = new DtcUrlCopyButtonView();
+    DtcUrlCopyDialogBoxView dialogBox = new DtcUrlCopyDialogBoxView();
+    DtcUrlCopyController controller = new DtcUrlCopyController();
+
+    controller.initialize(this, button, dialogBox);
+  }
+
   private void onLoadDtcResponseFrame(boolean success) {
     for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
       observer.onDtcResponseFrameLoaded(this.getDtcFrameDoc(), success);
@@ -518,15 +532,12 @@ public class DtcArdbeg implements EntryPoint {
     // this.ipHistoryManager.initialize(this);
     this.navigationBar.initialize(this);
     this.dtcRequestFormAccessor.initialize(this);
-    this.urlCopyManager.initialize(this);
     this.dtcTestPageViewConroller.initialize(this);
 
+    this.initializeUrlCopy();
     this.usernameSubmissionManager.initialize();
     this.requestRecaller.initialize(this);
     new DtcChronoView().initialize(this);
-
-    UserConfigModel userConfig = new UserConfigModel("sccu");
-    userConfig.setVisitCount("9porker", 9999);
   }
 
   private void onScrollDtcFrame() {

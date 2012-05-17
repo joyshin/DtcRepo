@@ -4,90 +4,61 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import net.skcomms.dtc.client.DtcArdbeg;
+import net.skcomms.dtc.client.view.DtcUrlCopyButtonView;
+import net.skcomms.dtc.client.view.DtcUrlCopyDialogBoxView;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.http.client.URL;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.TextArea;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class DtcUrlCopyController {
 
   private DtcArdbeg module;
 
-  private final DialogBox dialogBox = new DialogBox();
-  private final TextArea textUrl = new TextArea();
+  private DtcUrlCopyDialogBoxView dialogBox;
 
-  public Button linkCopyButton = new Button();
+  private DtcUrlCopyButtonView button;
 
-  public void initialize(DtcArdbeg dtcArdbeg) {
+  private String combineUrl() {
+    StringBuilder sb = new StringBuilder();
+
+    String href = this.module.getHref();
+    if (href.indexOf('?') == -1) {
+      sb.append(href);
+    } else {
+      sb.append(href.substring(0, href.indexOf('?')));
+    }
+
+    if (this.module.getDtcFrameSrc().indexOf('?') != -1) {
+      sb.append(this.module.getDtcFrameSrc().substring(
+          this.module.getDtcFrameSrc().indexOf('?')));
+    }
+
+    Map<String, String> params = DtcUrlCopyController.this.module.getDtcRequestParameters();
+    for (Entry<String, String> entry : params.entrySet()) {
+      sb.append('&');
+      sb.append(entry.getKey());
+      sb.append('=');
+      sb.append(entry.getValue());
+    }
+    return sb.toString();
+  }
+
+  public void initialize(DtcArdbeg dtcArdbeg, DtcUrlCopyButtonView aButton,
+      DtcUrlCopyDialogBoxView aDialogBox) {
     this.module = dtcArdbeg;
-    this.initializeDialogBox();
-    this.initializeLinkCopyButton();
-    RootPanel.get("linkCopyContainer").add(this.linkCopyButton);
-  }
+    this.button = aButton;
+    this.dialogBox = aDialogBox;
 
-  private void initializeDialogBox() {
-    this.textUrl.addStyleName("dtc-line-wrap");
-    this.textUrl.setHeight("200px");
-    this.textUrl.setWidth("550px");
-
-    this.dialogBox.setText("Copy to Clipboard");
-    this.dialogBox.setAnimationEnabled(true);
-
-    final Button closeButton = new Button("Close");
-    closeButton.getElement().setId("closeButton");
-
-    VerticalPanel dialogVPanel = new VerticalPanel();
-    dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
-    dialogVPanel.add(this.textUrl);
-    dialogVPanel.add(closeButton);
-    dialogVPanel.addStyleName("dialogVPanel");
-
-    this.dialogBox.setWidget(dialogVPanel);
-
-    closeButton.addClickHandler(new ClickHandler() {
+    this.button.addUrlCopyButtonClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        DtcUrlCopyController.this.dialogBox.hide();
+        DtcUrlCopyController.this.onClickUrlCopyButton();
       }
     });
   }
 
-  private void initializeLinkCopyButton() {
-    this.linkCopyButton.setText("Copy link");
-    this.linkCopyButton.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        StringBuilder sb = new StringBuilder();
-
-        if (Window.Location.getHref().indexOf('?') == -1) {
-          sb.append(Window.Location.getHref());
-        } else {
-          sb.append(Window.Location.getHref().substring(0, Window.Location.getHref().indexOf('?')));
-        }
-
-        if (DtcUrlCopyController.this.module.getDtcFrameSrc().indexOf('?') != -1) {
-          sb.append(DtcUrlCopyController.this.module.getDtcFrameSrc().substring(
-              DtcUrlCopyController.this.module.getDtcFrameSrc().indexOf('?')));
-        }
-
-        Map<String, String> params = DtcUrlCopyController.this.module.getDtcRequestParameters();
-        for (Entry<String, String> entry : params.entrySet()) {
-          sb.append('&');
-          sb.append(entry.getKey());
-          sb.append('=');
-          sb.append(entry.getValue());
-        }
-
-        DtcUrlCopyController.this.textUrl.setText(URL.encode(sb.toString()));
-        DtcUrlCopyController.this.dialogBox.center();
-        DtcUrlCopyController.this.textUrl.selectAll();
-      }
-    });
+  private void onClickUrlCopyButton() {
+    String url = this.combineUrl();
+    this.dialogBox.showUrlText(url);
   }
 }
