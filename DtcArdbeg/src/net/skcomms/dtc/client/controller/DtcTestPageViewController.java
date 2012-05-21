@@ -89,6 +89,8 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
     }
   }
 
+  private DtcArdbeg module;
+
   private HLayout layout = null;
   private VLayout vLayoutLeft;
   private ListGrid requestFormGrid;
@@ -178,7 +180,8 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
       @Override
       public void onClick(ClickEvent event) {
         String requestData = DtcTestPageViewController.this.createRequest();
-        String targetURL = URL.encode(DtcArdbeg.getDtcProxyUrl() + "response.html");
+        String targetURL = URL.encode(DtcTestPageViewController.this.module.getDtcProxyUrl()
+            + "response.html");
         RequestBuilder request = new RequestBuilder(RequestBuilder.POST, targetURL);
 
         request.setHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -201,7 +204,7 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
             GWT.log("responseUrl: " + responseUrl);
 
             RequestBuilder resultRequest = new RequestBuilder(RequestBuilder.GET,
-                DtcArdbeg.getDtcProxyUrl() + responseUrl.split("/")[1]);
+                DtcTestPageViewController.this.module.getDtcProxyUrl() + responseUrl.split("/")[1]);
             resultRequest.setHeader("Content-Type", "text/html; charset="
                 + DtcTestPageViewController.this.requestInfo.getEncoding());
             resultRequest.setCallback(new RequestCallback() {
@@ -263,7 +266,7 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
     this.htmlPane.setTop(40);
     this.htmlPane.setWidth100();
     this.htmlPane.setStyleName("response_panel");
-    this.htmlPane.setContentsURL(URL.encode(DtcArdbeg.getDtcProxyUrl() + "response.html"));
+    this.htmlPane.setContentsURL(URL.encode(this.module.getDtcProxyUrl() + "response.html"));
 
     this.hLayoutRight.addMember(this.htmlPane);
 
@@ -279,6 +282,7 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
   }
 
   public void initialize(DtcArdbeg dtcArdbeg) {
+    this.module = dtcArdbeg;
     dtcArdbeg.addDtcArdbegObserver(this);
 
   }

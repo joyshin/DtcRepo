@@ -12,7 +12,7 @@ import com.google.gwt.user.client.ui.RootPanel;
  */
 public class DtcUrlCopyButtonView {
 
-  private Button linkCopyButton = new Button();
+  protected Button linkCopyButton = this.createButton();
 
   public DtcUrlCopyButtonView() {
     this.initializeLinkCopyButton();
@@ -22,7 +22,11 @@ public class DtcUrlCopyButtonView {
     this.linkCopyButton.addClickHandler(handler);
   }
 
-  private void initializeLinkCopyButton() {
+  protected Button createButton() {
+    return new Button();
+  }
+
+  protected void initializeLinkCopyButton() {
     RootPanel.get("linkCopyContainer").add(this.linkCopyButton);
     this.linkCopyButton.setText("Copy link");
   }

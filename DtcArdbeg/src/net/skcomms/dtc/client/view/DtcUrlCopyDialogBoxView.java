@@ -16,15 +16,18 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  */
 public class DtcUrlCopyDialogBoxView {
 
-  private DialogBox dialogBox = new DialogBox();
+  private DialogBox dialogBox;
 
-  private TextArea urlTextArea = new TextArea();
+  private TextArea urlTextArea;
 
   public DtcUrlCopyDialogBoxView() {
     this.initializeDialogBox();
   }
 
-  public void initializeDialogBox() {
+  protected void initializeDialogBox() {
+    this.dialogBox = new DialogBox();
+    this.urlTextArea = new TextArea();
+
     this.urlTextArea.addStyleName("dtc-line-wrap");
     this.urlTextArea.setHeight("200px");
     this.urlTextArea.setWidth("550px");
