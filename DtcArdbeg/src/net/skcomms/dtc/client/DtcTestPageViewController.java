@@ -17,7 +17,6 @@ import com.google.gwt.http.client.URL;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.smartgwt.client.types.ContentsType;
 import com.smartgwt.client.types.ListGridEditEvent;
 import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.widgets.Button;
@@ -85,8 +84,23 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
     }
   }
 
-  private HLayout layout;
+  public static String Utf8toEucKr(String str)
+  {
+    if (str.equals(""))
+      return "";
+    String result = null;
 
+    try {
+      byte[] raws = str.getBytes("utf-8");
+      result = new String(raws, "EUC_KR");
+
+    } catch (java.io.UnsupportedEncodingException e) {
+      GWT.log("Transform Faild: " + e.getMessage());
+    }
+    return result;
+  }
+
+  private HLayout layout;
   private VLayout vLayoutLeft;
   private ListGrid requestFormGrid;
   private ListGridField nameField;
@@ -94,20 +108,24 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
   private Button searchButton;
   private VLayout vLayoutLeftBottom;
   private HLayout hLayoutRight;
+
   private String currentPath;
+
+  // final HTMLFlow htmlFlow = new HTMLFlow();
   final HTMLPane htmlPane = new HTMLPane();
 
   private String createRequest()
   {
     StringBuffer requestData = new StringBuffer();
-    String testURL = "c" + "=" + this.currentPath;
+    String testURL = "c" + "=" + URL.encode(this.currentPath);
     String process = "process=1";
     requestData.append(testURL);
     requestData.append("&");
     requestData.append(process);
-    requestData.append("&");
 
     for (ListGridRecord record : this.requestFormGrid.getRecords()) {
+
+      requestData.append("&");
 
       String request = "";
       if (record.getAttribute("name").toLowerCase().equals("ip_select")) {
@@ -115,17 +133,17 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
         MatchResult match = regExp.exec(record.getAttribute("value"));
         request = record.getAttribute("name") + "=" + match.getGroup(0);
       } else {
-        request = record.getAttribute("name") + "=" + record.getAttribute("value");
+        String value = DtcTestPageViewController.Utf8toEucKr(record.getAttribute("value"));
+        request = record.getAttribute("name") + "=" + value;
+        // request = record.getAttribute("name") + "=" + URL.encode(value);
+
       }
-
       requestData.append(request);
-      requestData.append("&");
-      GWT.log("request: " + request);
     }
-    requestData.deleteCharAt(requestData.length() - 1);
     GWT.log("Request: " + requestData.toString());
-
-    return URL.encode(requestData.toString());
+    // String encodedRequest = URL.encode(requestData.toString());
+    // GWT.log("Encoded Req: " + encodedRequest);
+    return requestData.toString();
   }
 
   private String createUrlParamter() {
@@ -182,22 +200,21 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
     this.layout.setHeight(800);
     // this.layout.setHeight100();
     this.layout.setMembersMargin(20);
-    this.layout.setBackgroundColor("gray");
+    // this.layout.setBackgroundColor("gray");
 
     this.vLayoutLeft = new VLayout();
     this.vLayoutLeft.setShowEdges(true);
-    this.vLayoutLeft.setWidth(400);
-    this.vLayoutLeft.setHeight100();
-    this.vLayoutLeft.setMembersMargin(5);
+    this.vLayoutLeft.setWidth(300);
+    this.vLayoutLeft.setMembersMargin(10);
     this.vLayoutLeft.setLayoutMargin(10);
-    this.vLayoutLeft.setBackgroundColor("cyan");
+    // this.vLayoutLeft.setBackgroundColor("cyan");
     // vLayout.addMember(new BlueBox(null, 50, "height 50"));
     // vLayout.addMember(new BlueBox((String) null, "*", "height *"));
     // vLayout.addMember(new BlueBox((String) null, "30%", "height 30%"));
     // layout.addMember(vLayout);
 
     this.requestFormGrid = new ListGrid();
-    this.requestFormGrid.setWidth(400);
+    this.requestFormGrid.setWidth(300);
     this.requestFormGrid.setShowAllRecords(true);
 
     this.requestFormGrid.setCanEdit(true);
@@ -208,11 +225,12 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
     this.requestFormGrid.setBodyOverflow(Overflow.VISIBLE);
     this.requestFormGrid.setOverflow(Overflow.VISIBLE);
     this.requestFormGrid.setLeaveScrollbarGap(false);
+    // this.requestFormGrid.addKeyDownHandler(handler)
 
     this.nameField = new ListGridField("key", "Name", 120);
     this.nameField.setCanEdit(false);
 
-    this.valueField = new ListGridField("value", "Value", 280);
+    this.valueField = new ListGridField("value", "Value", 180);
 
     this.requestFormGrid.setFields(this.nameField, this.valueField);
 
@@ -225,14 +243,13 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
 
       @Override
       public void onClick(ClickEvent event) {
-        // TODO Auto-generated method stub
         String requestData = DtcTestPageViewController.this.createRequest();
         GWT.log("createRequest : " + requestData);
         String targetURL = URL.encode(DtcArdbeg.getDtcProxyUrl() + "response.html");
-
         RequestBuilder request = new RequestBuilder(RequestBuilder.POST, targetURL);
 
         request.setHeader("Accept", "text/html,application/xhtml+xml,application/xml");
+        request.setHeader("Accept-Charset", "windows-949, euckr");
         request.setHeader("Content-Type", "application/x-www-form-urlencoded");
         request.setHeader("Host", "dtc.skcomms.net");
         request.setHeader("Origin", "http://dtc.skcomms.net");
@@ -243,13 +260,12 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
 
           @Override
           public void onError(Request request, Throwable exception) {
-            // TODO Auto-generated method stub
             GWT.log(exception.getMessage());
           }
 
           @Override
           public void onResponseReceived(Request request, Response response) {
-            // TODO Auto-generated method stub
+
             GWT.log(response.getText());
             String rawUrl = response.getText();
             RegExp regExp = RegExp.compile("src=\"([^\"]*)");
@@ -257,17 +273,43 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
             String responseUrl = match.getGroup(0);
             GWT.log("responseUrl: " + responseUrl);
 
-            DtcTestPageViewController.this.htmlPane.setContentsURL(DtcArdbeg.getDtcProxyUrl()
-                + responseUrl.split("/")[1]);
-            // DtcTestPageViewController.this.htmlFlow.setContents(response.getText());
+            RequestBuilder resultRequest = new RequestBuilder(RequestBuilder.GET,
+                DtcArdbeg.getDtcProxyUrl() + responseUrl.split("/")[1]);
+            resultRequest.setCallback(new RequestCallback() {
 
+              @Override
+              public void onError(Request request, Throwable exception) {
+                // TODO Auto-generated method stub
+                GWT.log(exception.getMessage());
+
+              }
+
+              @Override
+              public void onResponseReceived(Request request, Response response) {
+                // TODO Auto-generated method stub
+                String result = response.getText();
+                GWT.log(result);
+                DtcTestPageViewController.this.htmlPane.setContents(result);
+              }
+            });
+
+            try {
+              resultRequest.send();
+            } catch (RequestException e) {
+              e.printStackTrace();
+            }
+
+            // DtcTestPageViewController.this.htmlFlow.setContentsURL(DtcArdbeg.getDtcProxyUrl()
+            // + responseUrl.split("/")[1]);
+
+            // DtcTestPageViewController.this.htmlFlow.setHtmlElement(element);
+            DtcTestPageViewController.this.hLayoutRight.setHeight100();
           }
         });
 
         try {
           request.send();
         } catch (RequestException e) {
-          // TODO Auto-generated catch block
           e.printStackTrace();
         }
       }
@@ -275,8 +317,9 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
 
     this.vLayoutLeftBottom = new VLayout();
     this.vLayoutLeftBottom.setShowEdges(true);
-    this.vLayoutLeftBottom.setWidth(400);
-    this.vLayoutLeftBottom.setHeight(100);
+    this.vLayoutLeftBottom.setWidth(300);
+    this.vLayoutLeftBottom.setHeight(250);
+
     this.vLayoutLeftBottom.setMembersMargin(5);
     this.vLayoutLeftBottom.setLayoutMargin(0);
 
@@ -286,17 +329,16 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
 
     this.hLayoutRight = new HLayout();
     this.hLayoutRight.setShowEdges(true);
-    this.hLayoutRight.setHeight100();
+    // this.hLayoutRight.setHeight(150);
+
     this.hLayoutRight.setMembersMargin(5);
     this.hLayoutRight.setLayoutMargin(10);
-    this.hLayoutRight.setBackgroundColor("yellow");
+    // this.hLayoutRight.setBackgroundColor("yellow");
 
     this.htmlPane.setTop(40);
     this.htmlPane.setWidth100();
     this.htmlPane.setStyleName("response_panel");
-    this.htmlPane.setShowEdges(true);
-    this.htmlPane.setContentsType(ContentsType.PAGE);
-    this.htmlPane.setContentsURL(DtcArdbeg.getDtcProxyUrl() + "response.html");
+    this.htmlPane.setContentsURL(URL.encode(DtcArdbeg.getDtcProxyUrl() + "response.html"));
 
     this.hLayoutRight.addMember(this.htmlPane);
 
