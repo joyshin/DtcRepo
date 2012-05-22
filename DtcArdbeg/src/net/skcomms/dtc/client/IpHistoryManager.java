@@ -76,7 +76,7 @@ public class IpHistoryManager extends DefaultDtcArdbegObserver {
           + this.ipText + "\" style=\"width:226px;display:none;\" disabled>";
       innerHtml += "<select name=\"ip_select\" id=\"ip_select\" style=\"width:226px; font-size:10pt\">";
       innerHtml += "</select></div>";
-      innerHtml += "<div style=\"float:right;\"><input type=\"button\" value=\"↔\" onclick=\"javascript:fnCHANGE_IP();\"></div>";
+      innerHtml += "<div style=\"float:right;\"><input type=\"button\" value=\"��\" onclick=\"javascript:fnCHANGE_IP();\"></div>";
 
       Element spanIp = requestDoc.getElementById("span_ip");
       spanIp.setInnerHTML(innerHtml);

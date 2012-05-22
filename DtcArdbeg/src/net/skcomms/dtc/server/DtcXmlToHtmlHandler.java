@@ -20,10 +20,10 @@ public class DtcXmlToHtmlHandler extends DefaultHandler {
   final String RESULT_HEADER = "ResultHeader";
   final String RESULT_LIST = "ResultList";
   final String DOCUMENT = "Document";
-  final String CDATA_TOKEN = "<![CDATA[";
+  final String CDATA_TOKEN = "//<![CDATA[";
 
-  private StringBuilder parseBuffer;
-  private StringBuilder rawHtml;
+  private final StringBuilder parseBuffer;
+  private final StringBuilder rawHtml;
 
   public DtcXmlToHtmlHandler() {
     super();
@@ -69,12 +69,12 @@ public class DtcXmlToHtmlHandler extends DefaultHandler {
       this.parseBuffer.setLength(0);
       this.parseBuffer.append(this.CDATA_TOKEN);
       this.parseBuffer.append(temp);
-      this.parseBuffer.append("]]>");
+      this.parseBuffer.append("//]]>");
       this.parseBuffer.append("\n");
 
     } else if (this.parseBuffer.length() > 0) {
       this.parseBuffer.insert(0, this.CDATA_TOKEN);
-      this.parseBuffer.append("]]>");
+      this.parseBuffer.append("//]]>");
       this.parseBuffer.append("\n");
     }
 

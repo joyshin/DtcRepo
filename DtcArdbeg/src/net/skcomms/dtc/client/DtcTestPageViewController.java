@@ -1,5 +1,6 @@
 package net.skcomms.dtc.client;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +17,7 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.types.ListGridEditEvent;
 import com.smartgwt.client.types.Overflow;
@@ -88,16 +90,22 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
   {
     if (str.equals(""))
       return "";
-    String result = null;
+
+    StringBuilder strBuilder = new StringBuilder();
 
     try {
-      byte[] raws = str.getBytes("utf-8");
-      result = new String(raws, "EUC_KR");
+      byte[] raws = str.getBytes("euckr");
 
-    } catch (java.io.UnsupportedEncodingException e) {
-      GWT.log("Transform Faild: " + e.getMessage());
+      for (byte ch : raws) {
+        strBuilder.append("%");
+        strBuilder.append(Integer.toHexString(0xff & ch));
+      }
+    } catch (UnsupportedEncodingException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
-    return result;
+
+    return strBuilder.toString();
   }
 
   private HLayout layout;
@@ -142,6 +150,7 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
     }
     GWT.log("Request: " + requestData.toString());
     // String encodedRequest = URL.encode(requestData.toString());
+    // return encodedRequest;
     // GWT.log("Encoded Req: " + encodedRequest);
     return requestData.toString();
   }
@@ -288,8 +297,15 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
               public void onResponseReceived(Request request, Response response) {
                 // TODO Auto-generated method stub
                 String result = response.getText();
-                GWT.log(result);
-                DtcTestPageViewController.this.htmlPane.setContents(result);
+
+                // GWT.log(result);
+
+                SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                builder.appendEscaped(result);
+                GWT.log(builder.toSafeHtml().asString());
+                DtcTestPageViewController.this.htmlPane
+                    .setContents(builder.toSafeHtml().asString());
+                // DtcTestPageViewController.this.htmlPane.setContents(result);
               }
             });
 
@@ -299,10 +315,6 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
               e.printStackTrace();
             }
 
-            // DtcTestPageViewController.this.htmlFlow.setContentsURL(DtcArdbeg.getDtcProxyUrl()
-            // + responseUrl.split("/")[1]);
-
-            // DtcTestPageViewController.this.htmlFlow.setHtmlElement(element);
             DtcTestPageViewController.this.hLayoutRight.setHeight100();
           }
         });
