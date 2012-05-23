@@ -3,6 +3,9 @@
  */
 package net.skcomms.dtc.client.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import net.skcomms.dtc.client.DtcArdbeg;
 import net.skcomms.dtc.client.view.DtcUrlCopyButtonView;
 import net.skcomms.dtc.client.view.DtcUrlCopyDialogBoxView;
@@ -38,8 +41,18 @@ public class DtcUrlCopyControllerTest {
     }
 
     @Override
+    public String getDtcFrameHref() {
+      return "dtc.skcomms.net/_dtcproxy_/";
+    }
+
+    @Override
+    public Map<String, String> getDtcRequestParameters() {
+      return new HashMap<String, String>();
+    }
+
+    @Override
     public String getHref() {
-      return "dtc.skcomms.net";
+      return "http://dtc.skcomms.net/";
     }
   }
 
@@ -72,21 +85,35 @@ public class DtcUrlCopyControllerTest {
     @Override
     protected void initializeDialogBox() {
     }
+
+    @Override
+    public void showUrlText(String url) {
+      System.out.println("URL:" + url);
+    }
   }
 
   private DtcUrlCopyController controller;
+
   private MockDtcUrlCopyButtonView button;
+
+  private DtcArdbeg ardbeg;
+
+  private DtcUrlCopyDialogBoxView dialogBox;
 
   @Before
   public void before() {
     this.controller = new DtcUrlCopyController();
     this.button = new MockDtcUrlCopyButtonView();
-    this.controller.initialize(new MockDtcArdbeg(), this.button,
-        new MockDtcUrlCopyDialogBoxView());
+    this.ardbeg = new MockDtcArdbeg();
+    this.dialogBox = new MockDtcUrlCopyDialogBoxView();
+
+    this.controller.initialize(this.ardbeg, this.button,
+        this.dialogBox);
   }
 
   @Test
   public void test() {
+    this.ardbeg.setDtcFramePath("/");
     this.button.fireClickButton();
   }
 }

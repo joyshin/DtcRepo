@@ -44,12 +44,6 @@ import com.google.gwt.user.client.ui.RootPanel;
  */
 public class DtcArdbeg implements EntryPoint {
 
-  public class DtcFrameSrcProvider {
-    public String get() {
-      return DtcArdbeg.this.getDtcFrameSrc();
-    }
-  }
-
   public enum DtcPageType {
     NONE, HOME, DIRECTORY, TEST;
   }
@@ -405,7 +399,7 @@ public class DtcArdbeg implements EntryPoint {
     return IFrameElement.as(DtcArdbeg.this.dtcFrame.getElement()).getContentDocument();
   }
 
-  public String getDtcFrameSrc() {
+  public String getDtcFrameHref() {
     return this.getDtcFrameDoc().getURL();
   }
 
@@ -455,6 +449,15 @@ public class DtcArdbeg implements EntryPoint {
       return DtcPageType.TEST;
     }
     return DtcPageType.NONE;
+  }
+
+  private String getPathFromHref(String url) {
+    int index = url.indexOf("?");
+    if (index == -1) {
+      return "/";
+    } else {
+      return "/" + url.substring(index + 3);
+    }
   }
 
   private boolean hasVisitedService(List<Pair<Integer, Node>> rows) {

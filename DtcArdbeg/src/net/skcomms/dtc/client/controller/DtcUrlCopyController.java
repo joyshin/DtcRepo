@@ -9,6 +9,7 @@ import net.skcomms.dtc.client.view.DtcUrlCopyDialogBoxView;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.http.client.URL;
 
 public class DtcUrlCopyController {
 
@@ -28,17 +29,18 @@ public class DtcUrlCopyController {
       sb.append(href.substring(0, href.indexOf('?')));
     }
 
-    if (this.module.getDtcFrameSrc().indexOf('?') != -1) {
-      sb.append(this.module.getDtcFrameSrc().substring(
-          this.module.getDtcFrameSrc().indexOf('?')));
+    int index;
+    if ((index = this.module.getDtcFrameHref().indexOf('?')) != -1) {
+      sb.append(this.module.getDtcFrameHref().substring(index, index + 3));
+      sb.append(URL.encode(this.module.getDtcFrameHref().substring(index + 3)));
     }
 
-    Map<String, String> params = DtcUrlCopyController.this.module.getDtcRequestParameters();
+    Map<String, String> params = this.module.getDtcRequestParameters();
     for (Entry<String, String> entry : params.entrySet()) {
       sb.append('&');
       sb.append(entry.getKey());
       sb.append('=');
-      sb.append(entry.getValue());
+      sb.append(URL.encode(entry.getValue()));
     }
     return sb.toString();
   }

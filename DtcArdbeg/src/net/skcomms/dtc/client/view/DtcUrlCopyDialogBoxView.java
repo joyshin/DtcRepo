@@ -5,7 +5,6 @@ package net.skcomms.dtc.client.view;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.TextArea;
@@ -55,7 +54,7 @@ public class DtcUrlCopyDialogBoxView {
   }
 
   public void showUrlText(String url) {
-    this.urlTextArea.setText(URL.encode(url));
+    this.urlTextArea.setText(url);
     this.dialogBox.center();
     this.urlTextArea.selectAll();
   }
