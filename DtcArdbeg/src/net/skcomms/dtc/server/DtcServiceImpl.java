@@ -30,18 +30,25 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTML.Tag;
 import javax.swing.text.html.HTMLEditorKit.ParserCallback;
 import javax.swing.text.html.parser.ParserDelegator;
 
-import net.skcomms.dtc.client.DtcService;
-import net.skcomms.dtc.shared.DtcNodeInfo;
-import net.skcomms.dtc.shared.DtcRequestInfo;
-import net.skcomms.dtc.shared.DtcRequestParameter;
+import net.skcomms.dtc.client.service.DtcService;
+import net.skcomms.dtc.shared.DtcNodeMetaModel;
+import net.skcomms.dtc.shared.DtcRequestInfoModel;
+import net.skcomms.dtc.shared.DtcRequestParameterModel;
 import net.skcomms.dtc.shared.DtcServiceVerifier;
-import net.skcomms.dtc.shared.IpInfo;
+import net.skcomms.dtc.shared.IpInfoModel;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -51,10 +58,12 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
 
   private static final String DTC_URL = "http://10.141.6.198/";
 
-  private static ParserCallback createDtcDirectoryParserCallback(final List<DtcNodeInfo> items) {
+  private static
+      ParserCallback
+      createDtcDirectoryParserCallback(final List<DtcNodeMetaModel> items) {
     return new ParserCallback() {
       private int textCount;
-      private DtcNodeInfo currentItem = null;
+      private DtcNodeMetaModel currentItem = null;
       private boolean beforeHeaderRow = true;
 
       @Override
@@ -83,7 +92,7 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
         }
 
         if (tag == Tag.TR) {
-          this.currentItem = new DtcNodeInfo();
+          this.currentItem = new DtcNodeMetaModel();
           this.textCount = 0;
         } else if (tag == Tag.A) {
           String href = DtcServiceImpl.getAttributeByName(a, "href");
@@ -129,8 +138,8 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
    * @return
    * @throws IOException
    */
-  static List<DtcNodeInfo> createDtcNodeInfosFrom(byte[] contents) throws IOException {
-    final List<DtcNodeInfo> nodeInfos = new ArrayList<DtcNodeInfo>();
+  static List<DtcNodeMetaModel> createDtcNodeInfosFrom(byte[] contents) throws IOException {
+    final List<DtcNodeMetaModel> nodeInfos = new ArrayList<DtcNodeMetaModel>();
 
     ParserCallback callback = DtcServiceImpl.createDtcDirectoryParserCallback(nodeInfos);
 
@@ -145,7 +154,7 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
    * @return
    */
   private static ParserCallback createDtcRequestFrameParserCallback(
-      final DtcRequestInfo requestInfo,
+      final DtcRequestInfoModel requestInfo,
       final byte[] contents) {
     return new ParserCallback() {
 
@@ -155,12 +164,12 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
 
       private boolean insideRequestTable;
 
-      private List<DtcRequestParameter> params;
+      private List<DtcRequestParameterModel> params;
 
       private String currentKey;
 
-      private IpInfo createIpInfoFrom(String javascript) {
-        IpInfo ipInfo = new IpInfo();
+      private IpInfoModel createIpInfoFrom(String javascript) {
+        IpInfoModel ipInfo = new IpInfoModel();
 
         Pattern pattern = Pattern.compile("<input .* id=\"ip_text\" value=\"([0-9.]+)\" .*>");
         Matcher m = pattern.matcher(javascript);
@@ -201,7 +210,7 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
           if (this.insideRequestTable) {
             String value = DtcServiceImpl.getAttributeByName(a, "value");
             String name = DtcServiceImpl.getAttributeByName(a, "name");
-            this.params.add(new DtcRequestParameter(this.currentKey, name, value));
+            this.params.add(new DtcRequestParameterModel(this.currentKey, name, value));
           }
         }
       }
@@ -213,9 +222,11 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
             this.scriptEnd = pos;
             try {
               String encoding = DtcServiceImpl.guessCharacterEncoding(contents);
+              requestInfo.setEncoding(encoding);
+
               String javascript = new String(contents, this.scriptStart, this.scriptEnd
                   - this.scriptStart, encoding);
-              IpInfo ipInfo = this.createIpInfoFrom(javascript);
+              IpInfoModel ipInfo = this.createIpInfoFrom(javascript);
               requestInfo.setIpInfo(ipInfo);
             } catch (UnsupportedEncodingException e) {
               e.printStackTrace();
@@ -231,7 +242,7 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
           String id = DtcServiceImpl.getAttributeByName(a, "id");
           if ("tblREQUEST".equals(id)) {
             this.insideRequestTable = true;
-            this.params = new ArrayList<DtcRequestParameter>();
+            this.params = new ArrayList<DtcRequestParameterModel>();
           }
         }
       }
@@ -258,9 +269,9 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
    * @throws IOException
    * @throws UnsupportedEncodingException
    */
-  static DtcRequestInfo createDtcRequestInfoFrom(byte[] contents)
+  static DtcRequestInfoModel createDtcRequestInfoFrom(byte[] contents)
       throws UnsupportedEncodingException, IOException {
-    DtcRequestInfo requestInfo = new DtcRequestInfo();
+    DtcRequestInfoModel requestInfo = new DtcRequestInfoModel();
 
     String encoding = DtcServiceImpl.guessCharacterEncoding(contents);
     ParserCallback callback = DtcServiceImpl.createDtcRequestFrameParserCallback(requestInfo,
@@ -320,11 +331,19 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     return bos.toByteArray();
   }
 
+  private EntityManagerFactory emf;
+
   @Override
-  public List<DtcNodeInfo> getDir(String path) {
+  public List<DtcNodeMetaModel> getDir(String path) {
     if (!DtcServiceVerifier.isValidDirectoryPath(path)) {
       throw new IllegalArgumentException("Invalid directory:" + path);
     }
+
+    EntityManager manager = this.emf.createEntityManager();
+    manager.getTransaction().begin();
+    manager.persist(new DtcLog("\"" + path + "\" requested."));
+    manager.getTransaction().commit();
+    manager.close();
 
     try {
       String href;
@@ -350,7 +369,7 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
   }
 
   @Override
-  public DtcRequestInfo getDtcRequestPageInfo(String path) {
+  public DtcRequestInfoModel getDtcRequestPageInfo(String path) {
     if (!DtcServiceVerifier.isValidTestPage(path)) {
       throw new IllegalArgumentException("Invalid test page:" + path);
     }
@@ -365,5 +384,19 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
       e.printStackTrace();
       throw new IllegalArgumentException(e);
     }
+  }
+
+  @Override
+  public void init(ServletConfig config) throws ServletException {
+    System.out.println("init() called.");
+    super.init(config);
+    WebApplicationContextUtils.getRequiredWebApplicationContext(this.getServletContext())
+        .getAutowireCapableBeanFactory().autowireBean(this);
+  }
+
+  @Autowired
+  void setEntityManagerFactory(EntityManagerFactory emf) {
+    System.out.println("setEntityManagerFactory() called.");
+    this.emf = emf;
   }
 }

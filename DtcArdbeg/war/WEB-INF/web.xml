@@ -4,17 +4,24 @@
               http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 	version="2.5" xmlns="http://java.sun.com/xml/ns/javaee">
 
+    <!-- The definition of the Root Spring Container shared by all Servlets and Filters -->
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>/WEB-INF/spring/rootContext.xml</param-value>
+    </context-param>
+    
+    <context-param>
+        <param-name>spring.profiles.default</param-name>
+        <param-value>test</param-value>
+    </context-param>
+    
+    
+    <!-- Creates the Spring Container shared by all Servlets and Filters -->
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+    
 	<!-- Servlets -->
-	<servlet>
-		<servlet-name>greetServlet</servlet-name>
-		<servlet-class>net.skcomms.dtc.server.GreetingServiceImpl</servlet-class>
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>greetServlet</servlet-name>
-		<url-pattern>/dtcardbeg/greet</url-pattern>
-	</servlet-mapping>
-
     <servlet>
         <servlet-name>dtcServiceServlet</servlet-name>
         <servlet-class>net.skcomms.dtc.server.DtcServiceImpl</servlet-class>
@@ -23,6 +30,16 @@
     <servlet-mapping>
         <servlet-name>dtcServiceServlet</servlet-name>
         <url-pattern>/dtcardbeg/dtcservice</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>dtcUserConfigServiceServlet</servlet-name>
+        <servlet-class>net.skcomms.dtc.server.DtcUserConfigServiceImpl</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>dtcUserConfigServiceServlet</servlet-name>
+        <url-pattern>/dtcardbeg/dtcuserconfigservice</url-pattern>
     </servlet-mapping>
 
 	<servlet>
@@ -50,6 +67,14 @@
 	<servlet-mapping>
 		<servlet-name>DtcService</servlet-name>
 		<url-pattern>/dtcardbeg/DtcService</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<servlet-name>DtcUserConfigService</servlet-name>
+		<servlet-class>net.skcomms.dtc.server.DtcUserConfigServiceImpl</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>DtcUserConfigService</servlet-name>
+		<url-pattern>/dtcardbeg/DtcUserConfigService</url-pattern>
 	</servlet-mapping>
 
 </web-app>

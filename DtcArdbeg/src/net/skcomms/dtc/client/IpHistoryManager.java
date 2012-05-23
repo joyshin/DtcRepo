@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import net.skcomms.dtc.client.IpOption.Origin;
+import net.skcomms.dtc.client.model.IpOptionModel;
+import net.skcomms.dtc.client.model.IpOptionModel.Origin;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
@@ -20,17 +21,17 @@ public class IpHistoryManager extends DefaultDtcArdbegObserver {
 
   native static void addDtcIpSelectClickEventHandler(Document dtcFrameDoc,
       IpHistoryManager ipHistoryManager) /*-{
-		var select = dtcFrameDoc.getElementsByTagName("frame")[0].contentDocument
-				.getElementById("ip_select");
+    var select = dtcFrameDoc.getElementsByTagName("frame")[0].contentDocument
+        .getElementById("ip_select");
 
-		if (select != null) {
-			select.onclick = function() {
-				ipHistoryManager.@net.skcomms.dtc.client.IpHistoryManager::redrawIpOptions(Lcom/google/gwt/dom/client/Document;)(dtcFrameDoc);
-			};
-		}
+    if (select != null) {
+      select.onclick = function() {
+        ipHistoryManager.@net.skcomms.dtc.client.IpHistoryManager::redrawIpOptions(Lcom/google/gwt/dom/client/Document;)(dtcFrameDoc);
+      };
+    }
   }-*/;
 
-  private final List<IpOption> options = new ArrayList<IpOption>();
+  private final List<IpOptionModel> options = new ArrayList<IpOptionModel>();
   private final DtcRequestFormAccessor requestParameter;
   private String ipText;
   private OptGroupElement dtcOptGroup;
@@ -55,13 +56,13 @@ public class IpHistoryManager extends DefaultDtcArdbegObserver {
     return keyPrefix;
   }
 
-  private IpOption getOrCreateIpOptionBy(String ip) {
-    for (IpOption option : this.options) {
+  private IpOptionModel getOrCreateIpOptionBy(String ip) {
+    for (IpOptionModel option : this.options) {
       if (ip.equals(option.getIp())) {
         return option;
       }
     }
-    IpOption option = new IpOption(ip, ip, Origin.COOKIE);
+    IpOptionModel option = new IpOptionModel(ip, ip, Origin.COOKIE);
     this.options.add(option);
 
     return option;
@@ -100,7 +101,7 @@ public class IpHistoryManager extends DefaultDtcArdbegObserver {
         String value = Cookies.getCookie(key);
         Date date = new Date(Long.parseLong(value));
 
-        IpOption option = this.getOrCreateIpOptionBy(ip);
+        IpOptionModel option = this.getOrCreateIpOptionBy(ip);
         option.setLastSuccessTime(date);
       }
     }
@@ -133,7 +134,7 @@ public class IpHistoryManager extends DefaultDtcArdbegObserver {
 
     select.clear();
 
-    for (IpOption option : this.options) {
+    for (IpOptionModel option : this.options) {
       OptionElement optionElement = requestDoc.createOptionElement();
       optionElement.setValue(option.getIp());
       optionElement.setInnerText(option.getText() + option.getDecoratedText());
@@ -171,7 +172,7 @@ public class IpHistoryManager extends DefaultDtcArdbegObserver {
     for (int i = 0; i < elementsByTagName.getLength(); i++) {
       String ip = elementsByTagName.getItem(i).getAttribute("value");
       String text = elementsByTagName.getItem(i).getInnerText();
-      this.options.add(new IpOption(ip, text, IpOption.Origin.DTC));
+      this.options.add(new IpOptionModel(ip, text, Origin.DTC));
     }
     Element ipTextElement = requestDoc.getElementById("ip_text");
     this.ipText = InputElement.as(ipTextElement).getValue();
@@ -185,7 +186,7 @@ public class IpHistoryManager extends DefaultDtcArdbegObserver {
     String ip = this.requestParameter.getDtcRequestParameter("IP");
 
     String key = keyPrefix + ip;
-    IpOption option = this.getOrCreateIpOptionBy(ip);
+    IpOptionModel option = this.getOrCreateIpOptionBy(ip);
 
     Date now = new Date();
     option.setLastSuccessTime(now);

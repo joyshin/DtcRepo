@@ -13,6 +13,21 @@ h1 {
 	font-size: 16pt;
 }
 
+#loading {
+	position: fixed;
+	left: 0px;
+	top: 0px;
+	right: 0px;
+	bottom: 0px;
+	background-color: #000;
+	background-image:url('Loader.gif');
+	background-position: center center;
+	background-repeat:no-repeat;
+	filter:alpha(opacity=60);
+	opacity:0.6;
+	z-index: 2147483646
+}
+
 /** Most GWT widgets already have a style name defined */
 .gwt-DialogBox {
 	width: 600px;
