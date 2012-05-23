@@ -13,6 +13,7 @@ import net.skcomms.dtc.client.controller.LastRequestLoaderController;
 import net.skcomms.dtc.client.model.DtcNodeModel;
 import net.skcomms.dtc.client.view.DtcChronoView;
 import net.skcomms.dtc.client.view.DtcNavigationBarView;
+import net.skcomms.dtc.client.view.DtcNodeView;
 import net.skcomms.dtc.client.view.DtcUserSignInView;
 import net.skcomms.dtc.shared.DtcNodeMetaModel;
 import net.skcomms.dtc.shared.UserConfigModel;
@@ -33,9 +34,7 @@ import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Frame;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 
 /**
@@ -222,10 +221,6 @@ public class DtcArdbeg implements EntryPoint {
 
   private final LastRequestLoaderController requestRecaller = new LastRequestLoaderController();
 
-  private final FlowPanel dtcNodePanel = new FlowPanel();
-
-  private final FlowPanel dtcfavoriteNodePanel = new FlowPanel();
-
   private final Frame dtcFrame = new Frame();
 
   private final DtcNavigationBarView navigationBar = new DtcNavigationBarView();
@@ -243,6 +238,7 @@ public class DtcArdbeg implements EntryPoint {
 
   private final DtcNodeModel dtcArdbegNodeData = DtcNodeModel.getInstance();
   private final DtcNodeController dtcNodeController = DtcNodeController.getInstance();
+  private final DtcNodeView dtcNodeView = DtcNodeView.getInstace();
 
   private void addCssLinkIntoDtcFrame(Document doc) {
     LinkElement link = doc.createLinkElement();
@@ -473,21 +469,13 @@ public class DtcArdbeg implements EntryPoint {
   private void initializeDtcNodeContainer() {
 
     dtcArdbegNodeData.initialize(this);
+    dtcNodeView.initialize();
 
-    dtcNodePanel.add(dtcNodeController.getDtcNodeCellList());
-    dtcfavoriteNodePanel.add(dtcNodeController.getDtcFavoriteNodeCellList());
+    RootPanel.get("nodeContainer").add(dtcNodeView.getDtcNodePanelLabel());
+    RootPanel.get("nodeContainer").add(dtcNodeView.getDtcNodePanel());
 
-    Label dtcNodePanelLabel = new Label();
-    dtcNodePanelLabel.setText("Services");
-
-    Label dtcFavoriteNodePanelLabel = new Label();
-    dtcFavoriteNodePanelLabel.setText("Favorites");
-
-    RootPanel.get("nodeContainer").add(dtcNodePanelLabel);
-    RootPanel.get("nodeContainer").add(dtcNodePanel);
-
-    RootPanel.get("favoriteNodeContainer").add(dtcFavoriteNodePanelLabel);
-    RootPanel.get("favoriteNodeContainer").add(dtcfavoriteNodePanel);
+    RootPanel.get("favoriteNodeContainer").add(dtcNodeView.getDtcFavoriteNodePanelLabel());
+    RootPanel.get("favoriteNodeContainer").add(dtcNodeView.getDtcFavoriteNodePanel());
 
   }
 

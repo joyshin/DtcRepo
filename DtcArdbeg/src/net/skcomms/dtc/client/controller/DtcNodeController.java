@@ -1,39 +1,21 @@
 package net.skcomms.dtc.client.controller;
 
-import java.util.List;
-
 import net.skcomms.dtc.client.DtcNodeObserver;
 import net.skcomms.dtc.client.model.DtcNodeModel;
-import net.skcomms.dtc.client.view.DtcNodeMetaCellView;
-import net.skcomms.dtc.shared.DtcNodeMetaModel;
-
-import com.google.gwt.user.cellview.client.CellList;
+import net.skcomms.dtc.client.view.DtcNodeView;
 
 public class DtcNodeController implements DtcNodeObserver {
   private final static DtcNodeController instance = new DtcNodeController();
-
-  public static final CellList<DtcNodeMetaModel> dtcNodeCellList = new CellList<DtcNodeMetaModel>(
-      DtcNodeMetaCellView.getInstance());
-
-  public static final CellList<DtcNodeMetaModel> dtcFavoriteNodeCellList = new CellList<DtcNodeMetaModel>(
-      DtcNodeMetaCellView.getInstance());
 
   public static DtcNodeController getInstance() {
     return DtcNodeController.instance;
   }
 
   private final DtcNodeModel dtcNodeModel = DtcNodeModel.getInstance();
+  private final DtcNodeView dtcNodeView = DtcNodeView.getInstace();
 
   private DtcNodeController() {
     initialize();
-  }
-
-  public CellList<DtcNodeMetaModel> getDtcFavoriteNodeCellList() {
-    return DtcNodeController.dtcFavoriteNodeCellList;
-  }
-
-  public CellList<DtcNodeMetaModel> getDtcNodeCellList() {
-    return DtcNodeController.dtcNodeCellList;
   }
 
   private void initialize() {
@@ -42,21 +24,11 @@ public class DtcNodeController implements DtcNodeObserver {
 
   @Override
   public void onFavoriteNodeListChanged() {
-    setDtcFavoriteNodeCellList(dtcNodeModel.getFavoriteNodeList());
+    dtcNodeView.setDtcFavoriteNodeWidget(dtcNodeModel.getFavoriteNodeList());
   }
 
   @Override
   public void onNodeListChanged() {
-    setDtcNodeCellList(dtcNodeModel.getNodeList());
-  }
-
-  private void setDtcFavoriteNodeCellList(List<DtcNodeMetaModel> list) {
-    dtcFavoriteNodeCellList.setRowData(list);
-    dtcFavoriteNodeCellList.setRowCount(list.size(), true);
-  }
-
-  private void setDtcNodeCellList(List<DtcNodeMetaModel> list) {
-    dtcNodeCellList.setRowData(list);
-    dtcNodeCellList.setRowCount(list.size(), true);
+    dtcNodeView.setDtcNodeWidget(dtcNodeModel.getNodeList());
   }
 }
