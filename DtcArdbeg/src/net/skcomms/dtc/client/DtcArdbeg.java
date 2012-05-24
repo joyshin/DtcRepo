@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 
 import net.skcomms.dtc.client.controller.DtcTestPageViewController;
 import net.skcomms.dtc.client.controller.DtcUrlCopyController;
@@ -16,26 +15,15 @@ import net.skcomms.dtc.client.view.DtcNavigationBarView;
 import net.skcomms.dtc.client.view.DtcUrlCopyButtonView;
 import net.skcomms.dtc.client.view.DtcUrlCopyDialogBoxView;
 import net.skcomms.dtc.client.view.DtcUserSignInView;
-import net.skcomms.dtc.shared.DtcNodeMetaModel;
+import net.skcomms.dtc.shared.DtcRequestInfoModel;
 
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.IFrameElement;
-import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.LinkElement;
 import com.google.gwt.dom.client.Node;
-import com.google.gwt.dom.client.TableCellElement;
-import com.google.gwt.dom.client.TableRowElement;
-import com.google.gwt.event.dom.client.LoadEvent;
-import com.google.gwt.event.dom.client.LoadHandler;
-import com.google.gwt.event.logical.shared.ResizeEvent;
-import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 
@@ -173,15 +161,13 @@ public class DtcArdbeg implements EntryPoint {
     });
   }
 
-  private final DtcTestPageViewController dtcTestPageViewConroller = new DtcTestPageViewController();
+  private final DtcTestPageViewController dtcTestPageViewConroller = this.createTestPageView();
 
   private final LastRequestLoaderController requestRecaller = new LastRequestLoaderController();
 
   private final FlowPanel dtcNodePanel = this.createFlowPanel();
 
   private final FlowPanel dtcfavoriteNodePanel = this.createFlowPanel();
-
-  private final Frame dtcFrame = this.createFrame();
 
   private DtcNavigationBarView navigationBar;
 
@@ -193,6 +179,8 @@ public class DtcArdbeg implements EntryPoint {
       this.dtcRequestFormAccessor);
 
   private final List<DtcArdbegObserver> dtcArdbegObservers = new ArrayList<DtcArdbegObserver>();
+
+  private String currentPath;
 
   private void addCssLinkIntoDtcFrame(Document doc) {
     LinkElement link = doc.createLinkElement();
@@ -236,115 +224,12 @@ public class DtcArdbeg implements EntryPoint {
     }
   }
 
-  private LoadHandler createDtcFrameLoadHandler() {
-    return new LoadHandler() {
-      @Override
-      public void onLoad(LoadEvent event) {
-        Document doc = DtcArdbeg.this.getDtcFrameDoc();
-
-        if (doc == null) {
-          return;
-        }
-
-        DtcPageType type = DtcArdbeg.this.getPageType(doc.getURL());
-
-        switch (type) {
-        case HOME:
-        case DIRECTORY:
-          break;
-        case TEST:
-          DtcArdbeg.this.onLoadDtcTestPage(doc);
-          break;
-        default:
-          GWT.log("Invalid Page Type: " + doc.getURL());
-          break;
-        }
-      }
-    };
-  }
-
-  private ResizeHandler createDtcFrameResizeHandler() {
-    return new ResizeHandler() {
-      @Override
-      public void onResize(ResizeEvent event) {
-        DtcArdbeg.this.dtcFrame.setPixelSize(Window.getClientWidth() - 30,
-            Window.getClientHeight() - 200);
-      }
-    };
-  }
-
   protected FlowPanel createFlowPanel() {
     return new FlowPanel();
   }
 
-  protected Frame createFrame() {
-    return new Frame();
-  }
-
-  private Element createSortedTableBody(Document doc, List<Pair<Integer, Node>> rows) {
-    Element newTableBody = doc.createElement("tbody");
-    Element oldTableBody = doc.getElementsByTagName("tbody").getItem(0);
-
-    if (this.hasVisitedService(rows)) {
-      newTableBody.appendChild(oldTableBody.getFirstChild().cloneNode(true));
-    }
-
-    int prevScore = 1;
-    for (Pair<Integer, Node> pair : rows) {
-      if (prevScore != 0 && pair.getKey().equals(0)) {
-        newTableBody.appendChild(oldTableBody.getFirstChild());
-      }
-      newTableBody.appendChild(pair.getValue());
-      prevScore = pair.getKey();
-    }
-    return newTableBody;
-  }
-
-  private List<Pair<Integer, Node>> createTableRows(List<DtcNodeMetaModel> nodeInfos) {
-    Document doc = IFrameElement.as(this.dtcFrame.getElement()).getContentDocument();
-    List<Pair<Integer, Node>> rows = new ArrayList<Pair<Integer, Node>>();
-
-    for (DtcNodeMetaModel nodeInfo : nodeInfos) {
-      TableRowElement row = doc.createTRElement();
-      TableCellElement cell = doc.createTDElement();
-      if (nodeInfo.isLeaf()) {
-        String href = "?c=" + nodeInfo.getPath().substring(1);
-        AnchorElement a = doc.createAnchorElement();
-        a.setHref(href);
-        a.setInnerText(nodeInfo.getName());
-        cell.appendChild(a);
-
-        cell.appendChild(doc.createTextNode(" "));
-
-        a = doc.createAnchorElement();
-        a.setHref(href);
-        a.setTarget("_blank");
-        ImageElement image = doc.createImageElement();
-        image.setSrc("http://dtc.skcomms.net/newwindow.png");
-        image.setAttribute("border", "0");
-        image.setTitle("새창열기");
-        a.appendChild(image);
-        cell.appendChild(a);
-      } else {
-        AnchorElement a = doc.createAnchorElement();
-        a.setHref("?b=" + nodeInfo.getPath().substring(1));
-        a.setInnerText(nodeInfo.getName());
-        cell.appendChild(a);
-      }
-      row.appendChild(cell);
-
-      cell = doc.createTDElement();
-      cell.setInnerText(nodeInfo.getDescription());
-      row.appendChild(cell);
-
-      cell = doc.createTDElement();
-      cell.setInnerText(nodeInfo.getUpdateTime());
-      row.appendChild(cell);
-
-      Integer score = PersistenceManager.getInstance().getVisitCount(nodeInfo.getName());
-      rows.add(new Pair<Integer, Node>(score, row));
-    }
-    return rows;
+  protected DtcTestPageViewController createTestPageView() {
+    return new DtcTestPageViewController();
   }
 
   void displayDirectoryPage() {
@@ -368,6 +253,7 @@ public class DtcArdbeg implements EntryPoint {
   }
 
   public void fireDtcHomePageLoaded() {
+    this.currentPath = "/";
     for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
       observer.onDtcHomeLoaded();
     }
@@ -377,6 +263,7 @@ public class DtcArdbeg implements EntryPoint {
   }
 
   public void fireDtcServiceDirectoryPageLoaded(String path) {
+    this.currentPath = path;
     for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
       observer.onDtcDirectoryLoaded(path);
     }
@@ -391,24 +278,26 @@ public class DtcArdbeg implements EntryPoint {
     }
   }
 
+  public void fireDtcTestPageLoaded(DtcRequestInfoModel requestInfo) {
+    this.currentPath = requestInfo.getPath();
+    for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
+      observer.onDtcTestPageLoaded(requestInfo);
+    }
+
+    this.hideSplash();
+    this.displayTestPage();
+  }
+
   public String getBaseUrl() {
     return this.BASE_URL;
   }
 
-  public Document getDtcFrameDoc() {
-    return IFrameElement.as(DtcArdbeg.this.dtcFrame.getElement()).getContentDocument();
-  }
-
-  public String getDtcFrameHref() {
-    return this.getDtcFrameDoc().getURL();
+  public String getCurrentPath() {
+    return this.currentPath;
   }
 
   public String getDtcProxyUrl() {
     return this.DTC_PROXY_URL;
-  }
-
-  public Map<String, String> getDtcRequestParameters() {
-    return this.dtcRequestFormAccessor.getDtcRequestParameters();
   }
 
   /**
@@ -418,53 +307,7 @@ public class DtcArdbeg implements EntryPoint {
     return Window.Location.getHref();
   }
 
-  public String getHrefWithTypeAndPath(DtcPageType type, String path) {
-
-    String href = this.getDtcProxyUrl();
-
-    switch (type) {
-    case HOME:
-      return href;
-    case DIRECTORY:
-      return href + "?b=" + path.substring(1);
-    case TEST:
-      return href + "?c=" + path.substring(1);
-    }
-
-    return null;
-  }
-
-  protected DtcPageType getPageType(String url) {
-    if (url.equals(this.DTC_PROXY_URL)) {
-      return DtcPageType.HOME;
-    }
-
-    int index = url.indexOf("?b=");
-    if (index != -1) {
-      return DtcPageType.DIRECTORY;
-    }
-
-    index = url.indexOf("?c=");
-    if (index != -1) {
-      return DtcPageType.TEST;
-    }
-    return DtcPageType.NONE;
-  }
-
-  private String getPathFromHref(String url) {
-    int index = url.indexOf("?");
-    if (index == -1) {
-      return "/";
-    } else {
-      return "/" + url.substring(index + 3);
-    }
-  }
-
-  private boolean hasVisitedService(List<Pair<Integer, Node>> rows) {
-    return !rows.isEmpty() && rows.get(0).getKey() > 0;
-  }
-
-  private void hideSplash() {
+  public void hideSplash() {
     RootPanel.get("loading").setVisible(false);
   }
 
@@ -484,16 +327,7 @@ public class DtcArdbeg implements EntryPoint {
   }
 
   private void initializeDtcFrame() {
-    this.dtcFrame.setPixelSize(Window.getClientWidth() - 30, Window.getClientHeight() - 135);
-
-    this.dtcFrame.addLoadHandler(this.createDtcFrameLoadHandler());
-
-    Window.addResizeHandler(this.createDtcFrameResizeHandler());
-
     this.displayHomePage();
-
-    RootPanel.get("dtcContainer").add(this.dtcFrame);
-    this.dtcFrame.setVisible(false);
 
     this.setDtcFramePath("/");
   }
@@ -544,23 +378,8 @@ public class DtcArdbeg implements EntryPoint {
 
   private void onLoadDtcResponseFrame(boolean success) {
     for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
-      observer.onDtcResponseFrameLoaded(this.getDtcFrameDoc(), success);
+      observer.onDtcResponseFrameLoaded(success);
     }
-  }
-
-  private void onLoadDtcTestPage(Document dtcFrameDoc) {
-
-    for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
-      observer.onDtcTestPageLoaded(dtcFrameDoc);
-    }
-
-    DtcArdbeg.addDtcResponseFrameLoadEventHandler(DtcArdbeg.this, dtcFrameDoc);
-    DtcArdbeg.addDtcSearchButtonEventHandler(DtcArdbeg.this, dtcFrameDoc);
-    DtcArdbeg.addDtcFormEventHandler(DtcArdbeg.this, dtcFrameDoc);
-
-    this.hideSplash();
-
-    this.displayTestPage();
   }
 
   @Override
@@ -602,8 +421,6 @@ public class DtcArdbeg implements EntryPoint {
     this.showSplash();
 
     DtcPageType type = DtcArdbeg.getTypeOfSelected(path, !path.endsWith("/"));
-    String href = this.getHrefWithTypeAndPath(type, path);
-    this.dtcFrame.setUrl(href);
 
     if (type == DtcPageType.HOME) {
       DtcNodeModel.getInstance().refreshDtcHomePageNode();
@@ -611,9 +428,12 @@ public class DtcArdbeg implements EntryPoint {
     else if (type == DtcPageType.DIRECTORY) {
       DtcNodeModel.getInstance().refreshDtcDirectoryPageNode(path);
     }
+    else if (type == DtcPageType.TEST) {
+      DtcNodeModel.getInstance().refreshDtcTestPage(path);
+    }
   }
 
-  private void showSplash() {
+  public void showSplash() {
     RootPanel.get("loading").setVisible(true);
   }
 }

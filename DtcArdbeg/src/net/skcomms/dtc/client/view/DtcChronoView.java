@@ -4,6 +4,7 @@ import java.util.Date;
 
 import net.skcomms.dtc.client.DefaultDtcArdbegObserver;
 import net.skcomms.dtc.client.DtcArdbeg;
+import net.skcomms.dtc.shared.DtcRequestInfoModel;
 
 import com.google.gwt.animation.client.Animation;
 import com.google.gwt.dom.client.DivElement;
@@ -108,7 +109,7 @@ public class DtcChronoView extends DefaultDtcArdbegObserver {
 
   public void initialize(DtcArdbeg dtcArdbeg) {
     dtcArdbeg.addDtcArdbegObserver(this);
-    this.createChrono(dtcArdbeg.getDtcFrameDoc());
+    this.createChrono(Document.get());
   }
 
   @Override
@@ -122,12 +123,12 @@ public class DtcChronoView extends DefaultDtcArdbegObserver {
   }
 
   @Override
-  public void onDtcResponseFrameLoaded(Document dtcFrameDoc, boolean success) {
+  public void onDtcResponseFrameLoaded(boolean success) {
     this.end();
   }
 
   @Override
-  public void onDtcTestPageLoaded(Document dtcFrameDoc) {
+  public void onDtcTestPageLoaded(DtcRequestInfoModel requestInfo) {
     RootPanel.get("chronoContainer").setVisible(true);
   }
 

@@ -25,12 +25,13 @@ h1 {
 	background-repeat:no-repeat;
 	filter:alpha(opacity=60);
 	opacity:0.6;
-	z-index: 2147483646
+	z-index: 100
 }
 
 /** Most GWT widgets already have a style name defined */
 .gwt-DialogBox {
 	width: 600px;
+	z-index: 2147483646
 }
 
 .dialogVPanel {

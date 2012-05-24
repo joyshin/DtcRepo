@@ -1,6 +1,6 @@
 package net.skcomms.dtc.client;
 
-import com.google.gwt.dom.client.Document;
+import net.skcomms.dtc.shared.DtcRequestInfoModel;
 
 public interface DtcArdbegObserver {
 
@@ -8,9 +8,9 @@ public interface DtcArdbegObserver {
 
   void onDtcHomeLoaded();
 
-  void onDtcResponseFrameLoaded(Document dtcFrameDoc, boolean success);
+  void onDtcResponseFrameLoaded(boolean success);
 
-  void onDtcTestPageLoaded(Document dtcFrameDoc);
+  void onDtcTestPageLoaded(DtcRequestInfoModel requestInfo);
 
   void onSubmittingDtcRequest();
 }

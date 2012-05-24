@@ -93,7 +93,8 @@ public class DtcServiceImplTest {
     URL url = new URL(href);
     URLConnection conn = url.openConnection();
     byte[] contents = DtcServiceImpl.readAllBytes(conn.getInputStream());
-    DtcRequestInfoModel requestInfo = DtcServiceImpl.createDtcRequestInfoFrom(contents);
+    DtcRequestInfoModel requestInfo = DtcServiceImpl.createDtcRequestInfoFrom("/kadcpts/100.ini",
+        contents);
     System.out.println(requestInfo.getParams().toString());
     System.out.println(requestInfo.getIpInfo());
 
@@ -101,7 +102,7 @@ public class DtcServiceImplTest {
     url = new URL(href);
     conn = url.openConnection();
     contents = DtcServiceImpl.readAllBytes(conn.getInputStream());
-    requestInfo = DtcServiceImpl.createDtcRequestInfoFrom(contents);
+    requestInfo = DtcServiceImpl.createDtcRequestInfoFrom("/kegloos_new/100.ini", contents);
     System.out.println(requestInfo.getParams().toString());
     System.out.println(requestInfo.getIpInfo());
   }

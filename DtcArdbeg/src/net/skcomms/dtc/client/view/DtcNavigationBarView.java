@@ -5,8 +5,8 @@ package net.skcomms.dtc.client.view;
 
 import net.skcomms.dtc.client.DefaultDtcArdbegObserver;
 import net.skcomms.dtc.client.DtcArdbeg;
+import net.skcomms.dtc.shared.DtcRequestInfoModel;
 
-import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Anchor;
@@ -21,12 +21,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 public class DtcNavigationBarView extends DefaultDtcArdbegObserver {
 
   static String[] getNavigationNodes(String path) {
-    int valueStartIndex = path.lastIndexOf("?");
-    if (valueStartIndex == -1) {
-      return ("Home" + path).split("/");
-    }
-    String valueSource = path.substring(valueStartIndex + 3);
-    return ("Home/" + valueSource).split("/");
+    return ("Home" + path).split("/");
   }
 
   private final HorizontalPanel naviPanel = new HorizontalPanel();
@@ -59,10 +54,10 @@ public class DtcNavigationBarView extends DefaultDtcArdbegObserver {
     this.naviPanel.add(label);
   }
 
-  public void addPath(String url) {
+  public void addPath(String path) {
     this.naviPanel.clear();
 
-    String[] nodes = DtcNavigationBarView.getNavigationNodes(url);
+    String[] nodes = DtcNavigationBarView.getNavigationNodes(path);
 
     String nodeHistory = this.rootPath;
     for (int i = 0; i < nodes.length - 1; i++) {
@@ -97,7 +92,7 @@ public class DtcNavigationBarView extends DefaultDtcArdbegObserver {
   }
 
   @Override
-  public void onDtcTestPageLoaded(Document dtcFrameDoc) {
-    this.addPath(dtcFrameDoc.getURL());
+  public void onDtcTestPageLoaded(DtcRequestInfoModel requestInfo) {
+    this.addPath(requestInfo.getPath());
   }
 }

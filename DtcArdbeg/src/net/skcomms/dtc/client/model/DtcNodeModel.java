@@ -6,11 +6,12 @@ import java.util.Comparator;
 import java.util.List;
 
 import net.skcomms.dtc.client.DtcArdbeg;
-import net.skcomms.dtc.client.PersistenceManager;
 import net.skcomms.dtc.client.DtcArdbeg.Pair;
+import net.skcomms.dtc.client.PersistenceManager;
 import net.skcomms.dtc.client.service.DtcService;
 import net.skcomms.dtc.client.view.DtcNodeMetaCellView;
 import net.skcomms.dtc.shared.DtcNodeMetaModel;
+import net.skcomms.dtc.shared.DtcRequestInfoModel;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.CellList;
@@ -35,7 +36,8 @@ public class DtcNodeModel {
   private static void sortFavoritesByVisitCount(List<Pair<Integer, DtcNodeMetaModel>> rows) {
     Collections.sort(rows, new Comparator<Pair<Integer, DtcNodeMetaModel>>() {
       @Override
-      public int compare(Pair<Integer, DtcNodeMetaModel> arg0, Pair<Integer, DtcNodeMetaModel> arg1) {
+      public int
+          compare(Pair<Integer, DtcNodeMetaModel> arg0, Pair<Integer, DtcNodeMetaModel> arg1) {
         return -arg0.getKey().compareTo(arg1.getKey());
       }
     });
@@ -149,6 +151,23 @@ public class DtcNodeModel {
         DtcNodeModel.this.owner.fireDtcHomePageLoaded();
       }
     });
+  }
+
+  public void refreshDtcTestPage(final String path) {
+    DtcService.Util.getInstance().getDtcRequestPageInfo(path,
+        new AsyncCallback<DtcRequestInfoModel>() {
+
+          @Override
+          public void onFailure(Throwable caught) {
+            caught.printStackTrace();
+            GWT.log(caught.getMessage());
+          }
+
+          @Override
+          public void onSuccess(final DtcRequestInfoModel requestInfo) {
+            DtcNodeModel.this.owner.fireDtcTestPageLoaded(requestInfo);
+          }
+        });
   }
 
   private void setDtcFavoriteNodeCellList() {

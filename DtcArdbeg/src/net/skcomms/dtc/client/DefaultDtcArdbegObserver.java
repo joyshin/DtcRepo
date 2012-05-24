@@ -3,7 +3,7 @@
  */
 package net.skcomms.dtc.client;
 
-import com.google.gwt.dom.client.Document;
+import net.skcomms.dtc.shared.DtcRequestInfoModel;
 
 /**
  * @author jujang@sk.com
@@ -20,11 +20,11 @@ public class DefaultDtcArdbegObserver implements DtcArdbegObserver {
   }
 
   @Override
-  public void onDtcResponseFrameLoaded(Document dtcFrameDoc, boolean success) {
+  public void onDtcResponseFrameLoaded(boolean success) {
   }
 
   @Override
-  public void onDtcTestPageLoaded(Document dtcFrameDoc) {
+  public void onDtcTestPageLoaded(DtcRequestInfoModel requestInfo) {
   }
 
   @Override

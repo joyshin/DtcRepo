@@ -1,8 +1,5 @@
 package net.skcomms.dtc.client.controller;
 
-import java.util.Map;
-import java.util.Map.Entry;
-
 import net.skcomms.dtc.client.DtcArdbeg;
 import net.skcomms.dtc.client.view.DtcUrlCopyButtonView;
 import net.skcomms.dtc.client.view.DtcUrlCopyDialogBoxView;
@@ -29,19 +26,16 @@ public class DtcUrlCopyController {
       sb.append(href.substring(0, href.indexOf('?')));
     }
 
-    int index;
-    if ((index = this.module.getDtcFrameHref().indexOf('?')) != -1) {
-      sb.append(this.module.getDtcFrameHref().substring(index, index + 3));
-      sb.append(URL.encode(this.module.getDtcFrameHref().substring(index + 3)));
+    if (this.module.getCurrentPath().equals("/")) {
     }
+    else if (this.module.getCurrentPath().endsWith("/")) {
+      sb.append("?b=");
+    } else {
+      sb.append("?c=");
+    }
+    sb.append(URL.encode(this.module.getCurrentPath().substring(1)));
 
-    Map<String, String> params = this.module.getDtcRequestParameters();
-    for (Entry<String, String> entry : params.entrySet()) {
-      sb.append('&');
-      sb.append(entry.getKey());
-      sb.append('=');
-      sb.append(URL.encode(entry.getValue()));
-    }
+    // TODO 현재 경로가 test page인 경우 request parameter를 추가한다.
     return sb.toString();
   }
 

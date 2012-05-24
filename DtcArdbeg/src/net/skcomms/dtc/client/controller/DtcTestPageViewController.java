@@ -5,12 +5,10 @@ import java.util.List;
 
 import net.skcomms.dtc.client.DefaultDtcArdbegObserver;
 import net.skcomms.dtc.client.DtcArdbeg;
-import net.skcomms.dtc.client.service.DtcService;
 import net.skcomms.dtc.shared.DtcRequestInfoModel;
 import net.skcomms.dtc.shared.DtcRequestParameterModel;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Document;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
@@ -20,7 +18,6 @@ import com.google.gwt.http.client.URL;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.smartgwt.client.types.ListGridEditEvent;
 import com.smartgwt.client.types.Overflow;
@@ -100,15 +97,17 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
   private VLayout vLayoutLeftBottom;
   private HLayout hLayoutRight;
 
-  private String currentPath;
-
-  final HTMLPane htmlPane = new HTMLPane();
+  final HTMLPane htmlPane = this.createHtmlPane();
 
   protected DtcRequestInfoModel requestInfo;
 
+  protected HTMLPane createHtmlPane() {
+    return new HTMLPane();
+  }
+
   private String createRequest() {
     StringBuffer requestData = new StringBuffer();
-    String testURL = "c" + "=" + URL.encode(this.currentPath);
+    String testURL = "c" + "=" + URL.encode(this.requestInfo.getPath().substring(1));
     String process = "process=1";
     requestData.append(testURL);
     requestData.append("&");
@@ -284,97 +283,75 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
   public void initialize(DtcArdbeg dtcArdbeg) {
     this.module = dtcArdbeg;
     dtcArdbeg.addDtcArdbegObserver(this);
-
   }
 
   @Override
-  public void onDtcResponseFrameLoaded(Document dtcFrameDoc, boolean success) {
+  public void onDtcTestPageLoaded(DtcRequestInfoModel requestInfo) {
+    this.refreshTestPage(requestInfo);
   }
 
-  @Override
-  public void onDtcTestPageLoaded(Document dtcFrameDoc) {
-    GWT.log(dtcFrameDoc.getURL());
-    this.currentPath = dtcFrameDoc.getURL().split("c=")[1];
-    this.refreshDtcTestPage("/" + this.currentPath);
-  }
+  private void refreshTestPage(DtcRequestInfoModel requestInfo) {
+    this.drawPanel();
 
-  @Override
-  public void onSubmittingDtcRequest() {
+    DtcTestPageViewController.this.requestInfo = requestInfo;
+    GWT.log(this.requestInfo.toString());
 
-  }
+    List<DtcRequestParameterModel> params = this.requestInfo.getParams();
+    List<RequestFormRecord> records = new ArrayList<RequestFormRecord>();
 
-  public void refreshDtcTestPage(String path) {
+    int index = 0;
+    for (DtcRequestParameterModel param : params) {
+      records.add(new RequestFormRecord(index++, param.getKey(), param.getName(), param
+          .getValue()));
+    }
+    DtcTestPageViewController.this.requestFormGrid.setData(records
+        .toArray(new RequestFormRecord[0]));
 
-    DtcService.Util.getInstance().getDtcRequestPageInfo(path,
-        new AsyncCallback<DtcRequestInfoModel>() {
+    // add IP combo box
+    RequestFormRecord ipRrecord = new RequestFormRecord(params.size(), "IP", "ip_select",
+        this.requestInfo.getIpInfo().getIpText());
+    DtcTestPageViewController.this.requestFormGrid.addData(ipRrecord);
 
+    DtcTestPageViewController.this.requestFormGrid
+        .setEditorCustomizer(new ListGridEditorCustomizer() {
           @Override
-          public void onFailure(Throwable caught) {
-            caught.printStackTrace();
-            GWT.log(caught.getMessage());
-          }
+          public FormItem getEditor(ListGridEditorContext context) {
+            ListGridField field = context.getEditField();
+            if (field.getName().equals("value")) {
+              RequestFormRecord record = (RequestFormRecord) context.getEditedRecord();
 
-          @Override
-          public void onSuccess(final DtcRequestInfoModel requestInfo) {
-            DtcTestPageViewController.this.requestInfo = requestInfo;
-            GWT.log(requestInfo.toString());
+              if (record.getAttributeAsString("key").equals("IP")) {
+                ComboBoxItem cbItem = new ComboBoxItem();
 
-            List<DtcRequestParameterModel> params = requestInfo.getParams();
-            List<RequestFormRecord> records = new ArrayList<RequestFormRecord>();
+                cbItem.setType("comboBox");
 
-            int index = 0;
-            for (DtcRequestParameterModel param : params) {
-              records.add(new RequestFormRecord(index++, param.getKey(), param.getName(), param
-                  .getValue()));
+                String[] ipList = new String[DtcTestPageViewController.this.requestInfo.getIpInfo()
+                    .getOptions().size()];
+                for (int i = 0; i < ipList.length; i++) {
+                  cbItem.setAttribute("key", DtcTestPageViewController.this.requestInfo.getIpInfo()
+                      .getOptions().get(i)
+                      .getKey());
+                  cbItem.setAttribute("name", DtcTestPageViewController.this.requestInfo
+                      .getIpInfo().getOptions().get(i)
+                      .getName());
+
+                  ipList[i] = DtcTestPageViewController.this.requestInfo.getIpInfo().getOptions()
+                      .get(i).getValue();
+                }
+                cbItem.setValueMap(ipList);
+
+                return cbItem;
+              } else {
+                TextItem textItem = new TextItem();
+                textItem.setShowHint(true);
+                textItem.setShowHintInField(true);
+                textItem.setHint("Some Hint");
+
+                return textItem;
+              }
             }
-            DtcTestPageViewController.this.requestFormGrid.setData(records
-                .toArray(new RequestFormRecord[0]));
-
-            // add IP combo box
-            RequestFormRecord ipRrecord = new RequestFormRecord(params.size(), "IP", "ip_select",
-                requestInfo.getIpInfo().getIpText());
-            DtcTestPageViewController.this.requestFormGrid.addData(ipRrecord);
-
-            DtcTestPageViewController.this.requestFormGrid
-                .setEditorCustomizer(new ListGridEditorCustomizer() {
-                  @Override
-                  public FormItem getEditor(ListGridEditorContext context) {
-                    ListGridField field = context.getEditField();
-                    if (field.getName().equals("value")) {
-                      RequestFormRecord record = (RequestFormRecord) context.getEditedRecord();
-
-                      if (record.getAttributeAsString("key").equals("IP")) {
-                        ComboBoxItem cbItem = new ComboBoxItem();
-
-                        cbItem.setType("comboBox");
-
-                        String[] ipList = new String[requestInfo.getIpInfo()
-                            .getOptions().size()];
-                        for (int i = 0; i < ipList.length; i++) {
-                          cbItem.setAttribute("key", requestInfo.getIpInfo().getOptions().get(i)
-                              .getKey());
-                          cbItem.setAttribute("name", requestInfo.getIpInfo().getOptions().get(i)
-                              .getName());
-
-                          ipList[i] = requestInfo.getIpInfo().getOptions().get(i).getValue();
-                        }
-                        cbItem.setValueMap(ipList);
-
-                        return cbItem;
-                      } else {
-                        TextItem textItem = new TextItem();
-                        textItem.setShowHint(true);
-                        textItem.setShowHintInField(true);
-                        textItem.setHint("Some Hint");
-
-                        return textItem;
-                      }
-                    }
-                    return context.getDefaultProperties();
-                  }
-                });
+            return context.getDefaultProperties();
           }
         });
-    this.drawPanel();
   }
 }

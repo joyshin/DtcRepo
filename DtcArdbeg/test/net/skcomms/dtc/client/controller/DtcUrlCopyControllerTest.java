@@ -3,9 +3,6 @@
  */
 package net.skcomms.dtc.client.controller;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import net.skcomms.dtc.client.DtcArdbeg;
 import net.skcomms.dtc.client.view.DtcUrlCopyButtonView;
 import net.skcomms.dtc.client.view.DtcUrlCopyDialogBoxView;
@@ -16,7 +13,6 @@ import org.junit.Test;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Frame;
 
 /**
  * @author jujang@sk.com
@@ -36,23 +32,31 @@ public class DtcUrlCopyControllerTest {
     }
 
     @Override
-    protected Frame createFrame() {
+    protected DtcTestPageViewController createTestPageView() {
       return null;
     }
 
     @Override
-    public String getDtcFrameHref() {
+    public String getCurrentPath() {
       return "dtc.skcomms.net/_dtcproxy_/";
-    }
-
-    @Override
-    public Map<String, String> getDtcRequestParameters() {
-      return new HashMap<String, String>();
     }
 
     @Override
     public String getHref() {
       return "http://dtc.skcomms.net/";
+    }
+
+    @Override
+    public void hideSplash() {
+    }
+
+    @Override
+    public void setDtcFramePath(String path) {
+
+    }
+
+    @Override
+    public void showSplash() {
     }
   }
 

@@ -58,8 +58,7 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
 
   private static final String DTC_URL = "http://10.141.6.198/";
 
-  private static
-      ParserCallback
+  private static ParserCallback
       createDtcDirectoryParserCallback(final List<DtcNodeMetaModel> items) {
     return new ParserCallback() {
       private int textCount;
@@ -265,13 +264,15 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
   }
 
   /**
+   * @param path
    * @param contents
    * @throws IOException
    * @throws UnsupportedEncodingException
    */
-  static DtcRequestInfoModel createDtcRequestInfoFrom(byte[] contents)
+  static DtcRequestInfoModel createDtcRequestInfoFrom(String path, byte[] contents)
       throws UnsupportedEncodingException, IOException {
     DtcRequestInfoModel requestInfo = new DtcRequestInfoModel();
+    requestInfo.setPath(path);
 
     String encoding = DtcServiceImpl.guessCharacterEncoding(contents);
     ParserCallback callback = DtcServiceImpl.createDtcRequestFrameParserCallback(requestInfo,
@@ -376,7 +377,7 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     try {
       String href = DtcServiceImpl.DTC_URL + "request.html?c=" + path.substring(1);
       byte[] contents = DtcServiceImpl.getHtmlContents(href);
-      return DtcServiceImpl.createDtcRequestInfoFrom(contents);
+      return DtcServiceImpl.createDtcRequestInfoFrom(path, contents);
     } catch (MalformedURLException e) {
       e.printStackTrace();
       throw new IllegalArgumentException(e);

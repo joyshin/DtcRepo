@@ -19,6 +19,8 @@ public class DtcRequestInfoModel implements Serializable {
 
   private String encoding;
 
+  private String path;
+
   /**
    * @return
    */
@@ -37,6 +39,13 @@ public class DtcRequestInfoModel implements Serializable {
     return this.params;
   }
 
+  /**
+   * @return
+   */
+  public String getPath() {
+    return this.path;
+  }
+
   public void setEncoding(String encoding) {
     this.encoding = encoding;
   }
@@ -47,6 +56,13 @@ public class DtcRequestInfoModel implements Serializable {
 
   public void setParams(List<DtcRequestParameterModel> params) {
     this.params = params;
+  }
+
+  /**
+   * @param path
+   */
+  public void setPath(String path) {
+    this.path = path;
   }
 
   @Override
