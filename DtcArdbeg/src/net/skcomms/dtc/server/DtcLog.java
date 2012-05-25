@@ -18,13 +18,16 @@ import org.hibernate.annotations.GenericGenerator;
 @Entity
 public class DtcLog {
 
+  @SuppressWarnings("unused")
   @Id
   @GeneratedValue(generator = "increment")
   @GenericGenerator(name = "increment", strategy = "native")
   private Long id;
 
+  @SuppressWarnings("unused")
   private String message;
 
+  @SuppressWarnings("unused")
   private Date date = new Date();
 
   public DtcLog() {

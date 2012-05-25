@@ -31,6 +31,7 @@ public class UserConfigModel implements Serializable {
 
   public static final UserConfigModel EMPTY_CONFIG = new UserConfigModel();
 
+  @SuppressWarnings("unused")
   @Id
   @GeneratedValue(generator = "increment")
   @GenericGenerator(name = "increment", strategy = "native")

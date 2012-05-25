@@ -23,7 +23,7 @@ public class DtcJsonToXmlHandler implements ContentHandler {
 
   @Override
   public void endJSON() throws ParseException, IOException {
-    xmlSb.append("</Results>");
+    this.xmlSb.append("</Results>");
     // System.out.println("<?xml version=\"1.0\" encoding=\"" + encoding +
     // "\"?>");
     // System.out.println(xmlSb.toString());
@@ -31,24 +31,20 @@ public class DtcJsonToXmlHandler implements ContentHandler {
 
   @Override
   public boolean endObject() throws ParseException, IOException {
-    if (isCurrentPath("ResultSet/Results/ResultList/Document/")) {
-      String documentKey = stack.pop();
-      xmlSb.append(getIndentString() + "</" + documentKey + ">");
+    if (this.isCurrentPath("ResultSet/Results/ResultList/Document/")) {
+      String documentKey = this.stack.pop();
+      this.xmlSb.append(this.getIndentString() + "</" + documentKey + ">");
     }
     return true;
   }
 
   @Override
   public boolean endObjectEntry() throws ParseException, IOException {
-    String key = stack.pop();
-    if (!(isCurrentPath("") && key.equals("Encoding"))) {
-      xmlSb.append(getIndentString() + "</" + key + ">");
+    String key = this.stack.pop();
+    if (!(this.isCurrentPath("") && key.equals("Encoding"))) {
+      this.xmlSb.append(this.getIndentString() + "</" + key + ">");
     }
     return true;
-  }
-
-  private String escape(String string) {
-    return string;
   }
 
   private String getCDataString(String value) {
@@ -57,7 +53,7 @@ public class DtcJsonToXmlHandler implements ContentHandler {
 
   private String getIndentString() {
     StringBuilder sb = new StringBuilder();
-    for (int i = 0; i <= stack.size(); i++) {
+    for (int i = 0; i <= this.stack.size(); i++) {
       // sb.append("  ");
       sb.append("");
     }
@@ -67,7 +63,7 @@ public class DtcJsonToXmlHandler implements ContentHandler {
   private boolean isCurrentPath(String path) {
     StringBuilder sb = new StringBuilder();
 
-    for (String item : stack.toArray(new String[0])) {
+    for (String item : this.stack.toArray(new String[0])) {
       sb.append(item + "/");
     }
 
@@ -76,15 +72,15 @@ public class DtcJsonToXmlHandler implements ContentHandler {
 
   @Override
   public boolean primitive(Object value) throws ParseException, IOException {
-    if (isCurrentPath("ResultSet/ResponseInfo/Code/")
-        || isCurrentPath("ResultSet/ResponseInfo/Message/")) {
-      xmlSb.append(getIndentString() + value);
+    if (this.isCurrentPath("ResultSet/ResponseInfo/Code/")
+        || this.isCurrentPath("ResultSet/ResponseInfo/Message/")) {
+      this.xmlSb.append(this.getIndentString() + value);
     }
-    else if (isCurrentPath("Encoding/")) {
-      encoding = value.toString();
+    else if (this.isCurrentPath("Encoding/")) {
+      this.encoding = value.toString();
     }
     else {
-      xmlSb.append(getIndentString() + getCDataString(value.toString()));
+      this.xmlSb.append(this.getIndentString() + this.getCDataString(value.toString()));
     }
     return true;
   }
@@ -97,30 +93,30 @@ public class DtcJsonToXmlHandler implements ContentHandler {
 
   @Override
   public void startJSON() throws ParseException, IOException {
-    xmlSb = new StringBuilder();
-    xmlSb.append("<Results version=\"1.0\">");
+    this.xmlSb = new StringBuilder();
+    this.xmlSb.append("<Results version=\"1.0\">");
   }
 
   @Override
   public boolean startObject() throws ParseException, IOException {
-    if (isCurrentPath("ResultSet/Results/ResultList/")) {
-      xmlSb.append(getIndentString() + "<Document>");
-      stack.push("Document");
+    if (this.isCurrentPath("ResultSet/Results/ResultList/")) {
+      this.xmlSb.append(this.getIndentString() + "<Document>");
+      this.stack.push("Document");
     }
     return true;
   }
 
   @Override
   public boolean startObjectEntry(String key) throws ParseException, IOException {
-    if (!(isCurrentPath("") && key.equals("Encoding"))) {
-      xmlSb.append(getIndentString() + "<" + key + ">");
+    if (!(this.isCurrentPath("") && key.equals("Encoding"))) {
+      this.xmlSb.append(this.getIndentString() + "<" + key + ">");
     }
-    stack.push(key);
+    this.stack.push(key);
     return true;
   }
 
   @Override
   public String toString() {
-    return "<?xml version=\"1.0\" encoding=\"" + encoding + "\"?>" + xmlSb.toString();
+    return "<?xml version=\"1.0\" encoding=\"" + this.encoding + "\"?>" + this.xmlSb.toString();
   }
 }
