@@ -209,15 +209,7 @@ public class DtcArdbeg implements EntryPoint {
     this.ipHistoryManager.initialize(this);
     this.initializeNavigationBar();
     this.initializeRequestFormAccessor();
-    this.dtcTestPageConroller.initialize(this, this.dtcTestPageView);
-
-    this.dtcTestPageView.setOnReadyRequestDataCb(new DtcTestPageViewListener() {
-
-      @Override
-      public void onReadyRequestData() {
-        DtcArdbeg.this.onSubmitRequestForm();
-      }
-    });
+    this.initializeTestPage();
 
     this.initializeUrlCopy();
     this.usernameSubmissionManager.initialize();
@@ -265,6 +257,10 @@ public class DtcArdbeg implements EntryPoint {
   private void initializeRequestFormAccessor() {
     this.dtcRequestFormAccessor = new DtcRequestFormAccessor();
     this.dtcRequestFormAccessor.initialize(this);
+  }
+
+  private void initializeTestPage() {
+    this.dtcTestPageConroller.initialize(this, this.dtcTestPageView);
   }
 
   private void initializeUrlCopy() {

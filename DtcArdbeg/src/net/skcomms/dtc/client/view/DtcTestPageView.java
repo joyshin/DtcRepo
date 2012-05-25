@@ -3,7 +3,7 @@ package net.skcomms.dtc.client.view;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.skcomms.dtc.client.DtcTestPageViewListener;
+import net.skcomms.dtc.client.DtcTestPageViewObserver;
 import net.skcomms.dtc.shared.DtcRequestInfoModel;
 import net.skcomms.dtc.shared.DtcRequestParameterModel;
 
@@ -100,7 +100,7 @@ public class DtcTestPageView {
 
   private DtcRequestInfoModel requestInfo;
 
-  private DtcTestPageViewListener readyRequestDataCb;
+  private DtcTestPageViewObserver readyRequestDataCb;
 
   private void createFormRecord() {
 
@@ -293,7 +293,7 @@ public class DtcTestPageView {
 
   }
 
-  public void setOnReadyRequestDataCb(DtcTestPageViewListener cb) {
+  public void setOnReadyRequestDataObserver(DtcTestPageViewObserver cb) {
     this.readyRequestDataCb = cb;
 
   }

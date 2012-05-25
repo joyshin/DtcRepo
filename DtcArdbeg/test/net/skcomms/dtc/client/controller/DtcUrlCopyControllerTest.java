@@ -16,11 +16,11 @@ import com.google.gwt.user.client.ui.FlowPanel;
 
 /**
  * @author jujang@sk.com
- * 
  */
 public class DtcUrlCopyControllerTest {
 
   static class MockDtcArdbeg extends DtcArdbeg {
+
     @Override
     protected String calculateBaseUrl() {
       return null;
@@ -28,11 +28,6 @@ public class DtcUrlCopyControllerTest {
 
     @Override
     protected FlowPanel createFlowPanel() {
-      return null;
-    }
-
-    @Override
-    protected DtcTestPageViewController createTestPageView() {
       return null;
     }
 

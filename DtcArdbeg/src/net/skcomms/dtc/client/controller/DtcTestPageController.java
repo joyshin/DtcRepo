@@ -2,12 +2,11 @@ package net.skcomms.dtc.client.controller;
 
 import net.skcomms.dtc.client.DefaultDtcArdbegObserver;
 import net.skcomms.dtc.client.DtcArdbeg;
-import net.skcomms.dtc.client.service.DtcService;
+import net.skcomms.dtc.client.DtcTestPageViewObserver;
 import net.skcomms.dtc.client.view.DtcTestPageView;
 import net.skcomms.dtc.shared.DtcRequestInfoModel;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Document;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
@@ -16,13 +15,11 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class DtcTestPageController extends DefaultDtcArdbegObserver {
 
   private DtcTestPageView dtcTestPageView;
 
-  private String convertedHTML = null;
   private String currentPath;
 
   private String dtcProxyUrl;
@@ -53,12 +50,11 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
       public void onResponseReceived(Request request, Response response) {
         String result = response.getText();
         GWT.log(result);
-        DtcTestPageController.this.convertedHTML = result.replaceAll("<!\\[CDATA\\[", "").
+        String convertedHTML = result.replaceAll("<!\\[CDATA\\[", "").
             replaceAll("\\]\\]>", "");
-        GWT.log(DtcTestPageController.this.convertedHTML);
+        GWT.log(convertedHTML);
 
-        DtcTestPageController.this.dtcTestPageView
-            .setHTMLData(DtcTestPageController.this.convertedHTML);
+        DtcTestPageController.this.dtcTestPageView.setHTMLData(convertedHTML);
       }
     });
 
@@ -69,39 +65,31 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
     }
   }
 
-  public void initialize(DtcArdbeg dtcArdbeg, DtcTestPageView dtcTestPageView) {
+  public void initialize(final DtcArdbeg dtcArdbeg, DtcTestPageView dtcTestPageView) {
     dtcArdbeg.addDtcArdbegObserver(this);
     this.dtcProxyUrl = dtcArdbeg.getDtcProxyUrl();
     this.dtcTestPageView = dtcTestPageView;
 
+    dtcTestPageView.setOnReadyRequestDataObserver(new DtcTestPageViewObserver() {
+
+      @Override
+      public void onReadyRequestData() {
+        dtcArdbeg.onSubmitRequestForm();
+      }
+    });
   }
 
-  public void loadDtcTestPageView(String path) {
-
-    DtcService.Util.getInstance().getDtcRequestPageInfo(path,
-        new AsyncCallback<DtcRequestInfoModel>() {
-
-          @Override
-          public void onFailure(Throwable caught) {
-            caught.printStackTrace();
-            GWT.log(caught.getMessage());
-          }
-
-          @Override
-          public void onSuccess(final DtcRequestInfoModel requestInfo) {
-            DtcTestPageController.this.dtcTestPageView.setRequestInfo(requestInfo);
-            // GWT.log(requestInfo.toString());
-            DtcTestPageController.this.dtcTestPageView.draw();
-            DtcTestPageController.this.encoding = requestInfo.getEncoding();
-          }
-        });
+  public void loadDtcTestPageView(DtcRequestInfoModel requestInfo) {
+    this.currentPath = requestInfo.getPath();
+    DtcTestPageController.this.dtcTestPageView.setRequestInfo(requestInfo);
+    // GWT.log(requestInfo.toString());
+    DtcTestPageController.this.dtcTestPageView.draw();
+    DtcTestPageController.this.encoding = requestInfo.getEncoding();
   }
 
   @Override
-  public void onDtcTestPageLoaded(Document dtcFrameDoc) {
-    GWT.log(dtcFrameDoc.getURL());
-    this.currentPath = dtcFrameDoc.getURL().split("c=")[1];
-    this.loadDtcTestPageView("/" + this.currentPath);
+  public void onDtcTestPageLoaded(DtcRequestInfoModel requestInfo) {
+    this.loadDtcTestPageView(requestInfo);
   }
 
   @Override
