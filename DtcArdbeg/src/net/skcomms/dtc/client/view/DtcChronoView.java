@@ -125,7 +125,7 @@ public class DtcChronoView extends DefaultDtcArdbegObserver {
   }
 
   @Override
-  public void onSubmittingDtcRequest() {
+  public void onSubmitRequestForm() {
     this.start();
   }
 

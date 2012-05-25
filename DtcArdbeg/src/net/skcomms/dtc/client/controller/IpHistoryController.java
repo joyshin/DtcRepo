@@ -92,21 +92,17 @@ public class IpHistoryController extends DefaultDtcArdbegObserver {
 
     /*
      * SelectElement select = this.getOrCreateIpSelectElement(dtcFrameDoc); int
-     * current = select.getSelectedIndex(); select.clear();
-     * 
-     * Document requestDoc =
-     * FrameElement.as(dtcFrameDoc.getElementsByTagName("frame").getItem(0))
+     * current = select.getSelectedIndex(); select.clear(); Document requestDoc
+     * = FrameElement.as(dtcFrameDoc.getElementsByTagName("frame").getItem(0))
      * .getContentDocument(); for (IpOptionModel option : this.options) {
      * OptionElement optionElement = requestDoc.createOptionElement();
      * optionElement.setValue(option.getIp());
      * optionElement.setInnerText(option.getText() + option.getDecoratedText());
-     * 
      * if (option.getOrigin().equals(Origin.DTC)) {
      * this.dtcOptGroup.appendChild(optionElement); } else {
      * this.storedOptGroup.appendChild(optionElement); } }
      * select.appendChild(this.dtcOptGroup);
      * select.appendChild(this.storedOptGroup);
-     * 
      * select.setSelectedIndex(current);
      */
   }
@@ -131,16 +127,11 @@ public class IpHistoryController extends DefaultDtcArdbegObserver {
     /*
      * Document requestDoc =
      * FrameElement.as(dtcFrameDoc.getElementsByTagName("frame").getItem(0))
-     * .getContentDocument();
-     * 
-     * String keyPrefix = this.combineKeyPrefix(requestDoc); String ip =
-     * this.requestParameter.getDtcRequestParameter("IP");
-     * 
-     * String key = keyPrefix + ip; IpOptionModel option =
-     * this.getOrCreateIpOptionBy(ip);
-     * 
+     * .getContentDocument(); String keyPrefix =
+     * this.combineKeyPrefix(requestDoc); String ip =
+     * this.requestParameter.getDtcRequestParameter("IP"); String key =
+     * keyPrefix + ip; IpOptionModel option = this.getOrCreateIpOptionBy(ip);
      * Date now = new Date(); option.setLastSuccessTime(now);
-     * 
      * PersistenceManager.getInstance().setItem(key,
      * Long.toString(now.getTime()));
      */

@@ -97,7 +97,7 @@ public class LastRequestLoaderController extends DefaultDtcArdbegObserver {
   }
 
   @Override
-  public void onSubmittingDtcRequest() {
+  public void onSubmitRequestForm() {
   }
 
   public void persist() {
@@ -105,15 +105,13 @@ public class LastRequestLoaderController extends DefaultDtcArdbegObserver {
     /*
      * NodeCollection<Element> nodeCollection =
      * this.getFormControlElements(dtcFrameDoc); if (nodeCollection == null) {
-     * return; }
-     * 
-     * String key = LastRequestLoaderController.EMPTY_STRING; StringBuilder data
-     * = new StringBuilder(); for (int i = 0; i < nodeCollection.getLength();
-     * i++) { String name = nodeCollection.getItem(i).getAttribute("name"); if
-     * (name.equals("c")) { key =
-     * nodeCollection.getItem(i).getAttribute("value"); } else { String value =
-     * null; if (name.matches("REQUEST[0-9]+") || name.equals("ip_text") ||
-     * name.equals("port")) { InputElement inputElem =
+     * return; } String key = LastRequestLoaderController.EMPTY_STRING;
+     * StringBuilder data = new StringBuilder(); for (int i = 0; i <
+     * nodeCollection.getLength(); i++) { String name =
+     * nodeCollection.getItem(i).getAttribute("name"); if (name.equals("c")) {
+     * key = nodeCollection.getItem(i).getAttribute("value"); } else { String
+     * value = null; if (name.matches("REQUEST[0-9]+") || name.equals("ip_text")
+     * || name.equals("port")) { InputElement inputElem =
      * InputElement.as(nodeCollection.getItem(i)); value = inputElem.getValue();
      * } else if (name.equals("ip_select")) { SelectElement selectElem =
      * SelectElement.as(nodeCollection.getItem(i)); value =
@@ -121,15 +119,36 @@ public class LastRequestLoaderController extends DefaultDtcArdbegObserver {
      * data.append(LastRequestLoaderController.FORM_VALUE_DELIMETER);
      * data.append(value);
      * data.append(LastRequestLoaderController.FORM_FIELD_DELIMETER); } }
-     * 
      * PersistenceManager.getInstance().setItem(key, data.toString());
      */
   }
 
   public void recall(DtcRequestInfoModel requestInfo) {
-
     String key = LastRequestLoaderController.findKey(requestInfo.getPath());
     Map<String, String> params = LastRequestLoaderController.getLastParameters(key);
     // TODO fill request parameters
+    // NodeCollection<Element> nodeCollection =
+    // this.getFormControlElements(doc);
+    // if (nodeCollection == null) {
+    // return;
+    // }
+    //
+    // String key = LastRequestLoaderController.findKey(nodeCollection);
+    // Map<String, String> params =
+    // LastRequestLoaderController.getLastParameters(key);
+    // for (int i = 0; i < nodeCollection.getLength(); i++) {
+    // String name = nodeCollection.getItem(i).getAttribute("name");
+    // String value = params.get(name);
+    // if (value != null) {
+    // if (name.matches("REQUEST[0-9]+") || name.equals("ip_text") ||
+    // name.equals("port")) {
+    // InputElement inputElem = InputElement.as(nodeCollection.getItem(i));
+    // inputElem.setValue(value);
+    // } else if (name.equals("ip_select")) {
+    // SelectElement selectElem = SelectElement.as(nodeCollection.getItem(i));
+    // selectElem.setValue(value);
+    // }
+    // }
+    // }
   }
 }

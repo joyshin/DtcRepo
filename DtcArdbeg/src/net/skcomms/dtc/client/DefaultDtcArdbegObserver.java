@@ -7,7 +7,6 @@ import net.skcomms.dtc.shared.DtcRequestInfoModel;
 
 /**
  * @author jujang@sk.com
- * 
  */
 public class DefaultDtcArdbegObserver implements DtcArdbegObserver {
 
@@ -28,7 +27,8 @@ public class DefaultDtcArdbegObserver implements DtcArdbegObserver {
   }
 
   @Override
-  public void onSubmittingDtcRequest() {
+  public void onSubmitRequestForm() {
+
   }
 
 }

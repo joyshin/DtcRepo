@@ -20,7 +20,7 @@ public class DtcXmlToHtmlHandler extends DefaultHandler {
   final String RESULT_HEADER = "ResultHeader";
   final String RESULT_LIST = "ResultList";
   final String DOCUMENT = "Document";
-  final String CDATA_TOKEN = "//<![CDATA[";
+  final String CDATA_TOKEN = "<![CDATA[";
 
   private final StringBuilder parseBuffer;
   private final StringBuilder rawHtml;
@@ -57,10 +57,10 @@ public class DtcXmlToHtmlHandler extends DefaultHandler {
         (elementName == this.RESULT_LIST) ||
         (elementName == this.DOCUMENT))
     {
-      divForm.append("</ul>\n");
+      divForm.append("</div>\n");
       divForm.append("<hr />");
     } else {
-      divForm.append("</li>\n");
+      divForm.append("</div>\n");
     }
 
     if (this.parseBuffer.length() > 0 && this.parseBuffer.lastIndexOf(">") > 0) {
@@ -69,12 +69,12 @@ public class DtcXmlToHtmlHandler extends DefaultHandler {
       this.parseBuffer.setLength(0);
       this.parseBuffer.append(this.CDATA_TOKEN);
       this.parseBuffer.append(temp);
-      this.parseBuffer.append("//]]>");
+      this.parseBuffer.append("]]>");
       this.parseBuffer.append("\n");
 
     } else if (this.parseBuffer.length() > 0) {
       this.parseBuffer.insert(0, this.CDATA_TOKEN);
-      this.parseBuffer.append("//]]>");
+      this.parseBuffer.append("]]>");
       this.parseBuffer.append("\n");
     }
 
@@ -116,10 +116,10 @@ public class DtcXmlToHtmlHandler extends DefaultHandler {
         (elementName == this.RESULT_LIST) ||
         (elementName == this.DOCUMENT)) {
       className = elementName;
-      divForm.append("<ul id=\"");
+      divForm.append("<div id=\"");
     } else {
       className = elementName;
-      divForm.append("<li id=\"");
+      divForm.append("<div id=\"");
     }
 
     if (atts.getLength() > 0) {
