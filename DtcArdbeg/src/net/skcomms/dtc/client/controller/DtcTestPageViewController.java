@@ -178,6 +178,8 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
 
       @Override
       public void onClick(ClickEvent event) {
+        DtcTestPageViewController.this.module.onSubmitRequestForm();
+
         String requestData = DtcTestPageViewController.this.createRequest();
         String targetURL = URL.encode(DtcTestPageViewController.this.module.getDtcProxyUrl()
             + "response.html");
@@ -211,7 +213,7 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
               @Override
               public void onError(Request request, Throwable exception) {
                 GWT.log(exception.getMessage());
-
+                DtcTestPageViewController.this.module.onLoadDtcResponseFrame(false);
               }
 
               @Override
@@ -223,6 +225,7 @@ public class DtcTestPageViewController extends DefaultDtcArdbegObserver {
                 GWT.log(builder.toSafeHtml().asString());
                 DtcTestPageViewController.this.htmlPane
                     .setContents(builder.toSafeHtml().asString());
+                DtcTestPageViewController.this.module.onLoadDtcResponseFrame(true);
               }
             });
 

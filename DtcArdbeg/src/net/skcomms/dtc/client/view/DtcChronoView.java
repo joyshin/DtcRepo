@@ -73,14 +73,6 @@ public class DtcChronoView extends DefaultDtcArdbegObserver {
     }
   }
 
-  public native static void addDtcSearchButtonEventHandler(DtcChronoView chrono, Document dtcDoc) /*-{
-    var searchButton = dtcDoc.getElementsByTagName("frame")[0].contentWindow.document
-        .getElementById("div_search");
-    searchButton.onclick = function() {
-      chrono.@net.skcomms.dtc.client.DtcArdbeg::onSubmitRequestForm()();
-    };
-  }-*/;
-
   ChronoAnimation chronoAnimation;
 
   public void createChrono(Document dtcFrameDoc) {

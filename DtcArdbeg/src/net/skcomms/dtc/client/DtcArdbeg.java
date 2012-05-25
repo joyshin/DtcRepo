@@ -1,8 +1,6 @@
 package net.skcomms.dtc.client;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import net.skcomms.dtc.client.controller.DtcTestPageViewController;
@@ -19,9 +17,6 @@ import net.skcomms.dtc.shared.DtcRequestInfoModel;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.LinkElement;
-import com.google.gwt.dom.client.Node;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -57,78 +52,6 @@ public class DtcArdbeg implements EntryPoint {
     }
   }
 
-  private final String BASE_URL = this.calculateBaseUrl();
-
-  private final String DTC_PROXY_URL = this.BASE_URL + "_dtcproxy_/";
-
-  private static DtcChronoView dtcChrono = new DtcChronoView();
-
-  public native static void addDtcFormEventHandler(DtcArdbeg module, Document dtcDoc) /*-{
-    var inputForm = dtcDoc.getElementsByTagName("frame")[0].contentWindow.document
-        .getElementsByTagName("form")[0];
-    for (i = 0; i < inputForm.elements.length; i++) {
-      var inputElement = inputForm.elements[i];
-      if (inputElement.type == "text") {
-        inputElement.onkeydown = function(event) {
-          if (event.keyCode == 13) {
-            module.@net.skcomms.dtc.client.DtcArdbeg::onSubmitRequestForm()();
-            this.form.submit();
-            this.select();
-          }
-        }
-      }
-      ;
-    }
-  }-*/;
-
-  private static native void addDtcFrameScrollEventHandler(DtcArdbeg ardbeg) /*-{
-    if ($doc.cssInserted == null) {
-      $doc.cssInserted = true;
-      $doc.styleSheets[0]
-          .insertRule("div#dtcContainer iframe { background-position: 0px 0px; }", 0);
-    }
-
-    dtc = $doc.getElementsByTagName("iframe")[1];
-    $doc.styleSheets[0].cssRules[0].style.backgroundPositionY = "-100px";
-    dtc.contentWindow.onscroll = function() {
-      $doc.styleSheets[0].cssRules[0].style.backgroundPositionY = "-"
-          + parseInt((dtc.contentWindow.pageYOffset * 0.02 + 100)) + "px";
-      ardbeg.@net.skcomms.dtc.client.DtcArdbeg::onScrollDtcFrame()();
-    };
-  }-*/;
-
-  public native static void addDtcResponseFrameLoadEventHandler(DtcArdbeg module, Document dtcDoc) /*-{
-    var responseFrame = dtcDoc.getElementsByTagName("frame")[1];
-    responseFrame.onload = function() {
-      var resultFrame = responseFrame.contentDocument.getElementById("xmlresult");
-      var successfulSearch = false;
-
-      if (resultFrame != null) {
-        var codeElements = resultFrame.contentDocument.getElementsByTagName("Code");
-
-        if (codeElements.length > 0 && codeElements[0].textContent == "100") {
-          successfulSearch = true;
-        }
-      } else {
-        form = responseFrame.contentDocument.forms[0];
-        var patt = /status: 100/gi;
-
-        if (form.innerText.substring(0, 100).match(patt) != null) {
-          successfulSearch = true;
-        }
-      }
-      module.@net.skcomms.dtc.client.DtcArdbeg::onLoadDtcResponseFrame(Z)(successfulSearch);
-    }
-  }-*/;
-
-  public native static void addDtcSearchButtonEventHandler(DtcArdbeg module, Document dtcDoc) /*-{
-    var searchButton = dtcDoc.getElementsByTagName("frame")[0].contentWindow.document
-        .getElementById("div_search");
-    searchButton.onclick = function() {
-      module.@net.skcomms.dtc.client.DtcArdbeg::onSubmitRequestForm()();
-    };
-  }-*/;
-
   /**
    * 선택된 아이템의 DtcPageType을 가져온다.
    * 
@@ -152,14 +75,9 @@ public class DtcArdbeg implements EntryPoint {
     }
   }
 
-  private static void sortServicesByVisitCount(List<Pair<Integer, Node>> rows) {
-    Collections.sort(rows, new Comparator<Pair<Integer, Node>>() {
-      @Override
-      public int compare(Pair<Integer, Node> arg0, Pair<Integer, Node> arg1) {
-        return -arg0.getKey().compareTo(arg1.getKey());
-      }
-    });
-  }
+  private final String BASE_URL = this.calculateBaseUrl();
+
+  private final String DTC_PROXY_URL = this.BASE_URL + "_dtcproxy_/";
 
   private final DtcTestPageViewController dtcTestPageViewConroller = this.createTestPageView();
 
@@ -182,24 +100,8 @@ public class DtcArdbeg implements EntryPoint {
 
   private String currentPath;
 
-  private void addCssLinkIntoDtcFrame(Document doc) {
-    LinkElement link = doc.createLinkElement();
-    link.setType("text/css");
-    link.setAttribute("rel", "stylesheet");
-    link.setAttribute("href", this.BASE_URL + "DtcFrame.css");
-    doc.getBody().appendChild(link);
-  }
-
   public void addDtcArdbegObserver(DtcArdbegObserver observer) {
     this.dtcArdbegObservers.add(observer);
-  }
-
-  private void applyStylesToDtcDirectoryNodes(List<Pair<Integer, Node>> pairs) {
-    for (Pair<Integer, Node> pair : pairs) {
-      if (pair.getKey() == 0) {
-        Element.as(pair.getValue()).setAttribute("style", "color:gray; ");
-      }
-    }
   }
 
   protected String calculateBaseUrl() {
@@ -212,16 +114,6 @@ public class DtcArdbeg implements EntryPoint {
       index = Document.get().getURL().lastIndexOf('/', queryStringStart);
     }
     return Document.get().getURL().substring(0, index + 1);
-  }
-
-  private String calculateInitialDtcUrl() {
-    if (Window.Location.getParameter("b") != null) {
-      return this.DTC_PROXY_URL + "?b=" + Window.Location.getParameter("b");
-    } else if (Window.Location.getParameter("c") != null) {
-      return this.DTC_PROXY_URL + "?c=" + Window.Location.getParameter("c");
-    } else {
-      return this.DTC_PROXY_URL;
-    }
   }
 
   protected FlowPanel createFlowPanel() {
@@ -315,7 +207,7 @@ public class DtcArdbeg implements EntryPoint {
     this.initializeDtcFrame();
     this.initializeDtcNodeContainer();
 
-    // this.ipHistoryManager.initialize(this);
+    this.ipHistoryManager.initialize(this);
     this.initializeNavigationBar();
     this.initializeRequestFormAccessor();
     this.dtcTestPageViewConroller.initialize(this);
@@ -376,7 +268,7 @@ public class DtcArdbeg implements EntryPoint {
     controller.initialize(this, button, dialogBox);
   }
 
-  private void onLoadDtcResponseFrame(boolean success) {
+  public void onLoadDtcResponseFrame(boolean success) {
     for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
       observer.onDtcResponseFrameLoaded(success);
     }
@@ -387,27 +279,10 @@ public class DtcArdbeg implements EntryPoint {
     this.initializeComponents();
   }
 
-  private void onScrollDtcFrame() {
-  }
-
-  private void onSubmitRequestForm() {
+  public void onSubmitRequestForm() {
     for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
       observer.onSubmittingDtcRequest();
     }
-  }
-
-  private void removeComaparePageAnchor(Document doc) {
-    Node anchor = doc.getBody().getChild(0);
-    doc.getBody().removeChild(anchor);
-
-    Node br = doc.getBody().getChild(0);
-    doc.getBody().removeChild(br);
-
-    Node currentDirectoryMessage = doc.getBody().getChild(0);
-    doc.getBody().removeChild(currentDirectoryMessage);
-
-    br = doc.getBody().getChild(0);
-    doc.getBody().removeChild(br);
   }
 
   public void removeDtcArdbegObserver(DtcArdbegObserver observer) {
