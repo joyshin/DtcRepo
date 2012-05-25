@@ -39,7 +39,7 @@ public class DtcIniFactoryTest {
 
     return Arrays.asList(new Object[][] {
         { map1 },
-        { map2 }
+        // { map2 }
     });
   }
 

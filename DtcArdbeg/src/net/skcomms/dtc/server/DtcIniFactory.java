@@ -155,6 +155,78 @@ public class DtcIniFactory {
   }
 
   /**
+   * @throws IOException
+   */
+  private void list() throws IOException {
+    this.listOpenTag();
+    this.listProps();
+    this.listEndTag();
+  }
+
+  /**
+   * @throws IOException
+   */
+  private void listEndTag() throws IOException {
+    String line = this.getLine();
+    if (!line.toLowerCase().startsWith("{/list}")) {
+      throw new IllegalArgumentException("Error: line " + this.lineCount
+          + ": expected: LIST_END_TAG, " + "actual: " + line);
+    }
+    System.out.println("LIST_END:" + line);
+  }
+
+  /**
+   * @throws IOException
+   */
+  private void listOpenTag() throws IOException {
+    String line = this.getLine();
+    if (!line.toLowerCase().startsWith("{list")) {
+      throw new IllegalArgumentException("Error: line " + this.lineCount
+          + ": expected: LIST_START_TAG, " + "actual: " + line);
+    }
+
+    System.out.println("LIST_START: " + line);
+    Pattern attrPattern = Pattern.compile("<#(\\w+)>");
+    Matcher matcher = attrPattern.matcher(line);
+    while (matcher.find()) {
+      System.out.println("list attr:" + matcher.group(1));
+    }
+  }
+
+  private void listProp() throws IOException {
+    String line = this.getLine();
+    Pattern pattern = Pattern.compile("(\\S+)\\s+(\\w+)\\s*([:#](.*))?$");
+    Matcher matcher = pattern.matcher(line);
+    matcher.find();
+    System.out.println("type:" + matcher.group(1));
+    System.out.println("field:" + matcher.group(2));
+    System.out.println("comment:" + matcher.group(4));
+
+    String comment = matcher.group(4);
+    if (comment != null) {
+      Pattern attrPattern = Pattern.compile("<#(\\w+)>");
+      matcher = attrPattern.matcher(comment);
+      while (matcher.find()) {
+        System.out.println("attr:" + matcher.group(1));
+      }
+    }
+  }
+
+  /**
+   * @throws IOException
+   */
+  private void listProps() throws IOException {
+    String line = this.getLine();
+    this.ungetLine();
+    if (line.toLowerCase().startsWith("{/list}")) {
+      return;
+    }
+
+    this.listProp();
+    this.listProps();
+  }
+
+  /**
    * @param bytes
    * @param encoding
    * @return
@@ -179,7 +251,7 @@ public class DtcIniFactory {
     String line = this.getLine();
     if (!line.equals("[REQUEST]")) {
       throw new IllegalArgumentException("Error: line " + this.lineCount
-          + ": expected: [BASE], " + "actual: " + line);
+          + ": expected: [REQUEST], " + "actual: " + line);
     }
     this.currentHeader = line.substring(1, line.length() - 1);
     System.out.println("HEADER:" + this.currentHeader);
@@ -191,7 +263,6 @@ public class DtcIniFactory {
   private void requestProp() throws IOException {
     String line = this.getLine();
     Pattern pattern = Pattern.compile("(\\S+)\\s+(\\w+)(=([^:#]*))?\\s*([:#](.*))?$");
-    // Pattern pattern = Pattern.compile("(\\S+)");
     Matcher matcher = pattern.matcher(line);
     matcher.find();
     System.out.println("type:" + matcher.group(1));
@@ -232,12 +303,60 @@ public class DtcIniFactory {
     this.requestProps();
   }
 
-  /**
-   * 
-   */
-  private void responseSection() {
-    // TODO Auto-generated method stub
+  private void responseHeader() throws IOException {
+    String line = this.getLine();
+    if (!line.equals("[RESPONSE]")) {
+      throw new IllegalArgumentException("Error: line " + this.lineCount
+          + ": expected: [RESPONSE], " + "actual: " + line);
+    }
+    this.currentHeader = line.substring(1, line.length() - 1);
+    System.out.println("HEADER:" + this.currentHeader);
+  }
 
+  private void responseProp() throws IOException {
+    String line = this.getLine().toLowerCase();
+    this.ungetLine();
+    if (line.startsWith("{list")) {
+      this.list();
+    } else {
+      this.scalarProp();
+    }
+  }
+
+  /**
+   * @throws IOException
+   */
+  private void responseProps() throws IOException {
+    String line = this.getLine();
+    if (line == null) {
+      return;
+    }
+    this.responseProp();
+    this.responseProps();
+  }
+
+  private void responseSection() throws IOException {
+    this.responseHeader();
+    this.responseProps();
+  }
+
+  private void scalarProp() throws IOException {
+    String line = this.getLine();
+    Pattern pattern = Pattern.compile("(\\S+)\\s+(\\w+)\\s*([:#](.*))?$");
+    Matcher matcher = pattern.matcher(line);
+    matcher.find();
+    System.out.println("type:" + matcher.group(1));
+    System.out.println("field:" + matcher.group(2));
+    System.out.println("comment:" + matcher.group(4));
+
+    String comment = matcher.group(4);
+    if (comment != null) {
+      Pattern attrPattern = Pattern.compile("<#(\\w+)>");
+      matcher = attrPattern.matcher(comment);
+      while (matcher.find()) {
+        System.out.println("attr:" + matcher.group(1));
+      }
+    }
   }
 
   /**
