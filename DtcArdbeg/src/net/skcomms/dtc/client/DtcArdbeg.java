@@ -238,7 +238,8 @@ public class DtcArdbeg implements EntryPoint {
 
   private final DtcNodeModel dtcArdbegNodeData = DtcNodeModel.getInstance();
   private final DtcNodeController dtcNodeController = DtcNodeController.getInstance();
-  private final DtcNodeView dtcNodeView = DtcNodeView.getInstace();
+  private DtcNodeView dtcNodeView;
+  private DtcNodeView dtcFavoriteNodeView;
 
   private void addCssLinkIntoDtcFrame(Document doc) {
     LinkElement link = doc.createLinkElement();
@@ -374,20 +375,20 @@ public class DtcArdbeg implements EntryPoint {
   }
 
   void displayDirectoryPage() {
-    RootPanel.get("favoriteNodeContainer").setVisible(false);
-    RootPanel.get("nodeContainer").setVisible(true);
+    dtcFavoriteNodeView.setVisible(false);
+    dtcNodeView.setVisible(true);
     RootPanel.get("dtcContainer").setVisible(false);
   }
 
   void displayHomePage() {
-    RootPanel.get("favoriteNodeContainer").setVisible(true);
-    RootPanel.get("nodeContainer").setVisible(true);
+    dtcFavoriteNodeView.setVisible(true);
+    dtcNodeView.setVisible(true);
     RootPanel.get("dtcContainer").setVisible(false);
   }
 
   private void displayTestPage() {
-    RootPanel.get("nodeContainer").setVisible(false);
-    RootPanel.get("favoriteNodeContainer").setVisible(false);
+    dtcFavoriteNodeView.setVisible(false);
+    dtcNodeView.setVisible(false);
     RootPanel.get("dtcContainer").setVisible(true);
   }
 
@@ -466,17 +467,12 @@ public class DtcArdbeg implements EntryPoint {
     setDtcFramePath("/");
   }
 
-  private void initializeDtcNodeContainer() {
+  private void initializeDtcNodeView() {
+    dtcNodeView = new DtcNodeView();
+    dtcFavoriteNodeView = new DtcNodeView();
 
-    dtcArdbegNodeData.initialize(this);
-    dtcNodeView.initialize();
-
-    RootPanel.get("nodeContainer").add(dtcNodeView.getDtcNodePanelLabel());
-    RootPanel.get("nodeContainer").add(dtcNodeView.getDtcNodePanel());
-
-    RootPanel.get("favoriteNodeContainer").add(dtcNodeView.getDtcFavoriteNodePanelLabel());
-    RootPanel.get("favoriteNodeContainer").add(dtcNodeView.getDtcFavoriteNodePanel());
-
+    dtcNodeView.initialize("Services", "nodeContainer");
+    dtcFavoriteNodeView.initialize("Favorites", "favoriteNodeContainer");
   }
 
   private void onLoadDtcResponseFrame(boolean success) {
@@ -501,8 +497,10 @@ public class DtcArdbeg implements EntryPoint {
 
   @Override
   public void onModuleLoad() {
+    initializeDtcNodeView();
+    dtcNodeController.initialize(dtcNodeView, dtcFavoriteNodeView);
+    dtcArdbegNodeData.initialize(this);
     initializeDtcFrame();
-    initializeDtcNodeContainer();
 
     // this.ipHistoryManager.initialize(this);
     navigationBar.initialize(this);

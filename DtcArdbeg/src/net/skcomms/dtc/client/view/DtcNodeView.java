@@ -7,35 +7,19 @@ import net.skcomms.dtc.shared.DtcNodeMetaModel;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class DtcNodeView {
-  private final static DtcNodeView instance = new DtcNodeView();
   private FlowPanel dtcNodePanel = null;
-  private FlowPanel dtcFavoriteNodePanel = null;
 
   private static CellList<DtcNodeMetaModel> dtcNodeCellList = null;
-  private static CellList<DtcNodeMetaModel> dtcFavoriteNodeCellList = null;
 
   private static Label dtcNodePanelLabel = null;
-  private static Label dtcFavoriteNodePanelLabel = null;
 
-  private final static String NODE_PANEL_LABEL = "Services";
-  private final static String FAVORITE_NODE_PANEL_LABEL = "Favorites";
+  private String containerName = "";
 
-  public static DtcNodeView getInstace() {
-    return instance;
-  }
-
-  private DtcNodeView() {
-  }
-
-  public Widget getDtcFavoriteNodePanel() {
-    return dtcFavoriteNodePanel;
-  }
-
-  public Widget getDtcFavoriteNodePanelLabel() {
-    return dtcFavoriteNodePanelLabel;
+  public DtcNodeView() {
   }
 
   public Widget getDtcNodePanel() {
@@ -46,28 +30,27 @@ public class DtcNodeView {
     return dtcNodePanelLabel;
   }
 
-  public void initialize() {
+  public void initialize(String label, String containerName) {
     dtcNodeCellList = new CellList<DtcNodeMetaModel>(DtcNodeMetaCellView.getInstance());
-    dtcFavoriteNodeCellList = new CellList<DtcNodeMetaModel>(DtcNodeMetaCellView.getInstance());
 
     dtcNodePanel = new FlowPanel();
     dtcNodePanel.add(dtcNodeCellList);
-    dtcFavoriteNodePanel = new FlowPanel();
-    dtcFavoriteNodePanel.add(dtcFavoriteNodeCellList);
 
-    dtcNodePanelLabel = new Label();
-    dtcNodePanelLabel.setText(NODE_PANEL_LABEL);
-    dtcFavoriteNodePanelLabel = new Label();
-    dtcFavoriteNodePanelLabel.setText(FAVORITE_NODE_PANEL_LABEL);
-  }
-
-  public void setDtcFavoriteNodeWidget(List<DtcNodeMetaModel> list) {
-    dtcFavoriteNodeCellList.setRowData(list);
-    dtcFavoriteNodeCellList.setRowCount(list.size(), true);
+    dtcNodePanelLabel = new Label(label);
+    RootPanel.get(containerName).add(dtcNodePanelLabel);
+    RootPanel.get(containerName).add(dtcNodePanel);
+    this.containerName = containerName;
   }
 
   public void setDtcNodeWidget(List<DtcNodeMetaModel> list) {
     dtcNodeCellList.setRowData(list);
     dtcNodeCellList.setRowCount(list.size(), true);
+    System.out.println(containerName + " : " + dtcNodeCellList.getVisibleItems().get(0).getName());
+  }
+
+  public void setVisible(boolean visible) {
+    System.out.println(visible + " : " + containerName + " : "
+        + dtcNodeCellList.getVisibleItems().isEmpty());
+    RootPanel.get(containerName).setVisible(visible);
   }
 }

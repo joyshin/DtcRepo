@@ -11,20 +11,23 @@ public class DtcNodeController implements DtcNodeObserver {
     return DtcNodeController.instance;
   }
 
-  private final DtcNodeModel dtcNodeModel = DtcNodeModel.getInstance();
-  private final DtcNodeView dtcNodeView = DtcNodeView.getInstace();
+  private DtcNodeModel dtcNodeModel = null;
+  private DtcNodeView dtcNodeView = null;
+  private DtcNodeView dtcFavoriteNodeView = null;
 
   private DtcNodeController() {
-    initialize();
   }
 
-  private void initialize() {
+  public void initialize(DtcNodeView nodeView, DtcNodeView favoriteNodeView) {
+    dtcNodeView = nodeView;
+    dtcFavoriteNodeView = favoriteNodeView;
+    dtcNodeModel = DtcNodeModel.getInstance();
     dtcNodeModel.addObserver(this);
   }
 
   @Override
   public void onFavoriteNodeListChanged() {
-    dtcNodeView.setDtcFavoriteNodeWidget(dtcNodeModel.getFavoriteNodeList());
+    dtcFavoriteNodeView.setDtcNodeWidget(dtcNodeModel.getFavoriteNodeList());
   }
 
   @Override
