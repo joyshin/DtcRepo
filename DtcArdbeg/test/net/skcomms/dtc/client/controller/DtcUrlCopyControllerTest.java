@@ -106,7 +106,7 @@ public class DtcUrlCopyControllerTest {
     this.ardbeg = new MockDtcArdbeg();
     this.dialogBox = new MockDtcUrlCopyDialogBoxView();
 
-    this.controller.initialize(this.ardbeg, this.button,
+    this.controller.initialize(this.ardbeg, null, this.button,
         this.dialogBox);
   }
 

@@ -1,7 +1,9 @@
 package net.skcomms.dtc.client.view;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import net.skcomms.dtc.client.DtcTestPageViewObserver;
 import net.skcomms.dtc.shared.DtcRequestInfoModel;
@@ -285,6 +287,25 @@ public class DtcTestPageView {
 
   public void DtcTestPageView() {
 
+  }
+
+  public Map<String, String> getRequestParameter() {
+    Map<String, String> params = new HashMap<String, String>();
+
+    for (ListGridRecord record : this.requestFormGrid.getRecords()) {
+      String value;
+      if (record.getAttribute("name").toLowerCase().equals("ip_select")) {
+        RegExp regExp = RegExp.compile("[0-9]+.[0-9]+.[0-9]+.[0-9]+");
+        MatchResult match = regExp.exec(record.getAttribute("value"));
+        value = match.getGroup(0);
+      } else {
+        value = record.getAttribute("value");
+      }
+
+      params.put(record.getAttribute("key"), (value == null ? "" : value));
+    }
+
+    return params;
   }
 
   public void setHTMLData(String convertedHTML) {

@@ -268,7 +268,7 @@ public class DtcArdbeg implements EntryPoint {
     DtcUrlCopyDialogBoxView dialogBox = new DtcUrlCopyDialogBoxView();
     DtcUrlCopyController controller = new DtcUrlCopyController();
 
-    controller.initialize(this, button, dialogBox);
+    controller.initialize(this, this.dtcTestPageView, button, dialogBox);
   }
 
   public void onLoadDtcResponseFrame(boolean success) {

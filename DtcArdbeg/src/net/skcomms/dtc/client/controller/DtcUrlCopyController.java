@@ -1,6 +1,10 @@
 package net.skcomms.dtc.client.controller;
 
+import java.util.Map;
+import java.util.Map.Entry;
+
 import net.skcomms.dtc.client.DtcArdbeg;
+import net.skcomms.dtc.client.view.DtcTestPageView;
 import net.skcomms.dtc.client.view.DtcUrlCopyButtonView;
 import net.skcomms.dtc.client.view.DtcUrlCopyDialogBoxView;
 
@@ -15,6 +19,8 @@ public class DtcUrlCopyController {
   private DtcUrlCopyDialogBoxView dialogBox;
 
   private DtcUrlCopyButtonView button;
+
+  private DtcTestPageView dtcTestPageView;
 
   private String combineUrl() {
     StringBuilder sb = new StringBuilder();
@@ -35,13 +41,21 @@ public class DtcUrlCopyController {
     }
     sb.append(URL.encode(this.module.getCurrentPath().substring(1)));
 
-    // TODO 현재 경로가 test page인 경우 request parameter를 추가한다.
+    Map<String, String> params = this.dtcTestPageView.getRequestParameter();
+    for (Entry<String, String> entry : params.entrySet()) {
+      sb.append('&');
+      sb.append(entry.getKey());
+      sb.append('=');
+      sb.append(URL.encode(entry.getValue()));
+    }
+    System.out.println(sb.toString());
     return sb.toString();
   }
 
-  public void initialize(DtcArdbeg dtcArdbeg, DtcUrlCopyButtonView aButton,
-      DtcUrlCopyDialogBoxView aDialogBox) {
+  public void initialize(DtcArdbeg dtcArdbeg, DtcTestPageView dtcTestPageView,
+      DtcUrlCopyButtonView aButton, DtcUrlCopyDialogBoxView aDialogBox) {
     this.module = dtcArdbeg;
+    this.dtcTestPageView = dtcTestPageView;
     this.button = aButton;
     this.dialogBox = aDialogBox;
 
