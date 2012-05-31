@@ -11,6 +11,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.smartgwt.client.types.ListGridEditEvent;
 import com.smartgwt.client.types.Overflow;
@@ -28,8 +30,6 @@ import com.smartgwt.client.widgets.grid.ListGridEditorContext;
 import com.smartgwt.client.widgets.grid.ListGridEditorCustomizer;
 import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
-import com.smartgwt.client.widgets.grid.events.EditCompleteEvent;
-import com.smartgwt.client.widgets.grid.events.EditCompleteHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
 
@@ -213,15 +213,37 @@ public class DtcTestPageView {
     this.requestFormGrid.setCanEdit(true);
     this.requestFormGrid.setEditEvent(ListGridEditEvent.CLICK);
     this.requestFormGrid.setEditByCell(true);
-    this.requestFormGrid.addEditCompleteHandler(new EditCompleteHandler() {
+
+    // this.requestFormGrid.addEditCompleteHandler(new EditCompleteHandler() {
+    // @Override
+    // public void onEditComplete(EditCompleteEvent event) {
+    // // TODO Auto-generated method stub
+    // if (DtcTestPageView.this.validateRequestData() == 0) {
+    // DtcTestPageView.this.createRequestData();
+    // DtcTestPageView.this.readyRequestDataCb.onReadyRequestData();
+    // }
+    // }
+    // });
+
+    Event.addNativePreviewHandler(new Event.NativePreviewHandler() {
+
       @Override
-      public void onEditComplete(EditCompleteEvent event) {
-        if (DtcTestPageView.this.validateRequestData() == 0) {
-          DtcTestPageView.this.createRequestData();
-          DtcTestPageView.this.readyRequestDataCb.onReadyRequestData();
+      public void onPreviewNativeEvent(NativePreviewEvent event) {
+        if (event.isFirstHandler()) {
+          // GWT.log("Event: " + Integer.toString(event.getTypeInt()));
+          if (event.getTypeInt() == Event.ONKEYUP) {
+
+            if (event.getNativeEvent().getKeyCode() == 13) {
+              if (DtcTestPageView.this.validateRequestData() == 0) {
+                DtcTestPageView.this.createRequestData();
+                DtcTestPageView.this.readyRequestDataCb.onReadyRequestData();
+              }
+            }
+          }
         }
       }
     });
+
     this.requestFormGrid.setHeight(1);
     this.requestFormGrid.setShowAllRecords(true);
     this.requestFormGrid.setBodyOverflow(Overflow.VISIBLE);

@@ -39,6 +39,7 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
       DtcTestPageController.this.dtcTestPageView.setHTMLData(response.getText());
     }
     else {
+      GWT.log("ProxyURL: " + this.dtcProxyUrl);
       RequestBuilder resultRequest = new RequestBuilder(RequestBuilder.GET,
           this.dtcProxyUrl + responseUrl.split("/")[1]);
       resultRequest.setHeader("Content-Type", "text/html; charset="
@@ -116,6 +117,9 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
 
     String targetURL = URL.encode(this.dtcProxyUrl + "response.html");
     RequestBuilder request = new RequestBuilder(RequestBuilder.POST, targetURL);
+
+    GWT.log("ProxyURL: " + this.dtcProxyUrl);
+    GWT.log("TargetURL: " + targetURL);
 
     request.setHeader("Content-Type", "application/x-www-form-urlencoded");
     request.setRequestData(requestData.toString());
