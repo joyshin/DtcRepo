@@ -35,33 +35,38 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
     String responseUrl = match.getGroup(0);
     GWT.log("responseUrl: " + responseUrl);
 
-    RequestBuilder resultRequest = new RequestBuilder(RequestBuilder.GET,
-        this.dtcProxyUrl + responseUrl.split("/")[1]);
-    resultRequest.setHeader("Content-Type", "text/html; charset="
-        + DtcTestPageController.this.encoding);
-    resultRequest.setCallback(new RequestCallback() {
+    if (responseUrl == null) {
+      DtcTestPageController.this.dtcTestPageView.setHTMLData(response.getText());
+    }
+    else {
+      RequestBuilder resultRequest = new RequestBuilder(RequestBuilder.GET,
+          this.dtcProxyUrl + responseUrl.split("/")[1]);
+      resultRequest.setHeader("Content-Type", "text/html; charset="
+          + DtcTestPageController.this.encoding);
+      resultRequest.setCallback(new RequestCallback() {
 
-      @Override
-      public void onError(Request request, Throwable exception) {
-        GWT.log(exception.getMessage());
+        @Override
+        public void onError(Request request, Throwable exception) {
+          GWT.log(exception.getMessage());
+        }
+
+        @Override
+        public void onResponseReceived(Request request, Response response) {
+          String result = response.getText();
+          GWT.log(result);
+          String convertedHTML = result.replaceAll("<!\\[CDATA\\[", "").
+              replaceAll("\\]\\]>", "");
+          GWT.log(convertedHTML);
+
+          DtcTestPageController.this.dtcTestPageView.setHTMLData(convertedHTML);
+        }
+      });
+
+      try {
+        resultRequest.send();
+      } catch (RequestException e) {
+        e.printStackTrace();
       }
-
-      @Override
-      public void onResponseReceived(Request request, Response response) {
-        String result = response.getText();
-        GWT.log(result);
-        String convertedHTML = result.replaceAll("<!\\[CDATA\\[", "").
-            replaceAll("\\]\\]>", "");
-        GWT.log(convertedHTML);
-
-        DtcTestPageController.this.dtcTestPageView.setHTMLData(convertedHTML);
-      }
-    });
-
-    try {
-      resultRequest.send();
-    } catch (RequestException e) {
-      e.printStackTrace();
     }
   }
 
@@ -123,6 +128,7 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
 
       @Override
       public void onResponseReceived(Request request, Response response) {
+
         DtcTestPageController.this.getResponse(response);
       }
     });
