@@ -41,6 +41,7 @@ import javax.swing.text.html.HTMLEditorKit.ParserCallback;
 import javax.swing.text.html.parser.ParserDelegator;
 
 import net.skcomms.dtc.client.service.DtcService;
+import net.skcomms.dtc.server.model.DtcLog;
 import net.skcomms.dtc.shared.DtcNodeMetaModel;
 import net.skcomms.dtc.shared.DtcRequestInfoModel;
 import net.skcomms.dtc.shared.DtcRequestParameterModel;

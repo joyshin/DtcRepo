@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.skcomms.dtc.server;
+package net.skcomms.dtc.server.model;
 
 import java.util.Date;
 
