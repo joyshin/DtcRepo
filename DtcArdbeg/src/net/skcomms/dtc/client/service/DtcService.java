@@ -21,6 +21,7 @@ import net.skcomms.dtc.shared.DtcRequestInfoModel;
 import net.skcomms.dtc.shared.DtcServiceVerifier;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.http.client.RequestBuilder.Method;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
@@ -54,5 +55,7 @@ public interface DtcService extends RemoteService {
   List<DtcNodeMetaModel> getDir(String path) throws IllegalArgumentException;
 
   DtcRequestInfoModel getDtcRequestPageInfo(String path);
+
+  String getDtcTestPageResponse(Method httpMethod, String url, String requestData);
 
 }

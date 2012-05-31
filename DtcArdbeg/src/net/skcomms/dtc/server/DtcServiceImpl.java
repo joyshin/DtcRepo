@@ -40,6 +40,7 @@ import javax.swing.text.html.HTML.Tag;
 import javax.swing.text.html.HTMLEditorKit.ParserCallback;
 import javax.swing.text.html.parser.ParserDelegator;
 
+import net.skcomms.dtc.client.controller.DtcTestPageController;
 import net.skcomms.dtc.client.service.DtcService;
 import net.skcomms.dtc.shared.DtcNodeMetaModel;
 import net.skcomms.dtc.shared.DtcRequestInfoModel;
@@ -51,6 +52,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestBuilder.Method;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.Response;
+import com.google.gwt.regexp.shared.MatchResult;
+import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 @SuppressWarnings("serial")
@@ -385,6 +394,79 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
       e.printStackTrace();
       throw new IllegalArgumentException(e);
     }
+  }
+
+  @Override
+  public String getDtcTestPageResponse(Method httpMethod, String url, String requestData) {
+
+    RequestBuilder request = new RequestBuilder(httpMethod, url);
+
+    request.setHeader("Content-Type", "application/x-www-form-urlencoded");
+    request.setRequestData(requestData);
+    request.setCallback(new RequestCallback() {
+
+      @Override
+      public void onError(Request request, Throwable exception) {
+        GWT.log(exception.getMessage());
+      }
+
+      @Override
+      public void onResponseReceived(Request request, Response response) {
+
+        GWT.log(response.getText());
+        String rawUrl = response.getText();
+        RegExp regExp = RegExp.compile("src=\"([^\"]*)");
+        MatchResult match = regExp.exec(rawUrl);
+        String responseUrl = match.getGroup(0);
+        GWT.log("responseUrl: " + responseUrl);
+
+        if (responseUrl == null) {
+          // DtcTestPageController.this.dtcTestPageView.setHTMLData(response.getText());
+          return response.getText();
+        }
+        else {
+
+          RequestBuilder resultRequest = new RequestBuilder(RequestBuilder.GET,
+              dtcProxyUrl + responseUrl.split("/")[1]);
+
+          resultRequest.setHeader("Content-Type", "text/html; charset="
+              + this.encoding);
+
+          resultRequest.setCallback(new RequestCallback() {
+
+            @Override
+            public void onError(Request request, Throwable exception) {
+              GWT.log(exception.getMessage());
+            }
+
+            @Override
+            public void onResponseReceived(Request request, Response response) {
+              String result = response.getText();
+              GWT.log(result);
+              String convertedHTML = result.replaceAll("<!\\[CDATA\\[", "").
+                  replaceAll("\\]\\]>", "");
+              GWT.log(convertedHTML);
+
+              DtcTestPageController.this.dtcTestPageView.setHTMLData(convertedHTML);
+            }
+          });
+
+          try {
+            resultRequest.send();
+          } catch (RequestException e) {
+            e.printStackTrace();
+          }
+        }
+      }
+    });
+
+    try {
+      request.send();
+    } catch (RequestException e) {
+      e.printStackTrace();
+    }
+
+    return null;
   }
 
   @Override
