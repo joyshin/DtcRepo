@@ -35,33 +35,39 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
     String responseUrl = match.getGroup(0);
     GWT.log("responseUrl: " + responseUrl);
 
-    RequestBuilder resultRequest = new RequestBuilder(RequestBuilder.GET,
-        this.dtcProxyUrl + responseUrl.split("/")[1]);
-    resultRequest.setHeader("Content-Type", "text/html; charset="
-        + DtcTestPageController.this.encoding);
-    resultRequest.setCallback(new RequestCallback() {
+    if (responseUrl == null) {
+      DtcTestPageController.this.dtcTestPageView.setHTMLData(response.getText());
+    }
+    else {
+      GWT.log("ProxyURL: " + this.dtcProxyUrl);
+      RequestBuilder resultRequest = new RequestBuilder(RequestBuilder.GET,
+          this.dtcProxyUrl + responseUrl.split("/")[1]);
+      resultRequest.setHeader("Content-Type", "text/html; charset="
+          + DtcTestPageController.this.encoding);
+      resultRequest.setCallback(new RequestCallback() {
 
-      @Override
-      public void onError(Request request, Throwable exception) {
-        GWT.log(exception.getMessage());
+        @Override
+        public void onError(Request request, Throwable exception) {
+          GWT.log(exception.getMessage());
+        }
+
+        @Override
+        public void onResponseReceived(Request request, Response response) {
+          String result = response.getText();
+          GWT.log(result);
+          String convertedHTML = result.replaceAll("<!\\[CDATA\\[", "").
+              replaceAll("\\]\\]>", "");
+          GWT.log(convertedHTML);
+
+          DtcTestPageController.this.dtcTestPageView.setHTMLData(convertedHTML);
+        }
+      });
+
+      try {
+        resultRequest.send();
+      } catch (RequestException e) {
+        e.printStackTrace();
       }
-
-      @Override
-      public void onResponseReceived(Request request, Response response) {
-        String result = response.getText();
-        GWT.log(result);
-        String convertedHTML = result.replaceAll("<!\\[CDATA\\[", "").
-            replaceAll("\\]\\]>", "");
-        GWT.log(convertedHTML);
-
-        DtcTestPageController.this.dtcTestPageView.setHTMLData(convertedHTML);
-      }
-    });
-
-    try {
-      resultRequest.send();
-    } catch (RequestException e) {
-      e.printStackTrace();
     }
   }
 
@@ -112,6 +118,9 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
     String targetURL = URL.encode(this.dtcProxyUrl + "response.html");
     RequestBuilder request = new RequestBuilder(RequestBuilder.POST, targetURL);
 
+    GWT.log("ProxyURL: " + this.dtcProxyUrl);
+    GWT.log("TargetURL: " + targetURL);
+
     request.setHeader("Content-Type", "application/x-www-form-urlencoded");
     request.setRequestData(requestData.toString());
     request.setCallback(new RequestCallback() {
@@ -123,6 +132,7 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
 
       @Override
       public void onResponseReceived(Request request, Response response) {
+
         DtcTestPageController.this.getResponse(response);
       }
     });
