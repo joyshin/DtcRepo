@@ -17,6 +17,8 @@ package net.skcomms.dtc.server;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -57,13 +59,25 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 @SuppressWarnings("serial")
 public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
 
+  public static class DtcNodeFilter implements FileFilter {
+
+    @Override
+    public boolean accept(File file) {
+      return file.isDirectory() || (file.isFile() && file.getName().endsWith(".ini"));
+    }
+
+  }
+
   private static final String DTC_URL = "http://10.141.6.198/";
 
   private static ParserCallback
       createDtcDirectoryParserCallback(final List<DtcNodeMetaModel> items) {
     return new ParserCallback() {
+
       private int textCount;
+
       private DtcNodeMetaModel currentItem = null;
+
       private boolean beforeHeaderRow = true;
 
       @Override
@@ -308,6 +322,15 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     return contents;
   }
 
+  public static String getRootPath() {
+    if (new File("/home/search/dtc").isDirectory()) {
+      return "/home/search/dtc/";
+    } else {
+      return "sample/dtc/";
+    }
+
+  }
+
   static String guessCharacterEncoding(byte[] bytes) throws IOException {
     String string;
     if (bytes.length > 1024) {
@@ -347,6 +370,10 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     manager.getTransaction().commit();
     manager.close();
 
+    return this.getDirImpl(path);
+  }
+
+  List<DtcNodeMetaModel> getDirImpl(String path) {
     try {
       String href;
       if (path.equals("/")) {
@@ -368,6 +395,17 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
       e.printStackTrace();
       throw new IllegalArgumentException(e);
     }
+  }
+
+  List<DtcNodeMetaModel> getDirImplNew(String path) throws IOException {
+    String root = DtcServiceImpl.getRootPath();
+    String absolutePath = root + path;
+    File file = new File(absolutePath);
+    List<DtcNodeMetaModel> nodes = new ArrayList<DtcNodeMetaModel>();
+    for (File item : file.listFiles(new DtcNodeFilter())) {
+      nodes.add(new DtcNodeMetaModel(item));
+    }
+    return nodes;
   }
 
   @Override

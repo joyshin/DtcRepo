@@ -4,6 +4,7 @@
 package net.skcomms.dtc.server;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -27,7 +28,6 @@ import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * @author jujang@sk.com
- * 
  */
 public class DtcServiceImplTest {
 
@@ -55,7 +55,7 @@ public class DtcServiceImplTest {
           + item.getUpdateTime() + ":" + item.getPath() + "]");
     }
 
-    Assert.assertEquals(174, items.size());
+    Assert.assertEquals(176, items.size());
 
     Assert.assertFalse(items.isEmpty());
 
@@ -88,6 +88,25 @@ public class DtcServiceImplTest {
   }
 
   @Test
+  public void testGetDir() throws IOException {
+    List<DtcNodeMetaModel> nodes = new DtcServiceImpl().getDirImplNew("/common/");
+    for (DtcNodeMetaModel node : nodes) {
+      System.out.println(node);
+    }
+  }
+
+  @Test
+  public void testGetRootPath() {
+    Assert.assertEquals("sample/dtc/", DtcServiceImpl.getRootPath());
+    String absolutePath = DtcServiceImpl.getRootPath() + "/";
+    File file = new File(absolutePath);
+
+    for (File item : file.listFiles(new DtcServiceImpl.DtcNodeFilter())) {
+      System.out.println(item.getName());
+    }
+  }
+
+  @Test
   public void testParseTestPage() throws IOException {
     String href = "http://10.141.6.198/request.html?c=kadcpts/100.ini";
     URL url = new URL(href);
@@ -115,6 +134,7 @@ public class DtcServiceImplTest {
     SAXParserFactory sax = SAXParserFactory.newInstance();
     SAXParser p = sax.newSAXParser();
     p.parse(new ByteArrayInputStream(htmlContents), new DefaultHandler() {
+
       @Override
       public void characters(char[] ch, int start, int length) {
         System.out.print(new String(ch, start, length));

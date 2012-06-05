@@ -25,10 +25,10 @@ public class DtcIniFactory {
 
   private static final String CHARACTER_SET = "CHARACTER_SET";
 
-  private static String determineCharset(byte[] bytes) throws IOException {
+  private static String examineCharset(byte[] bytes) throws IOException {
     String line;
     BufferedReader reader = new BufferedReader(new InputStreamReader(
-        new ByteArrayInputStream(bytes), "euc-kr"));
+        new ByteArrayInputStream(bytes), "utf-8"));
     while ((line = reader.readLine()) != null) {
       if (line.startsWith(DtcIniFactory.CHARACTER_SET)) {
         return line.substring(DtcIniFactory.CHARACTER_SET.length() + 1);
@@ -123,7 +123,7 @@ public class DtcIniFactory {
 
     byte[] bytes = DtcServiceImpl.readAllBytes(is);
 
-    String encoding = DtcIniFactory.determineCharset(bytes);
+    String encoding = DtcIniFactory.examineCharset(bytes);
     return this.parse(bytes, encoding);
   }
 
