@@ -19,19 +19,20 @@ public class DtcNodeController implements DtcNodeObserver {
   }
 
   public void initialize(DtcNodeView nodeView, DtcNodeView favoriteNodeView) {
-    dtcNodeView = nodeView;
-    dtcFavoriteNodeView = favoriteNodeView;
-    dtcNodeModel = DtcNodeModel.getInstance();
-    dtcNodeModel.addObserver(this);
+    this.dtcNodeView = nodeView;
+    this.dtcFavoriteNodeView = favoriteNodeView;
+
+    this.dtcNodeModel = DtcNodeModel.getInstance();
+    this.dtcNodeModel.addObserver(this);
   }
 
   @Override
   public void onFavoriteNodeListChanged() {
-    dtcFavoriteNodeView.setDtcNodeWidget(dtcNodeModel.getFavoriteNodeList());
+    this.dtcFavoriteNodeView.setDtcNodeWidget(this.dtcNodeModel.getFavoriteNodeList());
   }
 
   @Override
   public void onNodeListChanged() {
-    dtcNodeView.setDtcNodeWidget(dtcNodeModel.getNodeList());
+    this.dtcNodeView.setDtcNodeWidget(this.dtcNodeModel.getNodeList());
   }
 }

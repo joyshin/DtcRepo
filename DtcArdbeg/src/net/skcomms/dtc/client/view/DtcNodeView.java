@@ -13,9 +13,7 @@ import com.google.gwt.user.client.ui.Widget;
 public class DtcNodeView {
   private FlowPanel dtcNodePanel = null;
 
-  private static CellList<DtcNodeMetaModel> dtcNodeCellList = null;
-
-  private static Label dtcNodePanelLabel = null;
+  private CellList<DtcNodeMetaModel> dtcNodeCellList = null;
 
   private String containerName = "";
 
@@ -23,34 +21,28 @@ public class DtcNodeView {
   }
 
   public Widget getDtcNodePanel() {
-    return dtcNodePanel;
-  }
-
-  public Widget getDtcNodePanelLabel() {
-    return dtcNodePanelLabel;
+    return this.dtcNodePanel;
   }
 
   public void initialize(String label, String containerName) {
-    dtcNodeCellList = new CellList<DtcNodeMetaModel>(DtcNodeMetaCellView.getInstance());
+    this.dtcNodeCellList = new CellList<DtcNodeMetaModel>(DtcNodeMetaCellView.getInstance());
 
-    dtcNodePanel = new FlowPanel();
-    dtcNodePanel.add(dtcNodeCellList);
+    this.dtcNodePanel = new FlowPanel();
+    this.dtcNodePanel.add(this.dtcNodeCellList);
 
-    dtcNodePanelLabel = new Label(label);
+    Label dtcNodePanelLabel = new Label(label);
     RootPanel.get(containerName).add(dtcNodePanelLabel);
-    RootPanel.get(containerName).add(dtcNodePanel);
+    RootPanel.get(containerName).add(this.dtcNodePanel);
+
     this.containerName = containerName;
   }
 
   public void setDtcNodeWidget(List<DtcNodeMetaModel> list) {
-    dtcNodeCellList.setRowData(list);
-    dtcNodeCellList.setRowCount(list.size(), true);
-    System.out.println(containerName + " : " + dtcNodeCellList.getVisibleItems().get(0).getName());
+    this.dtcNodeCellList.setRowData(list);
+    this.dtcNodeCellList.setRowCount(list.size(), true);
   }
 
   public void setVisible(boolean visible) {
-    System.out.println(visible + " : " + containerName + " : "
-        + dtcNodeCellList.getVisibleItems().isEmpty());
-    RootPanel.get(containerName).setVisible(visible);
+    RootPanel.get(this.containerName).setVisible(visible);
   }
 }

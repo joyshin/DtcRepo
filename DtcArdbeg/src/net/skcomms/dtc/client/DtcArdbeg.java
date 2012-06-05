@@ -236,7 +236,7 @@ public class DtcArdbeg implements EntryPoint {
 
   private final List<DtcArdbegObserver> dtcArdbegObservers = new ArrayList<DtcArdbegObserver>();
 
-  private final DtcNodeModel dtcArdbegNodeData = DtcNodeModel.getInstance();
+  private final DtcNodeModel dtcArdbegNodeModel = DtcNodeModel.getInstance();
   private final DtcNodeController dtcNodeController = DtcNodeController.getInstance();
   private DtcNodeView dtcNodeView;
   private DtcNodeView dtcFavoriteNodeView;
@@ -499,7 +499,7 @@ public class DtcArdbeg implements EntryPoint {
   public void onModuleLoad() {
     initializeDtcNodeView();
     dtcNodeController.initialize(dtcNodeView, dtcFavoriteNodeView);
-    dtcArdbegNodeData.initialize(this);
+    dtcArdbegNodeModel.initialize(this);
     initializeDtcFrame();
 
     // this.ipHistoryManager.initialize(this);
@@ -552,10 +552,10 @@ public class DtcArdbeg implements EntryPoint {
     dtcFrame.setUrl(href);
 
     if (type == DtcPageType.HOME) {
-      dtcArdbegNodeData.refreshDtcHomePageNode();
+      dtcArdbegNodeModel.refreshDtcHomePageNode();
     }
     else if (type == DtcPageType.DIRECTORY) {
-      dtcArdbegNodeData.refreshDtcDirectoryPageNode(path);
+      dtcArdbegNodeModel.refreshDtcDirectoryPageNode(path);
     }
   }
 
