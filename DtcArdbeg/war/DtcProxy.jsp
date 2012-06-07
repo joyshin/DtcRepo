@@ -61,6 +61,7 @@
     forwardedUrl = forwardedUrl.replace(baseUrl, DTC_URL);
     forwardedUrl = forwardedUrl.replace("./", DTC_URL);
 
+    System.out.println("ForwardedURL: " + forwardedUrl);
     return forwardedUrl;
   }%>
 <%!public static String guessCharacterEncoding(byte[] bytes) throws IOException {

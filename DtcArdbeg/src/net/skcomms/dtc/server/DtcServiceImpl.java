@@ -14,19 +14,25 @@
  *******************************************************************************/
 package net.skcomms.dtc.server;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,16 +45,21 @@ import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTML.Tag;
 import javax.swing.text.html.HTMLEditorKit.ParserCallback;
 import javax.swing.text.html.parser.ParserDelegator;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 
 import net.skcomms.dtc.client.service.DtcService;
 import net.skcomms.dtc.shared.DtcNodeMetaModel;
 import net.skcomms.dtc.shared.DtcRequestInfoModel;
 import net.skcomms.dtc.shared.DtcRequestParameterModel;
 import net.skcomms.dtc.shared.DtcServiceVerifier;
+import net.skcomms.dtc.shared.HttpRequestInfoModel;
 import net.skcomms.dtc.shared.IpInfoModel;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.xml.sax.SAXException;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -57,6 +68,28 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
 
   private static final String DTC_URL = "http://10.141.6.198/";
+
+  public static String combineQueryString(Map<String, String> params, String encoding) {
+    System.out.println("charset:" + encoding);
+    StringBuilder sb = new StringBuilder();
+    for (Map.Entry<String, String> entry : params.entrySet()) {
+      sb.append(entry.getKey());
+      sb.append("=");
+
+      if (entry.getValue() != null) {
+        try {
+          sb.append(URLEncoder.encode(entry.getValue(), encoding));
+        } catch (UnsupportedEncodingException e) {
+          e.printStackTrace();
+        }
+      }
+      else {
+        sb.append("");
+      }
+      sb.append("&");
+    }
+    return sb.toString().substring(0, sb.length() - 1);
+  }
 
   private static ParserCallback
       createDtcDirectoryParserCallback(final List<DtcNodeMetaModel> items) {
@@ -283,6 +316,135 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     return requestInfo;
   }
 
+  static String createDtcResponse(HttpRequestInfoModel httpRequestInfo) {
+
+    String response = null;
+    String encoding = null;
+    StringBuilder responseBuffer = new StringBuilder();
+
+    URL conUrl;
+
+    try {
+      conUrl = new URL(httpRequestInfo.getUrl());
+      HttpURLConnection httpCon = (HttpURLConnection) conUrl.openConnection();
+      httpCon.setDoInput(true);
+      httpCon.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+      if (httpRequestInfo.getEncoding() != "") {
+        httpCon.setRequestProperty("Content-Type", "text/html; charset="
+            + httpRequestInfo.getEncoding());
+      }
+
+      httpCon.setRequestMethod(httpRequestInfo.getHttpMethod().toUpperCase());
+
+      if (httpRequestInfo.getHttpMethod().toUpperCase().equals("POST")) {
+        httpCon.setDoOutput(true);
+        OutputStream postStream = httpCon.getOutputStream();
+
+        postStream.write(httpRequestInfo.getRequestData().getBytes());
+        postStream.flush();
+        postStream.close();
+      }
+
+      byte[] content = DtcServiceImpl.readAllBytes(httpCon.getInputStream());
+      encoding = DtcServiceImpl.guessCharacterEncoding(content);
+
+      BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
+          content), encoding));
+      String line;
+
+      while ((line = reader.readLine()) != null) {
+        responseBuffer.append(line);
+        // System.out.println(line);
+      }
+      reader.close();
+
+    } catch (IOException e) {
+      System.out.println("IOException: " + e.getLocalizedMessage());
+      e.printStackTrace();
+    }
+
+    Pattern regExp = Pattern.compile("src=\"([^\"]*)");
+    Matcher matcher = regExp.matcher(responseBuffer.toString());
+
+    if (matcher.find() == false) {
+      response = responseBuffer.toString();
+      return response;
+    }
+    else {
+
+      String targetUrl = null;
+      String responseUrl = null;
+      String htmlData = null;
+
+      try {
+        responseUrl = URLDecoder.decode(matcher.group(0).split("/")[1], "utf-8");
+        System.out.println("Response URL: " + responseUrl);
+      } catch (UnsupportedEncodingException e1) {
+        e1.printStackTrace();
+      }
+
+      HttpRequestInfoModel responseRequestInfo = new HttpRequestInfoModel();
+      responseRequestInfo.setEncoding(encoding);
+      responseRequestInfo.setHttpMethod("GET");
+
+      String url = responseUrl.split("\\?u=")[0];
+      String requestUrl = responseUrl.split("\\?u=")[1].split("\\?")[0];
+      String query = responseUrl.split("\\?u=")[1].split("\\?")[1];
+
+      System.out.println("url: " + url);
+      System.out.println("requestURL: " + requestUrl);
+      System.out.println("query: " + query);
+
+      query = requestUrl + "?" + query;
+
+      try {
+        targetUrl = DtcServiceImpl.DTC_URL + url + "?u=" + URLEncoder.encode(query, "utf-8");
+      } catch (UnsupportedEncodingException e) {
+        e.printStackTrace();
+      }
+
+      System.out.println("Target URL: " + targetUrl);
+      responseRequestInfo.setUrl(targetUrl);
+      response = DtcServiceImpl.createDtcResponse(responseRequestInfo);
+      System.out.println("Response: " + response);
+
+      if (responseUrl.contains("response_json.html")) {
+        // JSONParser parser = new JSONParser();
+        // DtcJsonToXmlHandler jsonHandler = new DtcJsonToXmlHandler();
+        //
+        // try {
+        // parser.parse(response, jsonHandler);
+        // } catch (ParseException e) {
+        // e.printStackTrace();
+        // }
+        //
+        // String xmlString = jsonHandler.toString();
+        //
+        // try {
+        // htmlData =
+        // DtcServiceImpl.getHtmlFromXml(xmlString.getBytes(encoding));
+        // } catch (UnsupportedEncodingException e) {
+        // e.printStackTrace();
+        // }
+        htmlData = response;
+
+      } else if (responseUrl.contains("response_xml.html")) {
+
+        try {
+          htmlData = DtcServiceImpl.getHtmlFromXml(response.getBytes(encoding));
+        } catch (UnsupportedEncodingException e) {
+          e.printStackTrace();
+        }
+      }
+      return htmlData;
+    }
+
+  }
+
+  public static String escapeForXml(String src) {
+    return src.replaceAll("\\\\u000B", "&#11;").replaceAll("\\\\f", "&#12;");
+  }
+
   private static String getAttributeByName(MutableAttributeSet a, String name) {
     Enumeration<?> attrs = a.getAttributeNames();
     while (attrs.hasMoreElements()) {
@@ -292,6 +454,46 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
       }
     }
     return null;
+  }
+
+  private static String getEncodedQuery(String query, String encoding) {
+
+    // decode UTF-8 query
+    StringBuilder paramList = new StringBuilder();
+    String decodedQuery = null;
+    String encodedQuery = null;
+
+    if (encoding.toLowerCase().equals("utf-8")) {
+      return query;
+    }
+
+    String[] params = query.split("&");
+
+    for (String param : params) {
+      String[] pair = param.split("=");
+      if (pair.length == 2) {
+        try {
+
+          decodedQuery = URLDecoder.decode(pair[1], "utf-8");
+          encodedQuery = URLEncoder.encode(decodedQuery, encoding);
+          // System.out.println("decodedQuery: " + decodedQuery);
+          // System.out.println("encodedQuery: " + encodedQuery);
+          paramList.append(pair[0]);
+          paramList.append("=");
+          paramList.append(encodedQuery);
+          paramList.append("&");
+        } catch (UnsupportedEncodingException e) {
+          e.printStackTrace();
+        }
+      } else {
+        paramList.append(pair[0]);
+        paramList.append("=");
+        paramList.append("");
+        paramList.append("&");
+      }
+    }
+
+    return paramList.toString().substring(0, paramList.length() - 1);
   }
 
   /**
@@ -305,6 +507,22 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     byte[] contents = DtcServiceImpl.readAllBytes(conn.getInputStream());
 
     return contents;
+  }
+
+  public static String getHtmlFromXml(byte[] content) {
+    DtcXmlToHtmlHandler dp = new DtcXmlToHtmlHandler();
+    ByteArrayInputStream bufferInputStream = new ByteArrayInputStream(content);
+    SAXParserFactory sf = SAXParserFactory.newInstance();
+    SAXParser sp;
+    try {
+      sp = sf.newSAXParser();
+      sp.parse(bufferInputStream, dp);
+
+    } catch (ParserConfigurationException | SAXException | IOException e) {
+      e.printStackTrace();
+    }
+    // sp.parse(new String(content, "windows-949"), dp);
+    return dp.getHtml().toString();
   }
 
   static String guessCharacterEncoding(byte[] bytes) throws IOException {
@@ -388,6 +606,27 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
   }
 
   @Override
+  public String getDtcTestPageResponse(HttpRequestInfoModel httpRequestInfo) {
+
+    String rawHtml = null;
+    if (!DtcServiceVerifier.isValidMethod(httpRequestInfo.getHttpMethod())) {
+      throw new IllegalArgumentException("Invalid HTTP Method: " + httpRequestInfo.getHttpMethod());
+    }
+
+    // change encoding
+    String encodedData =
+        DtcServiceImpl.getEncodedQuery(httpRequestInfo.getRequestData(),
+            httpRequestInfo.getEncoding());
+    httpRequestInfo.setRequestData(encodedData);
+
+    // replace URL
+    String targetUrl = DtcServiceImpl.DTC_URL + "response.html";
+    httpRequestInfo.setUrl(targetUrl);
+    rawHtml = DtcServiceImpl.createDtcResponse(httpRequestInfo);
+    return rawHtml;
+  }
+
+  @Override
   public void init(ServletConfig config) throws ServletException {
     System.out.println("init() called.");
     super.init(config);
@@ -400,4 +639,5 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     System.out.println("setEntityManagerFactory() called.");
     this.emf = emf;
   }
+
 }
