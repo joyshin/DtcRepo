@@ -5,7 +5,7 @@ import java.util.List;
 
 import net.skcomms.dtc.client.controller.DtcTestPageController;
 import net.skcomms.dtc.client.controller.DtcUrlCopyController;
-import net.skcomms.dtc.client.controller.IpHistoryController;
+import net.skcomms.dtc.client.controller.IpHistoryDao;
 import net.skcomms.dtc.client.controller.LastRequestLoaderController;
 import net.skcomms.dtc.client.model.DtcNodeModel;
 import net.skcomms.dtc.client.view.DtcChronoView;
@@ -92,12 +92,9 @@ public class DtcArdbeg implements EntryPoint {
 
   private DtcNavigationBarView navigationBar;
 
-  private DtcRequestFormAccessor dtcRequestFormAccessor;
-
   private final DtcUserSignInView usernameSubmissionManager = new DtcUserSignInView();
 
-  private final IpHistoryController ipHistoryManager = new IpHistoryController(
-      this.dtcRequestFormAccessor);
+  private final IpHistoryDao ipHistoryManager = new IpHistoryDao();
 
   private final List<DtcArdbegObserver> dtcArdbegObservers = new ArrayList<DtcArdbegObserver>();
 
@@ -206,9 +203,7 @@ public class DtcArdbeg implements EntryPoint {
     this.initializeDtcFrame();
     this.initializeDtcNodeContainer();
 
-    this.ipHistoryManager.initialize(this);
     this.initializeNavigationBar();
-    this.initializeRequestFormAccessor();
     this.initializeTestPage();
 
     this.initializeUrlCopy();
@@ -254,13 +249,10 @@ public class DtcArdbeg implements EntryPoint {
   /**
    * 
    */
-  private void initializeRequestFormAccessor() {
-    this.dtcRequestFormAccessor = new DtcRequestFormAccessor();
-    this.dtcRequestFormAccessor.initialize(this);
-  }
 
   private void initializeTestPage() {
-    this.dtcTestPageConroller.initialize(this, this.dtcTestPageView);
+    IpHistoryDao ipHistoryDao = new IpHistoryDao();
+    this.dtcTestPageConroller.initialize(this, this.dtcTestPageView, ipHistoryDao);
   }
 
   private void initializeUrlCopy() {

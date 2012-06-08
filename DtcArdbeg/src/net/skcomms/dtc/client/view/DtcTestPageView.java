@@ -27,6 +27,8 @@ import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.form.fields.ComboBoxItem;
 import com.smartgwt.client.widgets.form.fields.FormItem;
 import com.smartgwt.client.widgets.form.fields.TextItem;
+import com.smartgwt.client.widgets.form.fields.events.ChangeEvent;
+import com.smartgwt.client.widgets.form.fields.events.ChangeHandler;
 import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridEditorContext;
 import com.smartgwt.client.widgets.grid.ListGridEditorCustomizer;
@@ -138,25 +140,64 @@ public class DtcTestPageView {
           RequestGridRecord record = (RequestGridRecord) context.getEditedRecord();
           if (record.getAttributeAsString("key").equals("IP")) {
 
-            ComboBoxItem cbItem = new ComboBoxItem();
+            final ComboBoxItem cbItem = new ComboBoxItem();
+
             cbItem.setType("comboBox");
-            String[] ipList = new String[DtcTestPageView.this.requestInfo.getIpInfo()
+            final String[] ipList = new String[DtcTestPageView.this.requestInfo.getIpInfo()
                 .getOptions().size()];
+            final List<DtcRequestParameterModel> options = DtcTestPageView.this.requestInfo
+                .getIpInfo().getOptions();
 
             for (int i = 0; i < ipList.length; i++) {
-
-              cbItem.setAttribute("key", DtcTestPageView.this.requestInfo.getIpInfo()
-                  .getOptions().get(i).getKey());
-
-              cbItem.setAttribute("name", DtcTestPageView.this.requestInfo.getIpInfo()
-                  .getOptions().get(i).getName());
-
-              ipList[i] = DtcTestPageView.this.requestInfo.getIpInfo().getOptions()
-                  .get(i).getValue();
-
+              ipList[i] = "<b>" + options.get(i).getKey() + "</b>"
+                  + options.get(i).getValue().substring(options.get(i).getKey().length());
             }
 
             cbItem.setValueMap(ipList);
+
+            cbItem.addChangeHandler(new ChangeHandler() {
+
+              @Override
+              public void onChange(ChangeEvent event) {
+
+                for (int i = 0; i < ipList.length; i++) {
+                  if (ipList[i].equals(event.getValue().toString())) {
+                    event.getItem().setValue(options.get(i).getValue());
+                    break;
+                  }
+                }
+              }
+            });
+
+            cbItem
+                .addClickHandler(new
+                com.smartgwt.client.widgets.form.fields.events.ClickHandler() {
+
+                  @Override
+                  public void onClick(
+                      com.smartgwt.client.widgets.form.fields.events.ClickEvent event) {
+                    // String[] ipList1 = new
+                    // String[DtcTestPageView.this.requestInfo.getIpInfo().getOptions().size()
+                    // + 1];
+                    //
+                    // List<DtcRequestParameterModel> options =
+                    // DtcTestPageView.this.requestInfo
+                    // .getIpInfo().getOptions();
+                    // for (int i = 0; i < options.size(); i++) {
+                    //
+                    // ipList1[i] = "<b>" + options.get(i).getKey() + "</b>"
+                    // +
+                    // options.get(i).getValue().substring(options.get(i).getKey().length());
+                    //
+                    // }
+                    // ipList1[DtcTestPageView.this.requestInfo.getIpInfo().getOptions().size()]
+                    // = "added IP";
+
+                    // cbItem.setValueMap(ipList1);
+                    // event.getItem().setValueMap(ipList);
+                    // event.getItem().redraw();
+                  }
+                });
             return cbItem;
 
           } else {
@@ -320,11 +361,7 @@ public class DtcTestPageView {
     this.layout.setVisible(true);
   }
 
-  public void DtcTestPageView() {
-
-  }
-
-  public Map<String, String> getRequestParameter() {
+  public Map<String, String> getRequestParameters() {
     Map<String, String> params = new HashMap<String, String>();
 
     for (ListGridRecord record : this.requestFormGrid.getRecords()) {
@@ -358,7 +395,7 @@ public class DtcTestPageView {
     this.requestInfo = requestInfo;
   }
 
-  public int validateRequestData() {
+  private int validateRequestData() {
 
     for (ListGridRecord record : this.requestFormGrid.getRecords()) {
 

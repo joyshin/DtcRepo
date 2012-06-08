@@ -1,5 +1,8 @@
 package net.skcomms.dtc.client.controller;
 
+import java.util.Date;
+import java.util.Map;
+
 import net.skcomms.dtc.client.DefaultDtcArdbegObserver;
 import net.skcomms.dtc.client.DtcArdbeg;
 import net.skcomms.dtc.client.DtcTestPageViewObserver;
@@ -25,6 +28,17 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
   private String dtcProxyUrl;
 
   private String encoding;
+
+  private IpHistoryDao ipHistoryDao;
+
+  public void displayDtcTestPage(DtcRequestInfoModel requestInfo) {
+    this.currentPath = requestInfo.getPath();
+
+    DtcTestPageController.this.dtcTestPageView.setRequestInfo(requestInfo);
+    // GWT.log(requestInfo.toString());
+    DtcTestPageController.this.dtcTestPageView.draw();
+    DtcTestPageController.this.encoding = requestInfo.getEncoding();
+  }
 
   protected void getResponse(Response response) {
 
@@ -71,10 +85,12 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
     }
   }
 
-  public void initialize(final DtcArdbeg dtcArdbeg, DtcTestPageView dtcTestPageView) {
+  public void initialize(final DtcArdbeg dtcArdbeg, DtcTestPageView dtcTestPageView,
+      IpHistoryDao ipHistoryDao) {
     dtcArdbeg.addDtcArdbegObserver(this);
     this.dtcProxyUrl = dtcArdbeg.getDtcProxyUrl();
     this.dtcTestPageView = dtcTestPageView;
+    this.ipHistoryDao = ipHistoryDao;
 
     dtcTestPageView.setOnReadyRequestDataObserver(new DtcTestPageViewObserver() {
 
@@ -85,22 +101,16 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
     });
   }
 
-  public void loadDtcTestPageView(DtcRequestInfoModel requestInfo) {
-    this.currentPath = requestInfo.getPath();
-    DtcTestPageController.this.dtcTestPageView.setRequestInfo(requestInfo);
-    // GWT.log(requestInfo.toString());
-    DtcTestPageController.this.dtcTestPageView.draw();
-    DtcTestPageController.this.encoding = requestInfo.getEncoding();
-  }
-
   @Override
   public void onDtcTestPageLoaded(DtcRequestInfoModel requestInfo) {
-    this.loadDtcTestPageView(requestInfo);
+
+    this.displayDtcTestPage(requestInfo);
   }
 
   @Override
   public void onSubmitRequestForm() {
     this.sendRequest();
+    this.setIpHistory();
 
   }
 
@@ -112,7 +122,6 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
     requestData.append(testURL);
     requestData.append("&");
     requestData.append(process);
-
     requestData.append(this.dtcTestPageView.createRequestData());
 
     String targetURL = URL.encode(this.dtcProxyUrl + "response.html");
@@ -144,4 +153,9 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
     }
   }
 
+  private void setIpHistory() {
+    Map<String, String> requestParameters = this.dtcTestPageView.getRequestParameters();
+    String ip = requestParameters.get("IP");
+    this.ipHistoryDao.setIpHistory(this.currentPath, ip, new Date());
+  }
 }

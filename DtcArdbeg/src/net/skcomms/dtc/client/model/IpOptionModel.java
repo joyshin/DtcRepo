@@ -16,12 +16,10 @@ public class IpOptionModel {
 
   private Date lastSuccessTime;
 
-  private Origin origin;
-
-  public IpOptionModel(String anIp, String aText, Origin anOrigin) {
+  public IpOptionModel(String anIp, Date aTime, String aText) {
     this.ip = anIp;
+    this.lastSuccessTime = aTime;
     this.text = aText;
-    this.origin = anOrigin;
   }
 
   @Override
@@ -53,10 +51,6 @@ public class IpOptionModel {
 
   public Date getLastSuccessTime() {
     return this.lastSuccessTime;
-  }
-
-  public Origin getOrigin() {
-    return this.origin;
   }
 
   public String getText() {
@@ -109,7 +103,4 @@ public class IpOptionModel {
     this.lastSuccessTime = lastSuccessTime;
   }
 
-  public void setOrigin(Origin origin) {
-    this.origin = origin;
-  }
 }
