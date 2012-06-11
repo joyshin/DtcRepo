@@ -19,6 +19,7 @@ import java.util.List;
 import net.skcomms.dtc.shared.DtcNodeMetaModel;
 import net.skcomms.dtc.shared.DtcRequestInfoModel;
 import net.skcomms.dtc.shared.DtcServiceVerifier;
+import net.skcomms.dtc.shared.HttpRequestInfoModel;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -42,17 +43,18 @@ public interface DtcService extends RemoteService {
   }
 
   /**
-   * 디렉토리 리스트를 가져온다.
+   * �����━ 由ъ��몃� 媛���⑤�.
    * 
    * @param path
-   *          디렉토리 경로. 경로의 유효성은
-   *          {@link DtcServiceVerifier#isValidDirectoryPath(String)}을 참고.
-   * @return 디렉토리 아이템 리스트.
+   *          �����━ 寃쎈�. 寃쎈�������깆�
+   *          {@link DtcServiceVerifier#isValidDirectoryPath(String)}��李멸�.
+   * @return �����━ �����由ъ���
    * @throws IllegalArgumentException
-   *           디렉토리 경로가 유효하지 않은 경우.
+   *           �����━ 寃쎈�媛������� ��� 寃쎌�.
    */
   List<DtcNodeMetaModel> getDir(String path) throws IllegalArgumentException;
 
   DtcRequestInfoModel getDtcRequestPageInfo(String path);
 
+  String getDtcTestPageResponse(HttpRequestInfoModel httpRequestInfo);
 }
