@@ -2,20 +2,13 @@ package net.skcomms.dtc.client.view;
 
 import java.util.Date;
 
-import net.skcomms.dtc.client.DefaultDtcArdbegObserver;
-import net.skcomms.dtc.client.DtcArdbeg;
-import net.skcomms.dtc.shared.DtcRequestInfoModel;
-
 import com.google.gwt.animation.client.Animation;
-import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.dom.client.Text;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
-import com.google.gwt.user.client.ui.RootPanel;
+import com.smartgwt.client.widgets.Label;
 
-public class DtcChronoView extends DefaultDtcArdbegObserver {
+public class DtcChronoView extends Label {
 
   private static class ChronoAnimation extends Animation {
 
@@ -26,40 +19,73 @@ public class DtcChronoView extends DefaultDtcArdbegObserver {
 
     private long startTime;
 
-    private final Style chronoStyle;
+    private final StringBuilder contents;
+    private String elapsedTimeText;
+    private String searchTimeText;
+    private final Label timeLabel;
 
-    private final Text elapsedTimeText;
+    public ChronoAnimation(Label label, String searchTime, String elapsedTime) {
+      // GWT.log("searchTime: " + searchTime);
+      // GWT.log("elapsedTime: " + elapsedTime);
 
-    private final Text searchTimeText;
+      this.timeLabel = label;
+      this.searchTimeText = searchTime;
+      this.elapsedTimeText = elapsedTime;
 
-    public ChronoAnimation(Style aChronoStyle, Text aSearchTimeText, Text anElapsedTimeText) {
-      this.chronoStyle = aChronoStyle;
-      this.searchTimeText = aSearchTimeText;
-      this.elapsedTimeText = anElapsedTimeText;
-
+      this.contents = new StringBuilder();
+      this.contents.append("<font color=\"gray\" family=\"normal\" size=\"2\" weight=\"bold\">");
+      this.contents.append(this.searchTimeText);
+      this.contents.append(" ");
+      this.contents.append(this.elapsedTimeText);
+      this.contents.append("</font>");
+      this.timeLabel.setContents(this.contents.toString());
     }
 
-    private void changeColor(String value) {
-      this.chronoStyle.setColor(value);
-    }
+    /*
+     * private void changeColor(String value) { contents.append("<font color=\""
+     * + value + "\" family=\"normal\" size=\"12\" weight=\"bold\">"); }
+     */
 
     @Override
     protected void onCancel() {
       this.updateTimeText();
-      this.changeColor("grey");
+      this.contents.append("<font color=\"gray\" family=\"normal\" size=\"2\" weight=\"bold\">");
+      this.contents.append(this.searchTimeText);
+      this.contents.append(" ");
+      this.contents.append(this.elapsedTimeText);
+      this.contents.append("</font>");
+      this.timeLabel.setContents(this.contents.toString());
+      // this.timeLabel.redraw();
     }
 
     @Override
     protected void onComplete() {
       this.updateTimeText();
-      this.changeColor("grey");
+      this.timeLabel.clear();
+      this.contents.append("<font color=\"gray\" family=\"normal\" size=\"2\" weight=\"bold\">");
+      this.contents.append(this.searchTimeText);
+      this.contents.append(" ");
+      this.contents.append(this.elapsedTimeText);
+      this.contents.append("</font>");
+      this.timeLabel.setContents(this.contents.toString());
+      // this.timeLabel.redraw();
     }
 
     @Override
     protected void onStart() {
-      this.searchTimeText.setData(ChronoAnimation.getCurrentTimeString());
+      this.timeLabel.clear();
+      this.contents.setLength(0);
+      this.searchTimeText = ChronoAnimation.getCurrentTimeString().toString();
       this.startTime = new Date().getTime();
-      this.changeColor("red");
+      this.contents.append("<font color=\"red\" family=\"normal\" size=\"2\" weight=\"bold\">");
+      this.contents.append(this.searchTimeText);
+      this.contents.append(" ");
+      this.contents.append(this.elapsedTimeText);
+      this.contents.append("</font>");
+      this.timeLabel.setContents(this.contents.toString());
+      // this.timeLabel.redraw();
+
+      // this.changeColor("red");
     }
 
     @Override
@@ -69,64 +95,33 @@ public class DtcChronoView extends DefaultDtcArdbegObserver {
 
     private void updateTimeText() {
       long currentTime = new Date().getTime();
-      this.elapsedTimeText.setData(" " + Long.toString(currentTime - this.startTime) + " ms");
+      this.elapsedTimeText = " " + Long.toString(currentTime - this.startTime) + " ms";
+      GWT.log("elapsedTime: " + this.elapsedTimeText);
+      this.timeLabel.clear();
+
+      this.contents.append("<font color=\"red\" family=\"normal\" size=\"2\" weight=\"bold\">");
+      this.contents.append(this.searchTimeText);
+      this.contents.append(" ");
+      this.contents.append(this.elapsedTimeText);
+      this.contents.append("</font>");
+      this.timeLabel.setContents(this.contents.toString());
+      // this.timeLabel.redraw();
+
     }
   }
 
   ChronoAnimation chronoAnimation;
 
-  public void createChrono(Document dtcFrameDoc) {
-    DivElement chronoElement = dtcFrameDoc.createDivElement();
-    chronoElement.setId("responseTimeContainer");
+  public DtcChronoView() {
 
-    Text searchTimeText = dtcFrameDoc.createTextNode(ChronoAnimation.getCurrentTimeString());
-    Text elapsedTimeText = dtcFrameDoc.createTextNode("");
-    chronoElement.appendChild(searchTimeText);
-    chronoElement.appendChild(elapsedTimeText);
-
-    Style chronoStyle = chronoElement.getStyle();
-    chronoStyle.setFontStyle(Style.FontStyle.NORMAL);
-    chronoStyle.setFontSize(12, Style.Unit.PX);
-    chronoStyle.setFontWeight(Style.FontWeight.BOLD);
-    chronoStyle.setColor("gray");
-
-    this.chronoAnimation = new ChronoAnimation(chronoStyle, searchTimeText, elapsedTimeText);
-
-    RootPanel.get("chronoContainer").getElement().appendChild(chronoElement);
+    String searchTime = ChronoAnimation.getCurrentTimeString().toString();
+    GWT.log("searchTime: " + searchTime);
+    String elapsedTime = "";
+    this.chronoAnimation = new ChronoAnimation(this, searchTime, elapsedTime);
   }
 
   public void end() {
     this.chronoAnimation.cancel();
-  }
-
-  public void initialize(DtcArdbeg dtcArdbeg) {
-    dtcArdbeg.addDtcArdbegObserver(this);
-    this.createChrono(Document.get());
-  }
-
-  @Override
-  public void onDtcDirectoryLoaded(String path) {
-    RootPanel.get("chronoContainer").setVisible(false);
-  }
-
-  @Override
-  public void onDtcHomeLoaded() {
-    RootPanel.get("chronoContainer").setVisible(false);
-  }
-
-  @Override
-  public void onDtcResponseFrameLoaded(boolean success) {
-    this.end();
-  }
-
-  @Override
-  public void onDtcTestPageLoaded(DtcRequestInfoModel requestInfo) {
-    RootPanel.get("chronoContainer").setVisible(true);
-  }
-
-  @Override
-  public void onSubmitRequestForm() {
-    this.start();
   }
 
   public void start() {

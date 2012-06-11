@@ -38,6 +38,10 @@ h1 {
 	margin: 5px;
 }
 
+.ResultHeader {
+	color: red;
+}
+
 .serverResponseLabelError {
 	color: red;
 }

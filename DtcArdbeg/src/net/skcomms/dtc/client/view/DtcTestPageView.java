@@ -105,6 +105,8 @@ public class DtcTestPageView {
 
   private DtcRequestInfoModel requestInfo;
 
+  private DtcChronoView chronoView;
+
   private DtcTestPageViewObserver readyRequestDataCb;
 
   private void createGridRecord() {
@@ -208,6 +210,10 @@ public class DtcTestPageView {
     this.vLayoutLeft.setMembersMargin(10);
     this.vLayoutLeft.setLayoutMargin(10);
 
+    this.chronoView = new DtcChronoView();
+    this.chronoView.setWidth(300);
+    this.chronoView.setHeight(20);
+
     this.requestFormGrid = new ListGrid();
     this.requestFormGrid.setWidth(300);
     this.requestFormGrid.setShowAllRecords(true);
@@ -294,6 +300,7 @@ public class DtcTestPageView {
     this.vLayoutLeftBottom.setMembersMargin(5);
     this.vLayoutLeftBottom.setLayoutMargin(0);
 
+    this.vLayoutLeft.addMember(this.chronoView);
     this.vLayoutLeft.addMember(this.requestFormGrid);
     this.vLayoutLeft.addMember(this.searchButton);
     this.vLayoutLeft.addMember(this.vLayoutLeftBottom);
