@@ -5,18 +5,15 @@ package net.skcomms.dtc.shared;
 
 /**
  * @author jujang@sk.com
- * 
  */
 public class DtcServiceVerifier {
 
   /**
-   * 吏����寃쎈�������깆� 寃�����.
-   * 
-   * �����"/([a-zA-Z0-9_.-]+/)*"���쇱���㈃ �����寃��濡�������.
+   * 지정된 경로의 유효성을 검사한다. 정규식 "/([a-zA-Z0-9_.-]+/)*"에 일치하면 유효한 것으로 판단한다.
    * 
    * @param path
-   *          寃����寃쎈�
-   * @return �����寃쎌� true; ���硫�false
+   *          검사할 경로
+   * @return 유효한 경우 true; 아니면 false
    */
   public static boolean isValidDirectoryPath(String path) {
     if (path == null) {
@@ -28,17 +25,12 @@ public class DtcServiceVerifier {
   }
 
   public static boolean isValidMethod(String httpMethod) {
-
-    if (httpMethod.toLowerCase().equals("get") || httpMethod.toLowerCase().equals("post"))
-      return true;
-    else
-      return false;
+    return (httpMethod.toLowerCase().equals("get") || httpMethod.toLowerCase().equals("post"));
   }
 
   /**
-   * 吏������������吏�� ����깆� 寃�����.
-   * 
-   * �����"/([a-zA-Z0-9_.-]+/)*[a-zA-Z0-9_.-]+\\.ini"���쇱���㈃ �����寃��濡�������.
+   * 지정된 테스트 페이지의 유효성을 검사한다. 정규식 "/([a-zA-Z0-9_.-]+/)*[a-zA-Z0-9_.-]+\\.ini"에
+   * 일치하면 유효한 것으로 판단한다.
    * 
    * @param path
    * @return
@@ -51,4 +43,5 @@ public class DtcServiceVerifier {
     String regex = "/([a-zA-Z0-9_.-]+/)*[a-zA-Z0-9_.-]+\\.ini";
     return path.matches(regex);
   }
+
 }

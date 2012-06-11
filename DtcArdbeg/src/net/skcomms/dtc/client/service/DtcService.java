@@ -32,6 +32,7 @@ public interface DtcService extends RemoteService {
    * Utility class for simplifying access to the instance of async service.
    */
   public static class Util {
+
     private static DtcServiceAsync instance;
 
     public static DtcServiceAsync getInstance() {
@@ -43,14 +44,14 @@ public interface DtcService extends RemoteService {
   }
 
   /**
-   * �����━ 由ъ��몃� 媛���⑤�.
+   * 디렉토리 리스트를 가져온다.
    * 
    * @param path
-   *          �����━ 寃쎈�. 寃쎈�������깆�
-   *          {@link DtcServiceVerifier#isValidDirectoryPath(String)}��李멸�.
-   * @return �����━ �����由ъ���
+   *          디렉토리 경로. 경로의 유효성은
+   *          {@link DtcServiceVerifier#isValidDirectoryPath(String)}을 참고.
+   * @return 디렉토리 아이템 리스트.
    * @throws IllegalArgumentException
-   *           �����━ 寃쎈�媛������� ��� 寃쎌�.
+   *           디렉토리 경로가 유효하지 않은 경우.
    */
   List<DtcNodeMetaModel> getDir(String path) throws IllegalArgumentException;
 
