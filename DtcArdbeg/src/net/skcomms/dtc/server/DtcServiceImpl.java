@@ -94,8 +94,11 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
   private static ParserCallback
       createDtcDirectoryParserCallback(final List<DtcNodeMetaModel> items) {
     return new ParserCallback() {
+
       private int textCount;
+
       private DtcNodeMetaModel currentItem = null;
+
       private boolean beforeHeaderRow = true;
 
       @Override
@@ -518,10 +521,13 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
       sp = sf.newSAXParser();
       sp.parse(bufferInputStream, dp);
 
-    } catch (ParserConfigurationException | SAXException | IOException e) {
+    } catch (ParserConfigurationException e) {
+      e.printStackTrace();
+    } catch (SAXException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
       e.printStackTrace();
     }
-    // sp.parse(new String(content, "windows-949"), dp);
     return dp.getHtml().toString();
   }
 
