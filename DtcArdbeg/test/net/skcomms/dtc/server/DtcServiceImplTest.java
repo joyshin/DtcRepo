@@ -10,6 +10,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -89,14 +90,14 @@ public class DtcServiceImplTest {
 
   @Test
   public void testGetDir() throws IOException {
-    List<DtcNodeMetaModel> nodes = new DtcServiceImpl().getDirImplNew("/common/");
+    List<DtcNodeMetaModel> nodes = new DtcServiceImpl().getDirImpl("/common/");
     for (DtcNodeMetaModel node : nodes) {
       System.out.println(node);
     }
   }
 
   @Test
-  public void testGetRootPath() {
+  public void testGetRootPath() throws IOException {
     Assert.assertEquals("sample/dtc/", DtcServiceImpl.getRootPath());
     String absolutePath = DtcServiceImpl.getRootPath() + "/";
     File file = new File(absolutePath);
@@ -104,6 +105,18 @@ public class DtcServiceImplTest {
     for (File item : file.listFiles(new DtcServiceImpl.DtcNodeFilter())) {
       System.out.println(item.getName());
     }
+  }
+
+  @Test
+  public void testNodeComparator() {
+    File file1 = new File("sample/dtc/dtc.ini");
+    File file2 = new File("sample/dtc/habong");
+    File[] files = { file1, file2 };
+    Arrays.sort(files, DtcServiceImpl.NODE_COMPARATOR);
+
+    Assert.assertEquals(false, file1.isDirectory());
+    Assert.assertEquals(true, file2.isDirectory());
+    Assert.assertEquals("habong", files[0].getName());
   }
 
   @Test

@@ -19,6 +19,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -26,7 +27,11 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -43,6 +48,7 @@ import javax.swing.text.html.HTMLEditorKit.ParserCallback;
 import javax.swing.text.html.parser.ParserDelegator;
 
 import net.skcomms.dtc.client.service.DtcService;
+import net.skcomms.dtc.server.model.DtcIni;
 import net.skcomms.dtc.server.model.DtcLog;
 import net.skcomms.dtc.shared.DtcNodeMetaModel;
 import net.skcomms.dtc.shared.DtcRequestInfoModel;
@@ -69,6 +75,23 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
   }
 
   private static final String DTC_URL = "http://10.141.6.198/";
+
+  static final Comparator<File> NODE_COMPARATOR = new Comparator<File>() {
+
+    @Override
+    public int compare(File arg0, File arg1) {
+      if (arg0.isDirectory() != arg1.isDirectory()) {
+        if (arg0.isDirectory()) {
+          return -1;
+        } else {
+          return 1;
+        }
+      } else {
+        return arg0.getName().compareTo(arg1.getName());
+      }
+    }
+
+  };
 
   private static ParserCallback
       createDtcDirectoryParserCallback(final List<DtcNodeMetaModel> items) {
@@ -322,11 +345,13 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     return contents;
   }
 
-  public static String getRootPath() {
+  public static String getRootPath() throws IOException {
     if (new File("/home/search/dtc").isDirectory()) {
       return "/home/search/dtc/";
-    } else {
+    } else if (new File("sample/dtc").isDirectory()) {
       return "sample/dtc/";
+    } else {
+      return "../sample/dtc/";
     }
 
   }
@@ -370,40 +395,36 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     manager.getTransaction().commit();
     manager.close();
 
-    return this.getDirImpl(path);
-  }
-
-  List<DtcNodeMetaModel> getDirImpl(String path) {
     try {
-      String href;
-      if (path.equals("/")) {
-        href = DtcServiceImpl.DTC_URL;
-      }
-      else if (path.endsWith(".ini")) {
-        href = DtcServiceImpl.DTC_URL + "?c=" + path.substring(1);
-      }
-      else {
-        href = DtcServiceImpl.DTC_URL + "?b=" + path.substring(1);
-      }
-
-      byte[] contents = DtcServiceImpl.getHtmlContents(href);
-      return DtcServiceImpl.createDtcNodeInfosFrom(contents);
-    } catch (MalformedURLException e) {
-      e.printStackTrace();
-      throw new IllegalArgumentException(e);
+      return this.getDirImpl(path);
     } catch (IOException e) {
-      e.printStackTrace();
-      throw new IllegalArgumentException(e);
+      throw new IllegalStateException(e);
     }
   }
 
-  List<DtcNodeMetaModel> getDirImplNew(String path) throws IOException {
+  List<DtcNodeMetaModel> getDirImpl(String path) throws IOException {
     String root = DtcServiceImpl.getRootPath();
-    String absolutePath = root + path;
-    File file = new File(absolutePath);
+    String parentPath = root + path.substring(1);
+    System.out.println("Absolute path:" + parentPath);
+    File file = new File(parentPath);
     List<DtcNodeMetaModel> nodes = new ArrayList<DtcNodeMetaModel>();
-    for (File item : file.listFiles(new DtcNodeFilter())) {
-      nodes.add(new DtcNodeMetaModel(item));
+    File[] files = file.listFiles(new DtcNodeFilter());
+    Arrays.sort(files, DtcServiceImpl.NODE_COMPARATOR);
+    for (File item : files) {
+      DtcNodeMetaModel node = new DtcNodeMetaModel();
+      node.setName(item.getName());
+      if (item.isDirectory()) {
+        node.setDescription("디렉토리");
+        node.setPath(parentPath.substring(root.length() - 1) + item.getName() + "/");
+      } else {
+        DtcIni ini = new DtcIniFactory().createFrom(new FileInputStream(item));
+        node.setDescription(ini.getBaseProp("DESCRIPTION").getValue());
+        node.setPath(parentPath.substring(root.length() - 1) + item.getName());
+      }
+      String updateTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new Date(item
+          .lastModified()));
+      node.setUpdateTime(updateTime);
+      nodes.add(node);
     }
     return nodes;
   }

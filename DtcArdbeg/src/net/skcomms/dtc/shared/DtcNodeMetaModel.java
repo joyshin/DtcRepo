@@ -3,13 +3,7 @@
  */
 package net.skcomms.dtc.shared;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import net.skcomms.dtc.server.DtcServiceImpl;
 
 /**
  * @author jujang@sk.com
@@ -26,18 +20,6 @@ public class DtcNodeMetaModel implements Serializable {
   private String updateTime;
 
   public DtcNodeMetaModel() {
-  }
-
-  public DtcNodeMetaModel(File file) throws IOException {
-    this.name = file.getName();
-    this.path = file.getPath().substring(DtcServiceImpl.getRootPath().length() - 1);
-    if (file.isDirectory()) {
-      this.description = "디렉토리";
-    } else {
-      this.description = "INI";
-    }
-    this.updateTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new Date(file
-        .lastModified()));
   }
 
   public String getDescription() {

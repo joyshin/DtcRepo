@@ -20,12 +20,14 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 public class DtcNodeModel {
 
   private final List<DtcNodeMetaModel> dtcFavoriteNodeList = new ArrayList<DtcNodeMetaModel>();
+
   private final List<DtcNodeMetaModel> dtcNodeList = new ArrayList<DtcNodeMetaModel>();
 
   private static DtcNodeModel instance = new DtcNodeModel();
 
   private static final CellList<DtcNodeMetaModel> dtcNodeCellList = new CellList<DtcNodeMetaModel>(
       DtcNodeMetaCellView.getInstance());
+
   private static final CellList<DtcNodeMetaModel> dtcFavoriteNodeCellList = new CellList<DtcNodeMetaModel>(
       DtcNodeMetaCellView.getInstance());
 
@@ -35,6 +37,7 @@ public class DtcNodeModel {
 
   private static void sortFavoritesByVisitCount(List<Pair<Integer, DtcNodeMetaModel>> rows) {
     Collections.sort(rows, new Comparator<Pair<Integer, DtcNodeMetaModel>>() {
+
       @Override
       public int
           compare(Pair<Integer, DtcNodeMetaModel> arg0, Pair<Integer, DtcNodeMetaModel> arg1) {
@@ -55,6 +58,7 @@ public class DtcNodeModel {
     this.favoritePairs.clear();
 
     for (DtcNodeMetaModel nodeInfo : nodeInfos) {
+      System.out.println("name:" + nodeInfo.getName() + ", path:" + nodeInfo.getPath());
       Integer score = PersistenceManager.getInstance().getVisitCount(nodeInfo.getName());
       if (score > 0) {
         this.favoritePairs.add(new Pair<Integer, DtcNodeMetaModel>(score, nodeInfo));
@@ -110,6 +114,7 @@ public class DtcNodeModel {
 
   public void refreshDtcDirectoryPageNode(final String path) {
     DtcService.Util.getInstance().getDir(path, new AsyncCallback<List<DtcNodeMetaModel>>() {
+
       @Override
       public void onFailure(Throwable caught) {
         caught.printStackTrace();
@@ -135,6 +140,7 @@ public class DtcNodeModel {
   public void refreshDtcHomePageNode() {
 
     DtcService.Util.getInstance().getDir("/", new AsyncCallback<List<DtcNodeMetaModel>>() {
+
       @Override
       public void onFailure(Throwable caught) {
         caught.printStackTrace();
