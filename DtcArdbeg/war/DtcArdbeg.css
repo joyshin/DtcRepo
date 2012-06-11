@@ -67,5 +67,5 @@ div#dtcContainer iframe { /* 영화 "인터뷰" 포스터 */
 
 .results{display:table; border:0px}
 .test{display:table-row;}
-div[class="key_*]{display:table-cell}
-duv[class="value_*]{display:table-cell}
+.key_CookedQuery{display:table-cell}
+.value_CookedQuery{display:table-cell}
