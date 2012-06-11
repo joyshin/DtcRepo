@@ -27,19 +27,19 @@ public class DtcXmlToHtmlHandler extends DefaultHandler {
 
   public DtcXmlToHtmlHandler() {
     super();
-    this.parseBuffer = new StringBuilder();
-    this.rawHtml = new StringBuilder();
+    parseBuffer = new StringBuilder();
+    rawHtml = new StringBuilder();
   }
 
   @Override
   public void characters(char ch[], int start, int length) throws SAXException {
-    this.parseBuffer.append(ch, start, length);
+    parseBuffer.append(ch, start, length);
   }
 
   @Override
   public void endDocument() throws SAXException {
-    this.rawHtml.append("</body>");
-    this.rawHtml.append("</html>");
+    rawHtml.append("</body>");
+    rawHtml.append("</html>");
   }
 
   @Override
@@ -48,14 +48,14 @@ public class DtcXmlToHtmlHandler extends DefaultHandler {
     String elementName = qName;
     String temp;
 
-    if ((elementName == this.RESULTS) ||
-        (elementName == this.RESULT_SET) ||
-        (elementName == this.RESULTS)) {
+    if ((elementName == RESULTS) ||
+        (elementName == RESULT_SET) ||
+        (elementName == RESULTS)) {
       divForm.append("</div>\n");
-    } else if ((elementName == this.RESPONSE_INFO) ||
-        (elementName == this.RESULT_HEADER) ||
-        (elementName == this.RESULT_LIST) ||
-        (elementName == this.DOCUMENT))
+    } else if ((elementName == RESPONSE_INFO) ||
+        (elementName == RESULT_HEADER) ||
+        (elementName == RESULT_LIST) ||
+        (elementName == DOCUMENT))
     {
       divForm.append("</div>\n");
       divForm.append("<hr />");
@@ -63,28 +63,29 @@ public class DtcXmlToHtmlHandler extends DefaultHandler {
       divForm.append("</div>\n");
     }
 
-    if (this.parseBuffer.length() > 0 && this.parseBuffer.lastIndexOf(">") > 0) {
+    if (parseBuffer.length() > 0 && parseBuffer.lastIndexOf(">") > 0) {
       // Text Node 영역에 tag가 들어올 경우
-      temp = this.parseBuffer.substring(this.parseBuffer.lastIndexOf(">") + 1);
-      this.parseBuffer.setLength(0);
-      this.parseBuffer.append(this.CDATA_TOKEN);
-      this.parseBuffer.append(temp);
-      this.parseBuffer.append("]]>");
-      this.parseBuffer.append("\n");
+      temp = parseBuffer.substring(parseBuffer.lastIndexOf(">") + 1);
+      parseBuffer.setLength(0);
+      parseBuffer.append(CDATA_TOKEN);
+      parseBuffer.append(temp);
+      parseBuffer.append("]]>");
+      parseBuffer.append("\n");
 
-    } else if (this.parseBuffer.length() > 0) {
-      this.parseBuffer.insert(0, this.CDATA_TOKEN);
-      this.parseBuffer.append("]]>");
-      this.parseBuffer.append("\n");
+    } else if (parseBuffer.length() > 0) {
+      parseBuffer.insert(0, CDATA_TOKEN);
+      parseBuffer.append("]]>");
+      parseBuffer.append("\n");
     }
 
-    this.rawHtml.append(this.parseBuffer);
-    this.rawHtml.append(divForm);
-    this.parseBuffer.setLength(0);
+    rawHtml.append(parseBuffer);
+    rawHtml.append(divForm);
+    rawHtml.append("</div>\n");
+    parseBuffer.setLength(0);
   }
 
   public StringBuilder getHtml() {
-    return this.rawHtml;
+    return rawHtml;
   }
 
   @Override
@@ -94,8 +95,8 @@ public class DtcXmlToHtmlHandler extends DefaultHandler {
         + "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML Basic 1.1//EN\" "
         + "\"http://www.w3.org/TR/xhtml-basic/xhtml-basic11.dtd\">\n"
         + "<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\">";
-    this.rawHtml.append(dtd);
-    this.rawHtml.append("<body>");
+    rawHtml.append(dtd);
+    rawHtml.append("<body>");
   }
 
   @Override
@@ -103,23 +104,20 @@ public class DtcXmlToHtmlHandler extends DefaultHandler {
       throws SAXException {
     StringBuilder divForm = new StringBuilder();
     StringBuilder attrBuffer = new StringBuilder();
-    String elementName = qName;
-    String className = null;
+    String className = qName;
 
-    if ((elementName == this.RESULTS) ||
-        (elementName == this.RESULT_SET) ||
-        (elementName == this.RESULTS)) {
-      className = elementName;
-      divForm.append("<div id=\"");
-    } else if ((elementName == this.RESPONSE_INFO) ||
-        (elementName == this.RESULT_HEADER) ||
-        (elementName == this.RESULT_LIST) ||
-        (elementName == this.DOCUMENT)) {
-      className = elementName;
-      divForm.append("<div id=\"");
+    if ((className == RESULTS) ||
+        (className == RESULT_SET) ||
+        (className == RESULTS)) {
+      divForm.append("<div class=key_");
+    } else if ((className == RESPONSE_INFO) ||
+        (className == RESULT_HEADER) ||
+        (className == RESULT_LIST) ||
+        (className == DOCUMENT)) {
+      divForm.append("<div class=key_");
     } else {
-      className = elementName;
-      divForm.append("<div id=\"");
+      // divForm.append("<div class=key_");
+      divForm.append("<div class=test> <div class=key_");
     }
 
     if (atts.getLength() > 0) {
@@ -132,18 +130,16 @@ public class DtcXmlToHtmlHandler extends DefaultHandler {
       }
     }
 
-    divForm.append(elementName);
-    divForm.append("\"");
-
-    if (className != null) {
-      divForm.append(" class=\"");
-      divForm.append(className);
-      divForm.append("\"");
-    }
-
+    divForm.append(className);
     divForm.append(attrBuffer);
-    divForm.append(">\n");
-    this.rawHtml.append(divForm);
+    divForm.append("\">");
+    divForm.append(className);
+    divForm.append("</div>\n");
+
+    divForm.append("<div class=value_");
+    divForm.append(className);
+    divForm.append("\">\n");
+    rawHtml.append(divForm);
   }
 
   @Override

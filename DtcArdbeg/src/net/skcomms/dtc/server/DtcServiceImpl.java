@@ -138,65 +138,65 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
 
       @Override
       public void handleEndOfLineString(String eol) {
-        this.reset();
+        reset();
       }
 
       @Override
       public void handleEndTag(HTML.Tag tag, int pos) {
         if (tag == Tag.TR) {
-          if (this.currentItem != null) {
-            GWT.log("path:" + this.currentItem.getPath());
-            items.add(this.currentItem);
-            this.currentItem = null;
+          if (currentItem != null) {
+            GWT.log("path:" + currentItem.getPath());
+            items.add(currentItem);
+            currentItem = null;
           }
         }
       }
 
       @Override
       public void handleStartTag(HTML.Tag tag, MutableAttributeSet a, int pos) {
-        if (this.beforeHeaderRow) {
+        if (beforeHeaderRow) {
           if (tag == Tag.TR) {
-            this.beforeHeaderRow = false;
+            beforeHeaderRow = false;
           }
           return;
         }
 
         if (tag == Tag.TR) {
-          this.currentItem = new DtcNodeMetaModel();
-          this.textCount = 0;
+          currentItem = new DtcNodeMetaModel();
+          textCount = 0;
         } else if (tag == Tag.A) {
           String href = DtcServiceImpl.getAttributeByName(a, "href");
           int index = href.indexOf('=');
-          this.currentItem.setPath("/" + href.substring(index + 1));
+          currentItem.setPath("/" + href.substring(index + 1));
         }
       }
 
       @Override
       public void handleText(char[] data, int pos) {
-        if (this.currentItem != null) {
-          this.setColumn(String.valueOf(data));
+        if (currentItem != null) {
+          setColumn(String.valueOf(data));
         }
       }
 
       private void reset() {
-        this.textCount = 0;
-        this.currentItem = null;
-        this.beforeHeaderRow = true;
+        textCount = 0;
+        currentItem = null;
+        beforeHeaderRow = true;
       }
 
       private void setColumn(String value) {
-        switch (this.textCount++) {
+        switch (textCount++) {
         case 0:
-          this.currentItem.setName(value);
-          if (!this.currentItem.isLeaf()) {
-            this.textCount++;
+          currentItem.setName(value);
+          if (!currentItem.isLeaf()) {
+            textCount++;
           }
           break;
         case 2:
-          this.currentItem.setDescription(value);
+          currentItem.setDescription(value);
           break;
         case 3:
-          this.currentItem.setUpdateTime(value);
+          currentItem.setUpdateTime(value);
         }
       }
     };
@@ -258,29 +258,29 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
 
       @Override
       public void handleEndOfLineString(String eol) {
-        this.reset();
+        reset();
       }
 
       @Override
       public void handleEndTag(HTML.Tag tag, int pos) {
         if (tag == Tag.SCRIPT) {
-          if (this.scriptStart == 0) {
-            this.scriptStart = pos;
+          if (scriptStart == 0) {
+            scriptStart = pos;
           }
         }
         else if (tag == Tag.TABLE) {
-          this.insideRequestTable = false;
-          requestInfo.setParams(this.params);
+          insideRequestTable = false;
+          requestInfo.setParams(params);
         }
       }
 
       @Override
       public void handleSimpleTag(HTML.Tag tag, MutableAttributeSet a, int pos) {
         if (tag == Tag.INPUT) {
-          if (this.insideRequestTable) {
+          if (insideRequestTable) {
             String value = DtcServiceImpl.getAttributeByName(a, "value");
             String name = DtcServiceImpl.getAttributeByName(a, "name");
-            this.params.add(new DtcRequestParameterModel(this.currentKey, name, value));
+            params.add(new DtcRequestParameterModel(currentKey, name, value));
           }
         }
       }
@@ -288,15 +288,15 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
       @Override
       public void handleStartTag(HTML.Tag tag, MutableAttributeSet a, int pos) {
         if (tag == Tag.STYLE) {
-          if (this.scriptEnd == 0) {
-            this.scriptEnd = pos;
+          if (scriptEnd == 0) {
+            scriptEnd = pos;
             try {
               String encoding = DtcServiceImpl.guessCharacterEncoding(contents);
               requestInfo.setEncoding(encoding);
 
-              String javascript = new String(contents, this.scriptStart, this.scriptEnd
-                  - this.scriptStart, encoding);
-              IpInfoModel ipInfo = this.createIpInfoFrom(javascript);
+              String javascript = new String(contents, scriptStart, scriptEnd
+                  - scriptStart, encoding);
+              IpInfoModel ipInfo = createIpInfoFrom(javascript);
               requestInfo.setIpInfo(ipInfo);
             } catch (UnsupportedEncodingException e) {
               e.printStackTrace();
@@ -311,25 +311,25 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
         else if (tag == Tag.TABLE) {
           String id = DtcServiceImpl.getAttributeByName(a, "id");
           if ("tblREQUEST".equals(id)) {
-            this.insideRequestTable = true;
-            this.params = new ArrayList<DtcRequestParameterModel>();
+            insideRequestTable = true;
+            params = new ArrayList<DtcRequestParameterModel>();
           }
         }
       }
 
       @Override
       public void handleText(char[] data, int pos) {
-        if (this.insideRequestTable) {
-          this.currentKey = new String(data);
+        if (insideRequestTable) {
+          currentKey = new String(data);
         }
       }
 
       private void reset() {
-        this.scriptStart = 0;
-        this.scriptEnd = 0;
-        this.insideRequestTable = false;
-        this.currentKey = null;
-        this.params = null;
+        scriptStart = 0;
+        scriptEnd = 0;
+        insideRequestTable = false;
+        currentKey = null;
+        params = null;
       }
     };
   }
@@ -610,7 +610,7 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
       throw new IllegalArgumentException("Invalid directory:" + path);
     }
 
-    EntityManager manager = this.emf.createEntityManager();
+    EntityManager manager = emf.createEntityManager();
     manager.getTransaction().begin();
     manager.persist(new DtcLog("\"" + path + "\" requested."));
     manager.getTransaction().commit();
@@ -693,7 +693,7 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
   public void init(ServletConfig config) throws ServletException {
     System.out.println("init() called.");
     super.init(config);
-    WebApplicationContextUtils.getRequiredWebApplicationContext(this.getServletContext())
+    WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext())
         .getAutowireCapableBeanFactory().autowireBean(this);
   }
 

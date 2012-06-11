@@ -64,3 +64,8 @@ div#dtcContainer iframe { /* 영화 "인터뷰" 포스터 */
 .gwt-DtcNodeCellImageStyle {
 	border-radius: 15px;
 }
+
+.results{display:table; border:0px}
+.test{display:table-row;}
+div[class="key_*]{display:table-cell}
+duv[class="value_*]{display:table-cell}
