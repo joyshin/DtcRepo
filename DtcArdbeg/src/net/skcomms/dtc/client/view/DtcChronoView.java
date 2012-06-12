@@ -49,6 +49,7 @@ public class DtcChronoView extends Label {
     @Override
     protected void onCancel() {
       this.updateTimeText();
+      this.contents.setLength(0);
       this.contents.append("<font color=\"gray\" family=\"normal\" size=\"2\" weight=\"bold\">");
       this.contents.append(this.searchTimeText);
       this.contents.append(" ");
@@ -61,19 +62,20 @@ public class DtcChronoView extends Label {
     @Override
     protected void onComplete() {
       this.updateTimeText();
-      this.timeLabel.clear();
+      // this.timeLabel.clear();
+      this.contents.setLength(0);
       this.contents.append("<font color=\"gray\" family=\"normal\" size=\"2\" weight=\"bold\">");
       this.contents.append(this.searchTimeText);
       this.contents.append(" ");
       this.contents.append(this.elapsedTimeText);
       this.contents.append("</font>");
       this.timeLabel.setContents(this.contents.toString());
-      // this.timeLabel.redraw();
+      this.timeLabel.redraw();
     }
 
     @Override
     protected void onStart() {
-      this.timeLabel.clear();
+      // this.timeLabel.clear();
       this.contents.setLength(0);
       this.searchTimeText = ChronoAnimation.getCurrentTimeString().toString();
       this.startTime = new Date().getTime();
@@ -83,7 +85,7 @@ public class DtcChronoView extends Label {
       this.contents.append(this.elapsedTimeText);
       this.contents.append("</font>");
       this.timeLabel.setContents(this.contents.toString());
-      // this.timeLabel.redraw();
+      this.timeLabel.redraw();
 
       // this.changeColor("red");
     }
@@ -97,15 +99,15 @@ public class DtcChronoView extends Label {
       long currentTime = new Date().getTime();
       this.elapsedTimeText = " " + Long.toString(currentTime - this.startTime) + " ms";
       GWT.log("elapsedTime: " + this.elapsedTimeText);
-      this.timeLabel.clear();
-
+      // this.timeLabel.clear();
+      this.contents.setLength(0);
       this.contents.append("<font color=\"red\" family=\"normal\" size=\"2\" weight=\"bold\">");
       this.contents.append(this.searchTimeText);
       this.contents.append(" ");
       this.contents.append(this.elapsedTimeText);
       this.contents.append("</font>");
       this.timeLabel.setContents(this.contents.toString());
-      // this.timeLabel.redraw();
+      this.timeLabel.redraw();
 
     }
   }

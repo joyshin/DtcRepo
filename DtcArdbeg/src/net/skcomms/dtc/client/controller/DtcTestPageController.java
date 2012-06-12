@@ -74,12 +74,15 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
     httpRequestInfo.setUrl(targetUrl);
     httpRequestInfo.setRequestData(requestData.toString());
     httpRequestInfo.setEncoding(this.encoding);
+    DtcTestPageController.this.dtcTestPageView.chronoStart();
+
     DtcService.Util.getInstance().getDtcTestPageResponse(httpRequestInfo,
         new AsyncCallback<String>() {
 
           @Override
           public void onFailure(Throwable caught) {
             caught.printStackTrace();
+            DtcTestPageController.this.dtcTestPageView.chronoStop();
             GWT.log("getDtcTestPageResponse Failed: " + caught.getMessage());
           }
 
@@ -89,7 +92,7 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
             String convertedHTML = result.replaceAll("<!\\[CDATA\\[", "").
                 replaceAll("\\]\\]>", "");
             GWT.log(convertedHTML);
-
+            DtcTestPageController.this.dtcTestPageView.chronoStop();
             DtcTestPageController.this.dtcTestPageView.setHTMLData(convertedHTML);
           }
         });
