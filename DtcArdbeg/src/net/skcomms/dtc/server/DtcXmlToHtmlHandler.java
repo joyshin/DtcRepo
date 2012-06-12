@@ -58,7 +58,6 @@ public class DtcXmlToHtmlHandler extends DefaultHandler {
         (elementName == DOCUMENT))
     {
       divForm.append("</div>\n");
-      divForm.append("<hr />");
     } else {
       divForm.append("</div>\n");
     }
@@ -107,17 +106,16 @@ public class DtcXmlToHtmlHandler extends DefaultHandler {
     String className = qName;
 
     if ((className == RESULTS) ||
-        (className == RESULT_SET) ||
-        (className == RESULTS)) {
-      divForm.append("<div class=key_");
+        (className == RESULT_SET)) {
+      divForm.append("<div class=");
     } else if ((className == RESPONSE_INFO) ||
         (className == RESULT_HEADER) ||
         (className == RESULT_LIST) ||
         (className == DOCUMENT)) {
-      divForm.append("<div class=key_");
+      divForm.append("<div class=");
     } else {
       // divForm.append("<div class=key_");
-      divForm.append("<div class=test> <div class=key_");
+      divForm.append("<div class=table_row> <div class=key_");
     }
 
     if (atts.getLength() > 0) {
@@ -132,13 +130,22 @@ public class DtcXmlToHtmlHandler extends DefaultHandler {
 
     divForm.append(className);
     divForm.append(attrBuffer);
-    divForm.append("\">");
+    divForm.append(">");
     divForm.append(className);
     divForm.append("</div>\n");
 
-    divForm.append("<div class=value_");
-    divForm.append(className);
-    divForm.append("\">\n");
+    if ((className == RESULTS) ||
+        (className == RESULT_SET) ||
+        (className == RESPONSE_INFO) ||
+        (className == RESULT_HEADER) ||
+        (className == RESULT_LIST) ||
+        (className == DOCUMENT)) {
+    } else {
+      // divForm.append("<div class=key_");
+      divForm.append("<div class=value_");
+      divForm.append(className);
+      divForm.append("\">\n");
+    }
     rawHtml.append(divForm);
   }
 
