@@ -65,8 +65,29 @@ div#dtcContainer iframe { /* 영화 "인터뷰" 포스터 */
 	border-radius: 15px;
 }
 
-.ResultList{display:table; border:5px; padding:5px; background-color:#CCCCCC; width:100%;}
-.Document{display:table-row; border:5px; padding:5px; background-color:#AAAAAA;}
-.table_row{display:table-row;}
-div[class^='key']{display:table-cell; padding:5px; color:blue;}
-div[class^='value']{display:table-cell; padding:5px; background-color:#00ff00;}
+div#Results{display:table;
+			font-size:18px;
+			border:0px; 
+			padding:15px; 
+			background-color:#DBDBDB; 
+			width:100%;}
+
+.ResultSet{	display:table;
+			font-size:16px; 
+			border:0px; 
+			padding:15px; 
+			background-color:#BFBFBF; 
+			width:100%;}
+						
+.ResponseInfo{display:table; font-size:16px; border:0px; padding:15px; background-color:#8A8A8A; width:100%;}
+.Results{display:table; font-size:16px; border:0px; padding:15px; background-color:#8A8A8A; width:100%;}
+
+.ResultHeader{display:table; border:0px; padding:15px; background-color:#5E5E5E; width:100%;}
+.ResultList{display:table; border:0px; padding:15px; background-color:#5E5E5E; width:100%;}
+.Document{display:table; border:0px; padding:15px; background-color:#3B3B3B; color:#FFFB00 ;width:100%;}
+.table_row{display:table-row; width:100%}
+
+div[class^='key']{display:table-cell; font-size:12px; padding:3px; background-color:#1C1C1C; color:#53FF14;}
+div[class^='value']{display:table-cell; font-size:12px; padding:3px; background-color:#1C1C1C; color:white; width:100%;}
+
+

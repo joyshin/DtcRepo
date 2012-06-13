@@ -48,19 +48,7 @@ public class DtcXmlToHtmlHandler extends DefaultHandler {
     String elementName = qName;
     String temp;
 
-    if ((elementName == RESULTS) ||
-        (elementName == RESULT_SET) ||
-        (elementName == RESULTS)) {
-      divForm.append("</div>\n");
-    } else if ((elementName == RESPONSE_INFO) ||
-        (elementName == RESULT_HEADER) ||
-        (elementName == RESULT_LIST) ||
-        (elementName == DOCUMENT))
-    {
-      divForm.append("</div>\n");
-    } else {
-      divForm.append("</div>\n");
-    }
+    divForm.append("</div>\n");
 
     if (parseBuffer.length() > 0 && parseBuffer.lastIndexOf(">") > 0) {
       // Text Node 영역에 tag가 들어올 경우
@@ -79,7 +67,17 @@ public class DtcXmlToHtmlHandler extends DefaultHandler {
 
     rawHtml.append(parseBuffer);
     rawHtml.append(divForm);
-    rawHtml.append("</div>\n");
+    if ((elementName == this.RESULTS) ||
+        (elementName == this.RESULT_SET) ||
+        (elementName == this.RESPONSE_INFO) ||
+        (elementName == this.RESULT_HEADER) ||
+        (elementName == this.RESULT_LIST) ||
+        (elementName == this.DOCUMENT))
+    {
+    } else {
+      rawHtml.append("</div>\n");
+
+    }
     parseBuffer.setLength(0);
   }
 
@@ -105,19 +103,7 @@ public class DtcXmlToHtmlHandler extends DefaultHandler {
     StringBuilder attrBuffer = new StringBuilder();
     String className = qName;
 
-    if ((className == RESULTS) ||
-        (className == RESULT_SET)) {
-      divForm.append("<div class=");
-    } else if ((className == RESPONSE_INFO) ||
-        (className == RESULT_HEADER) ||
-        (className == RESULT_LIST) ||
-        (className == DOCUMENT)) {
-      divForm.append("<div class=");
-    } else {
-      // divForm.append("<div class=key_");
-      divForm.append("<div class=table_row> <div class=key_");
-    }
-
+    // get attribute
     if (atts.getLength() > 0) {
       for (int i = 0; i < atts.getLength(); i++) {
         attrBuffer.append(" ");
@@ -128,24 +114,47 @@ public class DtcXmlToHtmlHandler extends DefaultHandler {
       }
     }
 
-    divForm.append(className);
-    divForm.append(attrBuffer);
-    divForm.append(">");
-    divForm.append(className);
-    divForm.append("</div>\n");
+    if (className == RESULTS) {
+      // root node
+      if (atts.getLength() > 0) {
+        divForm.append("<div id=");
+        divForm.append(className);
+        divForm.append(attrBuffer);
+        divForm.append(">");
+        divForm.append(className);
 
-    if ((className == RESULTS) ||
+      } else {
+        // child Results node
+        divForm.append("<div class=");
+        divForm.append(className);
+        divForm.append(">");
+        divForm.append(className);
+      }
+    } else if ((className == RESPONSE_INFO) ||
         (className == RESULT_SET) ||
-        (className == RESPONSE_INFO) ||
         (className == RESULT_HEADER) ||
         (className == RESULT_LIST) ||
         (className == DOCUMENT)) {
+
+      divForm.append("<div class=");
+      divForm.append(className);
+      divForm.append(">");
+      divForm.append(className);
+
     } else {
-      // divForm.append("<div class=key_");
+      // data node
+      divForm.append("<div class=table_row> <div class=key_");
+      divForm.append(className);
+      divForm.append(attrBuffer);
+      divForm.append(">");
+
+      divForm.append(className);
+      divForm.append("</div>\n");
       divForm.append("<div class=value_");
       divForm.append(className);
       divForm.append("\">\n");
     }
+
     rawHtml.append(divForm);
   }
 
