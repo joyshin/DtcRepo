@@ -553,6 +553,7 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     SAXParserFactory sf = SAXParserFactory.newInstance();
     SAXParser sp;
     try {
+
       sp = sf.newSAXParser();
       sp.parse(bufferInputStream, dp);
 

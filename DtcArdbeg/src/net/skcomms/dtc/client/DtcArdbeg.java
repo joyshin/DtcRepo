@@ -8,7 +8,6 @@ import net.skcomms.dtc.client.controller.DtcUrlCopyController;
 import net.skcomms.dtc.client.controller.IpHistoryController;
 import net.skcomms.dtc.client.controller.LastRequestLoaderController;
 import net.skcomms.dtc.client.model.DtcNodeModel;
-import net.skcomms.dtc.client.view.DtcChronoView;
 import net.skcomms.dtc.client.view.DtcNavigationBarView;
 import net.skcomms.dtc.client.view.DtcTestPageView;
 import net.skcomms.dtc.client.view.DtcUrlCopyButtonView;
@@ -214,7 +213,6 @@ public class DtcArdbeg implements EntryPoint {
     this.initializeUrlCopy();
     this.usernameSubmissionManager.initialize();
     this.requestRecaller.initialize(this);
-    new DtcChronoView().initialize(this);
   }
 
   private void initializeDtcFrame() {
