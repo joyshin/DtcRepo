@@ -1,6 +1,8 @@
 package net.skcomms.dtc.server;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 import net.skcomms.dtc.server.model.DtcAtp;
 
@@ -12,7 +14,9 @@ public class DtcAtpParser {
 
   private static final String FT = Character.toString((char) 0x09);
 
-  public static DtcAtp parse(byte[] bytes) {
+  private static final String RS = Character.toString((char) 0x1E);
+
+  public static DtcAtp parse(byte[] bytes) throws IOException {
     DtcAtpParser parser = new DtcAtpParser(bytes);
     parser.parseResponse();
     return parser.getAtp();
@@ -22,12 +26,17 @@ public class DtcAtpParser {
 
   private Tokenizer tokenizer;
 
+  private int binarySize;
+
+  private InputStream inputStream;
+
   private DtcAtpParser(byte[] bytes) {
-    this.tokenizer = new Tokenizer(new ByteArrayInputStream(bytes));
+    this.inputStream = new ByteArrayInputStream(bytes);
+    this.tokenizer = new Tokenizer(this.inputStream);
     this.atp = new DtcAtp();
   }
 
-  private void argumentData() {
+  private void argumentData() throws IOException {
     this.argumentList();
     this.binaryData();
   }
@@ -47,8 +56,10 @@ public class DtcAtpParser {
 
   }
 
-  private void binaryData() {
-    // TODO Auto-generated method stub
+  private void binaryData() throws IOException {
+    this.number();
+    this.match(this.getToken(), DtcAtpParser.LT);
+    this.octetStream();
 
   }
 
@@ -74,7 +85,16 @@ public class DtcAtpParser {
     }
   }
 
-  private void parseResponse() {
+  private void number() {
+    this.binarySize = Integer.parseInt(this.getToken());
+  }
+
+  private void octetStream() throws IOException {
+
+    this.atp.setBinary(this.tokenizer.getBinaryData(this.binarySize));
+  }
+
+  private void parseResponse() throws IOException {
     this.responseLine();
     this.responseHeader();
     this.match(this.getToken(), DtcAtpParser.LT);

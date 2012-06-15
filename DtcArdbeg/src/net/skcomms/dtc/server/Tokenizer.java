@@ -16,6 +16,18 @@ public class Tokenizer {
 
   }
 
+  public byte[] getBinaryData(int binarySize) {
+    byte[] bytes = new byte[binarySize];
+
+    for (int i = 0; i < bytes.length; i++) {
+      bytes[i] = this.scanner.nextByte();
+    }
+    // throw new IllegalArgumentException("ERROR: nRead:" + nRead +
+    // ", binarySize:"
+    // + this.binarySize);
+    return bytes;
+  }
+
   public String getToken() {
     if (this.recalledToken != null) {
       String token = this.recalledToken;

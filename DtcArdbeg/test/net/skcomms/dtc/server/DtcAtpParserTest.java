@@ -1,6 +1,7 @@
 package net.skcomms.dtc.server;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 import net.skcomms.dtc.server.model.DtcAtp;
 
@@ -12,10 +13,9 @@ public class DtcAtpParserTest {
   String FT = Character.toString((char) 0x09);
 
   @Test
-  public void testParseResponse() {
+  public void testParseResponse() throws IOException {
     String response = "ATP/1.2 100 Continue" + this.LT + this.LT + "s-id" + this.FT + this.LT
-        + this.LT + "0" + this.LT;
-    String string = "abc\u5639\u563b";
+        + this.LT + "2" + this.LT + "11";
     DtcAtp atp = DtcAtpParser.parse(response.getBytes());
 
     Assert.assertNotNull(atp);
