@@ -9,13 +9,15 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class DtcAtpParserTest {
+
   String LT = Character.toString((char) 0x0a);
+
   String FT = Character.toString((char) 0x09);
 
   @Test
   public void testParseResponse() throws IOException {
     String response = "ATP/1.2 100 Continue" + this.LT + this.LT + "s-id" + this.FT + this.LT
-        + this.LT + "2" + this.LT + "11";
+        + this.LT + "3" + this.LT + "abc";
     DtcAtp atp = DtcAtpParser.parse(response.getBytes());
 
     Assert.assertNotNull(atp);
