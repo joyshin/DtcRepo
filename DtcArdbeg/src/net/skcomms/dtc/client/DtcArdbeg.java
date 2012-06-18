@@ -2,6 +2,7 @@ package net.skcomms.dtc.client;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import net.skcomms.dtc.client.controller.DtcTestPageController;
 import net.skcomms.dtc.client.controller.DtcUrlCopyController;
@@ -28,7 +29,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 public class DtcArdbeg implements EntryPoint {
 
   public enum DtcPageType {
-    NONE, HOME, DIRECTORY, TEST;
+    HOME, DIRECTORY, TEST;
   }
 
   public static class Pair<K, V> {
@@ -75,9 +76,9 @@ public class DtcArdbeg implements EntryPoint {
     }
   }
 
-  private final String BASE_URL = this.calculateBaseUrl();
+  private final String BASE_URL = calculateBaseUrl();
 
-  private final String DTC_PROXY_URL = this.BASE_URL + "_dtcproxy_/";
+  private final String DTC_PROXY_URL = BASE_URL + "_dtcproxy_/";
 
   private final DtcTestPageController dtcTestPageConroller = new DtcTestPageController();
 
@@ -85,25 +86,22 @@ public class DtcArdbeg implements EntryPoint {
 
   private final LastRequestLoaderController requestRecaller = new LastRequestLoaderController();
 
-  private final FlowPanel dtcNodePanel = this.createFlowPanel();
+  private final FlowPanel dtcNodePanel = createFlowPanel();
 
-  private final FlowPanel dtcfavoriteNodePanel = this.createFlowPanel();
+  private final FlowPanel dtcfavoriteNodePanel = createFlowPanel();
 
   private DtcNavigationBarView navigationBar;
 
-  private DtcRequestFormAccessor dtcRequestFormAccessor;
-
   private final DtcUserSignInView usernameSubmissionManager = new DtcUserSignInView();
 
-  private final IpHistoryController ipHistoryManager = new IpHistoryController(
-      this.dtcRequestFormAccessor);
+  private final IpHistoryController ipHistoryManager = new IpHistoryController();
 
   private final List<DtcArdbegObserver> dtcArdbegObservers = new ArrayList<DtcArdbegObserver>();
 
   private String currentPath;
 
   public void addDtcArdbegObserver(DtcArdbegObserver observer) {
-    this.dtcArdbegObservers.add(observer);
+    dtcArdbegObservers.add(observer);
   }
 
   protected String calculateBaseUrl() {
@@ -143,23 +141,23 @@ public class DtcArdbeg implements EntryPoint {
   }
 
   public void fireDtcHomePageLoaded() {
-    this.currentPath = "/";
-    for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
+    currentPath = "/";
+    for (DtcArdbegObserver observer : dtcArdbegObservers) {
       observer.onDtcHomeLoaded();
     }
 
-    this.hideSplash();
-    this.displayHomePage();
+    hideSplash();
+    displayHomePage();
   }
 
   public void fireDtcServiceDirectoryPageLoaded(String path) {
-    this.currentPath = path;
-    for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
+    currentPath = path;
+    for (DtcArdbegObserver observer : dtcArdbegObservers) {
       observer.onDtcDirectoryLoaded(path);
     }
 
-    this.hideSplash();
-    this.displayDirectoryPage();
+    hideSplash();
+    displayDirectoryPage();
 
     String[] nodes = path.split("/");
     if (nodes.length == 2) {
@@ -169,25 +167,25 @@ public class DtcArdbeg implements EntryPoint {
   }
 
   public void fireDtcTestPageLoaded(DtcRequestInfoModel requestInfo) {
-    this.currentPath = requestInfo.getPath();
-    for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
+    currentPath = requestInfo.getPath();
+    for (DtcArdbegObserver observer : dtcArdbegObservers) {
       observer.onDtcTestPageLoaded(requestInfo);
     }
 
-    this.hideSplash();
-    this.displayTestPage();
+    hideSplash();
+    displayTestPage();
   }
 
   public String getBaseUrl() {
-    return this.BASE_URL;
+    return BASE_URL;
   }
 
   public String getCurrentPath() {
-    return this.currentPath;
+    return currentPath;
   }
 
   public String getDtcProxyUrl() {
-    return this.DTC_PROXY_URL;
+    return DTC_PROXY_URL;
   }
 
   /**
@@ -197,36 +195,40 @@ public class DtcArdbeg implements EntryPoint {
     return Window.Location.getHref();
   }
 
+  public Map<String, List<String>> getRequestParameters() {
+    return Window.Location.getParameterMap();
+
+  }
+
   public void hideSplash() {
     RootPanel.get("loading").setVisible(false);
   }
 
   protected void initializeComponents() {
-    this.initializeDtcFrame();
-    this.initializeDtcNodeContainer();
+    initializeDtcFrame();
+    initializeDtcNodeContainer();
 
-    this.ipHistoryManager.initialize(this);
-    this.initializeNavigationBar();
-    this.initializeRequestFormAccessor();
-    this.initializeTestPage();
+    ipHistoryManager.initialize(this);
+    initializeNavigationBar();
+    initializeTestPage();
 
-    this.initializeUrlCopy();
-    this.usernameSubmissionManager.initialize();
-    this.requestRecaller.initialize(this);
+    initializeUrlCopy();
+    usernameSubmissionManager.initialize();
+    requestRecaller.initialize(this);
   }
 
   private void initializeDtcFrame() {
-    this.displayHomePage();
+    // displayHomePage();
 
-    this.setDtcFramePath("/");
+    setDtcFramePath("/");
   }
 
   private void initializeDtcNodeContainer() {
 
     DtcNodeModel.getInstance().initialize(this);
 
-    this.dtcNodePanel.add(DtcNodeModel.getInstance().getDtcNodeCellList());
-    this.dtcfavoriteNodePanel.add(DtcNodeModel.getInstance().getDtcFavoriteNodeCellList());
+    dtcNodePanel.add(DtcNodeModel.getInstance().getDtcNodeCellList());
+    dtcfavoriteNodePanel.add(DtcNodeModel.getInstance().getDtcFavoriteNodeCellList());
 
     Label dtcNodePanelLabel = new Label();
     dtcNodePanelLabel.setText("Services");
@@ -235,30 +237,19 @@ public class DtcArdbeg implements EntryPoint {
     dtcFavoriteNodePanelLabel.setText("Favorites");
 
     RootPanel.get("nodeContainer").add(dtcNodePanelLabel);
-    RootPanel.get("nodeContainer").add(this.dtcNodePanel);
+    RootPanel.get("nodeContainer").add(dtcNodePanel);
 
     RootPanel.get("favoriteNodeContainer").add(dtcFavoriteNodePanelLabel);
-    RootPanel.get("favoriteNodeContainer").add(this.dtcfavoriteNodePanel);
+    RootPanel.get("favoriteNodeContainer").add(dtcfavoriteNodePanel);
   }
 
-  /**
-     * 
-     */
   private void initializeNavigationBar() {
-    this.navigationBar = new DtcNavigationBarView();
-    this.navigationBar.initialize(this);
-  }
-
-  /**
-   * 
-   */
-  private void initializeRequestFormAccessor() {
-    this.dtcRequestFormAccessor = new DtcRequestFormAccessor();
-    this.dtcRequestFormAccessor.initialize(this);
+    navigationBar = new DtcNavigationBarView();
+    navigationBar.initialize(this);
   }
 
   private void initializeTestPage() {
-    this.dtcTestPageConroller.initialize(this, this.dtcTestPageView);
+    dtcTestPageConroller.initialize(this, dtcTestPageView);
   }
 
   private void initializeUrlCopy() {
@@ -266,35 +257,35 @@ public class DtcArdbeg implements EntryPoint {
     DtcUrlCopyDialogBoxView dialogBox = new DtcUrlCopyDialogBoxView();
     DtcUrlCopyController controller = new DtcUrlCopyController();
 
-    controller.initialize(this, this.dtcTestPageView, button, dialogBox);
+    controller.initialize(this, dtcTestPageView, button, dialogBox);
   }
 
   public void onLoadDtcResponseFrame(boolean success) {
-    for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
+    for (DtcArdbegObserver observer : dtcArdbegObservers) {
       observer.onDtcResponseFrameLoaded(success);
     }
   }
 
   @Override
   public void onModuleLoad() {
-    this.initializeComponents();
+    initializeComponents();
   }
 
   public void onSubmitRequestForm() {
-    for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
+    for (DtcArdbegObserver observer : dtcArdbegObservers) {
       observer.onSubmitRequestForm();
     }
   }
 
   public void removeDtcArdbegObserver(DtcArdbegObserver observer) {
-    this.dtcArdbegObservers.remove(observer);
+    dtcArdbegObservers.remove(observer);
   }
 
   /**
    * @param path
    */
   public void setDtcFramePath(String path) {
-    this.showSplash();
+    showSplash();
 
     DtcPageType type = DtcArdbeg.getTypeOfSelected(path, !path.endsWith("/"));
 

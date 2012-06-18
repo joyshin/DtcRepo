@@ -6,7 +6,6 @@ import java.util.List;
 
 import net.skcomms.dtc.client.DefaultDtcArdbegObserver;
 import net.skcomms.dtc.client.DtcArdbeg;
-import net.skcomms.dtc.client.DtcRequestFormAccessor;
 import net.skcomms.dtc.client.PersistenceManager;
 import net.skcomms.dtc.client.model.IpOptionModel;
 import net.skcomms.dtc.client.model.IpOptionModel.Origin;
@@ -20,9 +19,6 @@ public class IpHistoryController extends DefaultDtcArdbegObserver {
   private final List<IpOptionModel> options = new ArrayList<IpOptionModel>();
 
   private String ipText;
-
-  public IpHistoryController(DtcRequestFormAccessor dtcRequestFormAccesser) {
-  }
 
   private String combineKeyPrefix(Document requestDoc) {
     String url = requestDoc.getURL();
@@ -39,13 +35,13 @@ public class IpHistoryController extends DefaultDtcArdbegObserver {
   }
 
   private IpOptionModel getOrCreateIpOptionBy(String ip) {
-    for (IpOptionModel option : this.options) {
+    for (IpOptionModel option : options) {
       if (ip.equals(option.getIp())) {
         return option;
       }
     }
     IpOptionModel option = new IpOptionModel(ip, ip, Origin.COOKIE);
-    this.options.add(option);
+    options.add(option);
 
     return option;
   }
@@ -55,7 +51,7 @@ public class IpHistoryController extends DefaultDtcArdbegObserver {
   }
 
   private void joinAdditionalInfo(Document requestDoc) {
-    String keyPrefix = this.combineKeyPrefix(requestDoc);
+    String keyPrefix = combineKeyPrefix(requestDoc);
 
     ArrayList<String> keys = new ArrayList<String>(PersistenceManager.getInstance().getItemKeys());
     for (String key : keys) {
@@ -65,7 +61,7 @@ public class IpHistoryController extends DefaultDtcArdbegObserver {
         String value = PersistenceManager.getInstance().getItem(key);
         Date date = new Date(Long.parseLong(value));
 
-        IpOptionModel option = this.getOrCreateIpOptionBy(ip);
+        IpOptionModel option = getOrCreateIpOptionBy(ip);
         option.setLastSuccessTime(date);
       }
     }
@@ -73,8 +69,8 @@ public class IpHistoryController extends DefaultDtcArdbegObserver {
 
   @Override
   public void onDtcResponseFrameLoaded(boolean success) {
-    this.updateIpHistory();
-    this.redrawIpOptions();
+    updateIpHistory();
+    redrawIpOptions();
     if (success) {
 
     }
@@ -82,11 +78,11 @@ public class IpHistoryController extends DefaultDtcArdbegObserver {
 
   @Override
   public void onDtcTestPageLoaded(DtcRequestInfoModel requestInfo) {
-    this.retrieveInfo(requestInfo);
+    retrieveInfo(requestInfo);
   }
 
   public void redrawIpOptions() {
-    if (this.options.size() < 2) {
+    if (options.size() < 2) {
       return;
     }
 
@@ -108,18 +104,18 @@ public class IpHistoryController extends DefaultDtcArdbegObserver {
   }
 
   public void retrieveInfo(DtcRequestInfoModel requestInfo) {
-    this.retrieveNativeIpInfos(requestInfo);
+    retrieveNativeIpInfos(requestInfo);
   }
 
   private void retrieveNativeIpInfos(DtcRequestInfoModel requestInfo) {
-    this.options.clear();
+    options.clear();
 
     requestInfo.getIpInfo().getOptions();
     for (DtcRequestParameterModel option : requestInfo.getIpInfo().getOptions()) {
-      this.options.add(new IpOptionModel(option.getKey(), option.getValue(),
+      options.add(new IpOptionModel(option.getKey(), option.getValue(),
           IpOptionModel.Origin.DTC));
     }
-    this.ipText = requestInfo.getIpInfo().getIpText();
+    ipText = requestInfo.getIpInfo().getIpText();
   }
 
   public void updateIpHistory() {

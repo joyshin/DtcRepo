@@ -1,11 +1,15 @@
 package net.skcomms.dtc.client.controller;
 
+import java.util.List;
+import java.util.Map;
+
 import net.skcomms.dtc.client.DefaultDtcArdbegObserver;
 import net.skcomms.dtc.client.DtcArdbeg;
 import net.skcomms.dtc.client.DtcTestPageViewObserver;
 import net.skcomms.dtc.client.service.DtcService;
 import net.skcomms.dtc.client.view.DtcTestPageView;
 import net.skcomms.dtc.shared.DtcRequestInfoModel;
+import net.skcomms.dtc.shared.DtcRequestParameterModel;
 import net.skcomms.dtc.shared.HttpRequestInfoModel;
 
 import com.google.gwt.core.client.GWT;
@@ -22,10 +26,34 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
 
   private String encoding;
 
+  private Map<String, List<String>> initialRequestParameters = null;
+
+  private void adjustRequestInfo(DtcRequestInfoModel requestInfo) {
+    if (initialRequestParameters != null) {
+      // requestInfo;
+
+      // IP
+      if (initialRequestParameters.containsKey("IP")) {
+        requestInfo.getIpInfo().setIpText(initialRequestParameters.get("IP").get(0));
+      }
+
+      // other
+      for (DtcRequestParameterModel param : requestInfo.getParams()) {
+        if (initialRequestParameters.containsKey(param.getKey())) {
+          param.setValue(initialRequestParameters.get(param.getKey()).get(0));
+        }
+      }
+
+      initialRequestParameters = null;
+    }
+
+  }
+
   public void initialize(final DtcArdbeg dtcArdbeg, DtcTestPageView dtcTestPageView) {
     dtcArdbeg.addDtcArdbegObserver(this);
-    this.dtcProxyUrl = dtcArdbeg.getDtcProxyUrl();
+    dtcProxyUrl = dtcArdbeg.getDtcProxyUrl();
     this.dtcTestPageView = dtcTestPageView;
+    initialRequestParameters = dtcArdbeg.getRequestParameters();
 
     dtcTestPageView.setOnReadyRequestDataObserver(new DtcTestPageViewObserver() {
 
@@ -37,7 +65,8 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
   }
 
   public void loadDtcTestPageView(DtcRequestInfoModel requestInfo) {
-    this.currentPath = requestInfo.getPath();
+    adjustRequestInfo(requestInfo);
+    currentPath = requestInfo.getPath();
     DtcTestPageController.this.dtcTestPageView.setRequestInfo(requestInfo);
     // GWT.log(requestInfo.toString());
     DtcTestPageController.this.dtcTestPageView.draw();
@@ -46,34 +75,34 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
 
   @Override
   public void onDtcTestPageLoaded(DtcRequestInfoModel requestInfo) {
-    this.loadDtcTestPageView(requestInfo);
+    loadDtcTestPageView(requestInfo);
   }
 
   @Override
   public void onSubmitRequestForm() {
-    this.sendRequest();
+    sendRequest();
 
   }
 
   protected void sendRequest() {
     StringBuffer requestData = new StringBuffer();
-    String testURL = "c" + "=" + URL.encode(this.currentPath);
+    String testURL = "c" + "=" + URL.encode(currentPath);
     String process = "process=1";
-    String targetUrl = URL.encode(this.dtcProxyUrl + "response.html");
+    String targetUrl = URL.encode(dtcProxyUrl + "response.html");
 
     requestData.append(testURL);
     requestData.append("&");
     requestData.append(process);
 
-    requestData.append(this.dtcTestPageView.createRequestData());
-    GWT.log("ProxyURL: " + this.dtcProxyUrl);
+    requestData.append(dtcTestPageView.createRequestData());
+    GWT.log("ProxyURL: " + dtcProxyUrl);
     // GWT.log("TargetURL: " + targetUrl);
 
     HttpRequestInfoModel httpRequestInfo = new HttpRequestInfoModel();
     httpRequestInfo.setHttpMethod("POST");
     httpRequestInfo.setUrl(targetUrl);
     httpRequestInfo.setRequestData(requestData.toString());
-    httpRequestInfo.setEncoding(this.encoding);
+    httpRequestInfo.setEncoding(encoding);
     DtcTestPageController.this.dtcTestPageView.chronoStart();
 
     DtcService.Util.getInstance().getDtcTestPageResponse(httpRequestInfo,
@@ -82,7 +111,7 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
           @Override
           public void onFailure(Throwable caught) {
             caught.printStackTrace();
-            DtcTestPageController.this.dtcTestPageView.chronoStop();
+            dtcTestPageView.chronoStop();
             GWT.log("getDtcTestPageResponse Failed: " + caught.getMessage());
           }
 
@@ -92,8 +121,8 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
             String convertedHTML = result.replaceAll("<!\\[CDATA\\[", "").
                 replaceAll("\\]\\]>", "");
             GWT.log(convertedHTML);
-            DtcTestPageController.this.dtcTestPageView.chronoStop();
-            DtcTestPageController.this.dtcTestPageView.setHTMLData(convertedHTML);
+            dtcTestPageView.chronoStop();
+            dtcTestPageView.setHTMLData(convertedHTML);
           }
         });
   }
