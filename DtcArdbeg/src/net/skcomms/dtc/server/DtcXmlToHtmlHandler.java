@@ -12,19 +12,20 @@ import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * @author jujang@sk.com
- * 
  */
 public class DtcXmlToHtmlHandler extends DefaultHandler {
 
   public class ResultNode {
-    String nodeName;
-    String attribute;
+
+    String nodeName = "";
+
+    String attribute = "";
+
     int depth;
+
     boolean isRoot;
 
     public ResultNode() {
-      this.nodeName = new String();
-      this.attribute = new String();
       this.isRoot = false;
     }
 
@@ -64,8 +65,11 @@ public class DtcXmlToHtmlHandler extends DefaultHandler {
   final String CDATA_TOKEN = "<![CDATA[";
 
   private final StringBuilder parseBuffer;
+
   private final StringBuilder rawHtml;
+
   private final Stack<ResultNode> divFormStack;
+
   private final Stack<String> tagNameStack;
 
   public DtcXmlToHtmlHandler() {
@@ -80,6 +84,23 @@ public class DtcXmlToHtmlHandler extends DefaultHandler {
   @Override
   public void characters(char ch[], int start, int length) throws SAXException {
     this.parseBuffer.append(ch, start, length);
+    if (this.parseBuffer.length() > 0 && this.parseBuffer.lastIndexOf(">") > 0) {
+      // Text Node 영역에 tag가 들어올 경우
+      System.out.println("!!!!!!!!!!!!!!!!");
+      String temp = this.parseBuffer.substring(this.parseBuffer.lastIndexOf(">") + 1);
+      this.parseBuffer.setLength(0);
+      this.parseBuffer.append(this.CDATA_TOKEN);
+      this.parseBuffer.append(temp);
+      this.parseBuffer.append("]]>");
+      this.parseBuffer.append("\n");
+
+    } else if (this.parseBuffer.length() > 0) {
+      this.parseBuffer.insert(0, this.CDATA_TOKEN);
+      this.parseBuffer.append("]]>");
+      this.parseBuffer.append("\n");
+    }
+
+    System.out.println("C:" + new String(ch, start, length));
   }
 
   @Override
@@ -90,30 +111,11 @@ public class DtcXmlToHtmlHandler extends DefaultHandler {
 
   @Override
   public void endElement(String uri, String name, String qName) throws SAXException {
+    System.out.println("E:" + qName);
     String elementName = qName;
-    String temp;
     StringBuilder divForm = new StringBuilder();
     StringBuilder nodeItem = new StringBuilder();
     ResultNode node = null;
-
-    // terminal node
-    // System.out.println("tagNameStack: " + this.tagNameStack.peek() + ":" +
-    // elementName);
-
-    if (this.parseBuffer.length() > 0 && this.parseBuffer.lastIndexOf(">") > 0) {
-      // Text Node 영역에 tag가 들어올 경우
-      temp = this.parseBuffer.substring(this.parseBuffer.lastIndexOf(">") + 1);
-      this.parseBuffer.setLength(0);
-      this.parseBuffer.append(CDATA_TOKEN);
-      this.parseBuffer.append(temp);
-      this.parseBuffer.append("]]>");
-      this.parseBuffer.append("\n");
-
-    } else if (this.parseBuffer.length() > 0) {
-      this.parseBuffer.insert(0, CDATA_TOKEN);
-      this.parseBuffer.append("]]>");
-      this.parseBuffer.append("\n");
-    }
 
     if (this.tagNameStack.peek().equals(elementName)) {
 
@@ -170,7 +172,6 @@ public class DtcXmlToHtmlHandler extends DefaultHandler {
     } else {
       nodeItem.append("</div>\n");
       divForm.append(nodeItem.toString());
-
     }
 
     this.tagNameStack.pop();
@@ -184,11 +185,7 @@ public class DtcXmlToHtmlHandler extends DefaultHandler {
 
   @Override
   public void startDocument() throws SAXException {
-
-    String dtd = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-        + "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML Basic 1.1//EN\" "
-        + "\"http://www.w3.org/TR/xhtml-basic/xhtml-basic11.dtd\">\n"
-        + "<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\">";
+    String dtd = "<!DOCTYPE html>\n" + "<html>";
     this.rawHtml.append(dtd);
     this.rawHtml.append("<body>");
   }
@@ -196,6 +193,7 @@ public class DtcXmlToHtmlHandler extends DefaultHandler {
   @Override
   public void startElement(String uri, String name, String qName, Attributes atts)
       throws SAXException {
+    System.out.println("S:" + qName);
 
     String elementName = qName;
     StringBuilder attrBuffer = new StringBuilder();

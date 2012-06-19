@@ -93,7 +93,6 @@ public class DtcIni {
   }
 
   public void setRequestProp(DtcRequestProperty prop) {
-    System.out.println(prop);
     this.requestProps.add(prop);
   }
 

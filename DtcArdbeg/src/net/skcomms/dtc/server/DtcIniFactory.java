@@ -62,7 +62,6 @@ public class DtcIniFactory {
       return;
     }
     this.currentHeader = line.substring(1, line.length() - 1);
-    System.out.println("HEADER:" + this.currentHeader);
   }
 
   private void baseKeyValue() throws IOException {
@@ -73,7 +72,6 @@ public class DtcIniFactory {
           + ": expected: BASE_KEY_VAL, " + "actual: " + line);
       return;
     }
-    System.out.println("Key:" + kv[0] + ", Value:" + kv[1]);
     this.ini.setBaseProp(new DtcBaseProperty(kv[0], kv[1]));
   }
 
@@ -87,7 +85,6 @@ public class DtcIniFactory {
           + ": expected: BASE_KEY_VAL_COMMENT, " + "actual: " + line);
       return;
     }
-    System.out.println("Key:" + kv[0] + ", Value:" + kv[1]);
     this.ini.setBaseProp(new DtcBaseProperty(kv[0], kv[1], comment));
   }
 
@@ -106,7 +103,6 @@ public class DtcIniFactory {
     String line = this.reader.getBaseLine();
     if (line == null || line.startsWith("[")) {
       this.reader.ungetLine();
-      System.out.println("=== END OF SECTION ===");
       return;
     }
     this.reader.ungetLine();
@@ -144,7 +140,6 @@ public class DtcIniFactory {
           + ": expected: LIST_END_TAG, " + "actual: " + line);
       return;
     }
-    System.out.println("LIST_END:" + line);
   }
 
   private void listOpenTag() throws IOException {
@@ -164,7 +159,6 @@ public class DtcIniFactory {
 
   private void listProp() throws IOException {
     String line = this.reader.getResponseLine();
-    System.out.println("LINE:" + line);
     Matcher matcher = DtcIniFactory.LIST_FIELD_PATTERN.matcher(line);
     boolean found = matcher.find();
     if (!found) {
@@ -219,12 +213,10 @@ public class DtcIniFactory {
       return;
     }
     this.currentHeader = line.substring(1, line.length() - 1);
-    System.out.println("HEADER:" + this.currentHeader);
   }
 
   private void requestProp() throws IOException {
     String line = this.reader.getRequestLine();
-    System.out.println("LINE:" + line);
     Matcher matcher = DtcIniFactory.REQUEST_PROP_PATTERN.matcher(line);
     boolean found = matcher.find();
     if (!found) {
@@ -242,7 +234,6 @@ public class DtcIniFactory {
       Pattern attrPattern = Pattern.compile("<#(\\w+)>");
       matcher = attrPattern.matcher(comment);
       while (matcher.find()) {
-        System.out.println("key: " + key + ", attr:" + matcher.group(1));
         attrs.add(matcher.group(1).trim());
       }
     }
@@ -316,10 +307,8 @@ public class DtcIniFactory {
 
   private void singleProp() throws IOException {
     String line = this.reader.getResponseLine();
-    System.out.println("LINE:" + line);
     Matcher matcher = DtcIniFactory.SINGLE_PROP_PATTERN.matcher(line);
-    boolean found = matcher.find();
-    if (!found) {
+    if (!matcher.find()) {
       this.ini.addErrorMessage("Error: line " + this.reader.getLineCount()
           + ": invalid list property:" + line);
       return;
@@ -333,11 +322,9 @@ public class DtcIniFactory {
     if (comment != null) {
       matcher = DtcIniFactory.ATTRIBUTE_PATTERN.matcher(comment);
       while (matcher.find()) {
-        System.out.println("attr:" + matcher.group(1));
         attrs.add(matcher.group(1));
       }
     }
-    System.out.println("Field:" + fieldName);
     this.ini.setResponseProp(new DtcResponseProperty(fieldName, type, comment, attrs));
   }
 }

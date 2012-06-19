@@ -91,12 +91,19 @@ public class DtcTestPageView {
   }
 
   private int invalidRecordIdx;
+
   private HLayout layout;
+
   private VLayout vLayoutLeft;
+
   private ListGrid requestFormGrid;
+
   private ListGridField nameField;
+
   private ListGridField valueField;
+
   private Button searchButton;
+
   private VLayout vLayoutLeftBottom;
 
   private HLayout hLayoutRight;
@@ -191,8 +198,9 @@ public class DtcTestPageView {
         MatchResult match = regExp.exec(record.getAttribute("value"));
         request = record.getAttribute("name") + "=" + match.getGroup(0);
       } else {
-        String value = URL.encode(record.getAttribute("value"));
-        request = record.getAttribute("name") + "=" + value;
+        String value = record.getAttribute("value");
+        String encodedValue = (value == null) ? "" : URL.encode(value);
+        request = record.getAttribute("name") + "=" + encodedValue;
       }
       requestData.append(request);
     }
@@ -291,6 +299,7 @@ public class DtcTestPageView {
     this.searchButton.setTop(45);
 
     this.searchButton.addClickHandler(new ClickHandler() {
+
       @Override
       public void onClick(ClickEvent event) {
         if (DtcTestPageView.this.validateRequestData() == 0) {
