@@ -205,7 +205,7 @@ public class DtcArdbeg implements EntryPoint {
   }
 
   protected void initializeComponents() {
-    initializeDtcFrame();
+    initializePath();
     initializeDtcNodeContainer();
 
     ipHistoryManager.initialize(this);
@@ -215,12 +215,6 @@ public class DtcArdbeg implements EntryPoint {
     initializeUrlCopy();
     usernameSubmissionManager.initialize();
     requestRecaller.initialize(this);
-  }
-
-  private void initializeDtcFrame() {
-    // displayHomePage();
-
-    setDtcFramePath("/");
   }
 
   private void initializeDtcNodeContainer() {
@@ -246,6 +240,16 @@ public class DtcArdbeg implements EntryPoint {
   private void initializeNavigationBar() {
     navigationBar = new DtcNavigationBarView();
     navigationBar.initialize(this);
+  }
+
+  private void initializePath() {
+    String path;
+    if (Window.Location.getParameter("path") != null) {
+      path = "/" + Window.Location.getParameter("path");
+    } else {
+      path = "/";
+    }
+    setPath(path);
   }
 
   private void initializeTestPage() {
@@ -284,7 +288,7 @@ public class DtcArdbeg implements EntryPoint {
   /**
    * @param path
    */
-  public void setDtcFramePath(String path) {
+  public void setPath(String path) {
     showSplash();
 
     DtcPageType type = DtcArdbeg.getTypeOfSelected(path, !path.endsWith("/"));

@@ -89,7 +89,7 @@ public class DtcNodeModel {
   }
 
   public void goToPageBasedOn(DtcNodeMetaModel selected) {
-    DtcNodeModel.this.owner.setDtcFramePath(selected.getPath());
+    DtcNodeModel.this.owner.setPath(selected.getPath());
   }
 
   public void initialize(DtcArdbeg dtcArdbeg) {

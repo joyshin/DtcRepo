@@ -35,10 +35,10 @@ public class DtcUrlCopyController {
     if (module.getCurrentPath().equals("/")) {
     }
     else if (module.getCurrentPath().endsWith("/")) {
-      sb.append("?b=");
+      sb.append("?path=");
       sb.append(URL.encode(module.getCurrentPath().substring(1)));
     } else {
-      sb.append("?c=");
+      sb.append("?path=");
       sb.append(URL.encode(module.getCurrentPath().substring(1)));
       Map<String, String> params = dtcTestPageView.getRequestParameter();
       for (Entry<String, String> entry : params.entrySet()) {

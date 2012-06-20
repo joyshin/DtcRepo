@@ -46,7 +46,7 @@ public class DtcUrlCopyControllerTest {
     }
 
     @Override
-    public void setDtcFramePath(String path) {
+    public void setPath(String path) {
 
     }
 
@@ -112,7 +112,7 @@ public class DtcUrlCopyControllerTest {
 
   @Test
   public void test() {
-    this.ardbeg.setDtcFramePath("/");
+    this.ardbeg.setPath("/");
     this.button.fireClickButton();
   }
 }
