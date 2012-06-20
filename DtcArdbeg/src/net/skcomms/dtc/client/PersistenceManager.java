@@ -9,6 +9,8 @@ import net.skcomms.dtc.client.model.ClientStorageModel;
 import net.skcomms.dtc.client.model.CookieStorageModel;
 import net.skcomms.dtc.client.model.LocalStorageModel;
 
+import com.google.gwt.core.client.GWT;
+
 /**
  * @author jujang@sk.com
  * 
@@ -24,6 +26,7 @@ public class PersistenceManager {
   private final ClientStorageModel clientStorage;
 
   private PersistenceManager() {
+
     if (LocalStorageModel.isSupported()) {
       System.out.println("use Local Storage");
       this.clientStorage = new LocalStorageModel();
@@ -38,6 +41,8 @@ public class PersistenceManager {
   }
 
   public String getItem(String key) {
+    GWT.log("getItem Key: " + key);
+    GWT.log("getItem Data :" + this.clientStorage.getItem(key));
     return this.clientStorage.getItem(key);
   }
 
@@ -61,6 +66,8 @@ public class PersistenceManager {
   }
 
   public void setItem(String key, String data) {
+    GWT.log("setItem Key: " + key);
+    GWT.log("setItem Data :" + data);
     this.clientStorage.setItem(key, data);
   }
 

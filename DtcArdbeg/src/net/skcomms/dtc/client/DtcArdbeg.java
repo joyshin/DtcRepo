@@ -212,12 +212,10 @@ public class DtcArdbeg implements EntryPoint {
 
     this.initializeUrlCopy();
     this.usernameSubmissionManager.initialize();
-    this.requestRecaller.initialize(this);
   }
 
   private void initializeDtcFrame() {
     this.displayHomePage();
-
     this.setDtcFramePath("/");
   }
 
@@ -258,7 +256,7 @@ public class DtcArdbeg implements EntryPoint {
   }
 
   private void initializeTestPage() {
-    this.dtcTestPageConroller.initialize(this, this.dtcTestPageView);
+    this.dtcTestPageConroller.initialize(this, this.dtcTestPageView, this.requestRecaller);
   }
 
   private void initializeUrlCopy() {

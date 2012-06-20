@@ -193,6 +193,7 @@ public class DtcTestPageView {
       requestData.append("&");
 
       String request = "";
+      GWT.log(record.getAttribute("value"));
       if (record.getAttribute("name").toLowerCase().equals("ip_select")) {
         RegExp regExp = RegExp.compile("[0-9]+.[0-9]+.[0-9]+.[0-9]+");
         MatchResult match = regExp.exec(record.getAttribute("value"));

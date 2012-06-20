@@ -1,28 +1,20 @@
 package net.skcomms.dtc.client.controller;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
-import net.skcomms.dtc.client.DefaultDtcArdbegObserver;
-import net.skcomms.dtc.client.DomExplorerHelper;
-import net.skcomms.dtc.client.DtcArdbeg;
 import net.skcomms.dtc.client.PersistenceManager;
 import net.skcomms.dtc.shared.DtcRequestInfoModel;
+import net.skcomms.dtc.shared.DtcRequestParameterModel;
 
-import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.FormElement;
-import com.google.gwt.dom.client.FrameElement;
-import com.google.gwt.dom.client.NodeCollection;
+import com.google.gwt.core.client.GWT;
 
-public class LastRequestLoaderController extends DefaultDtcArdbegObserver {
-
-  private static final String EMPTY_STRING = "";
+public class LastRequestLoaderController {
 
   private static final char FORM_VALUE_DELIMETER = 0x0b;
-
   private static final char FORM_FIELD_DELIMETER = 0x0C;
-
   private static final String PREFIX = "LastRequestLoaderController.";
 
   private static String findKey(String string) {
@@ -32,6 +24,7 @@ public class LastRequestLoaderController extends DefaultDtcArdbegObserver {
   private static Map<String, String> getLastParameters(String key) {
     String data = PersistenceManager.getInstance().getItem(key);
 
+    GWT.log("data: " + data);
     Map<String, String> map = new HashMap<String, String>();
 
     if (data == null) {
@@ -56,99 +49,83 @@ public class LastRequestLoaderController extends DefaultDtcArdbegObserver {
     return map;
   }
 
-  private NodeCollection<Element> getFormControlElements(Document doc) {
-    Document requestDocument = null;
-    FrameElement frameElement = null;
-    FormElement formElement = null;
+  String requestKey;
 
-    frameElement = DomExplorerHelper.getFrameElement(doc, "request");
-    if (frameElement == null) {
-      return null;
+  StringBuilder requestData;
+
+  Map<String, String> storedParams;
+
+  public LastRequestLoaderController() {
+    requestKey = null;
+    requestData = new StringBuilder();
+  }
+
+  public void createLastRequest(String requestKey, Map<String, String> param) {
+
+    String key = null;
+    String value = null;
+
+    this.requestKey = null;
+    this.requestData.setLength(0);
+
+    this.requestKey = LastRequestLoaderController.findKey(requestKey);
+
+    Iterator<String> keyItor = param.keySet().iterator();
+
+    for (int i = 0; i < param.keySet().size(); i++) {
+      key = keyItor.next();
+      value = param.get(key);
+      this.requestData.append(key);
+      this.requestData.append(LastRequestLoaderController.FORM_VALUE_DELIMETER);
+      this.requestData.append(value);
+      this.requestData.append(LastRequestLoaderController.FORM_FIELD_DELIMETER);
     }
 
-    requestDocument = frameElement.getContentDocument();
+    // GWT.log("Create LastRequest: " + this.requestData.toString());
+  }
 
-    formElement = DomExplorerHelper.getFormElement(requestDocument, "frmMain");
-    if (formElement == null) {
-      return null;
+  public void loadLastRequest(DtcRequestInfoModel requestInfo) {
+
+    // set value
+    List<DtcRequestParameterModel> requestParamList = requestInfo.getParams();
+    DtcRequestParameterModel requestParam = null;
+
+    String storedValue = null;
+
+    for (int i = 0; i < requestParamList.size(); i++) {
+      requestParam = requestParamList.get(i);
+      // GWT.log("requestParam name: " + requestParam.getKey() + " value: " +
+      // requestParam.getValue());
+
+      storedValue = storedParams.get(requestParam.getKey());
+      if (storedValue == null)
+        storedValue = "";
+      requestParam.setValue(storedValue);
     }
 
-    NodeCollection<Element> nodeCollection = formElement.getElements();
-    return nodeCollection;
+    // set ip
+    // IpInfoModel requestIp = requestInfo.getIpInfo();
+    String storedIp = storedParams.get("IP");
+    requestInfo.getIpInfo().setIpText(storedIp);
   }
 
   /**
    * @param dtcArdbeg
    */
-  public void initialize(DtcArdbeg dtcArdbeg) {
-    dtcArdbeg.addDtcArdbegObserver(this);
-  }
-
-  @Override
-  public void onDtcResponseFrameLoaded(boolean success) {
-    this.persist();
-    if (success) {
-    }
-  }
-
-  @Override
-  public void onDtcTestPageLoaded(DtcRequestInfoModel requestInfo) {
-    this.recall(requestInfo);
-  }
-
-  @Override
-  public void onSubmitRequestForm() {
-  }
 
   public void persist() {
-    // TODO gets request parameters and stores them.
-    /*
-     * NodeCollection<Element> nodeCollection =
-     * this.getFormControlElements(dtcFrameDoc); if (nodeCollection == null) {
-     * return; } String key = LastRequestLoaderController.EMPTY_STRING;
-     * StringBuilder data = new StringBuilder(); for (int i = 0; i <
-     * nodeCollection.getLength(); i++) { String name =
-     * nodeCollection.getItem(i).getAttribute("name"); if (name.equals("c")) {
-     * key = nodeCollection.getItem(i).getAttribute("value"); } else { String
-     * value = null; if (name.matches("REQUEST[0-9]+") || name.equals("ip_text")
-     * || name.equals("port")) { InputElement inputElem =
-     * InputElement.as(nodeCollection.getItem(i)); value = inputElem.getValue();
-     * } else if (name.equals("ip_select")) { SelectElement selectElem =
-     * SelectElement.as(nodeCollection.getItem(i)); value =
-     * selectElem.getValue(); } else { continue; } data.append(name);
-     * data.append(LastRequestLoaderController.FORM_VALUE_DELIMETER);
-     * data.append(value);
-     * data.append(LastRequestLoaderController.FORM_FIELD_DELIMETER); } }
-     * PersistenceManager.getInstance().setItem(key, data.toString());
-     */
+    PersistenceManager.getInstance().setItem(this.requestKey, this.requestData.toString());
   }
 
-  public void recall(DtcRequestInfoModel requestInfo) {
-    String key = LastRequestLoaderController.findKey(requestInfo.getPath());
-    Map<String, String> params = LastRequestLoaderController.getLastParameters(key);
-    // TODO fill request parameters
-    // NodeCollection<Element> nodeCollection =
-    // this.getFormControlElements(doc);
-    // if (nodeCollection == null) {
-    // return;
-    // }
-    //
-    // String key = LastRequestLoaderController.findKey(nodeCollection);
-    // Map<String, String> params =
-    // LastRequestLoaderController.getLastParameters(key);
-    // for (int i = 0; i < nodeCollection.getLength(); i++) {
-    // String name = nodeCollection.getItem(i).getAttribute("name");
-    // String value = params.get(name);
-    // if (value != null) {
-    // if (name.matches("REQUEST[0-9]+") || name.equals("ip_text") ||
-    // name.equals("port")) {
-    // InputElement inputElem = InputElement.as(nodeCollection.getItem(i));
-    // inputElem.setValue(value);
-    // } else if (name.equals("ip_select")) {
-    // SelectElement selectElem = SelectElement.as(nodeCollection.getItem(i));
-    // selectElem.setValue(value);
-    // }
-    // }
-    // }
+  public boolean recall(String lastRequestKey) {
+
+    String key = LastRequestLoaderController.findKey(lastRequestKey);
+    this.storedParams = LastRequestLoaderController.getLastParameters(key);
+
+    // GWT.log("storedParams: " + this.storedParams.toString());
+    if (this.storedParams.size() > 0)
+      return true;
+    else
+      return false;
   }
 }
