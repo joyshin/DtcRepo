@@ -238,28 +238,14 @@ public class DtcTestPageView {
     this.requestFormGrid.setEditEvent(ListGridEditEvent.CLICK);
     this.requestFormGrid.setEditByCell(true);
 
-    // this.requestFormGrid.addEditCompleteHandler(new EditCompleteHandler() {
-    // @Override
-    // public void onEditComplete(EditCompleteEvent event) {
-    // // TODO Auto-generated method stub
-    // if (DtcTestPageView.this.validateRequestData() == 0) {
-    // DtcTestPageView.this.createRequestData();
-    // DtcTestPageView.this.readyRequestDataCb.onReadyRequestData();
-    // }
-    // }
-    // });
-
     Event.addNativePreviewHandler(new Event.NativePreviewHandler() {
 
       @Override
       public void onPreviewNativeEvent(NativePreviewEvent event) {
         if (event.isFirstHandler()) {
-          // GWT.log("Event: " + Integer.toString(event.getTypeInt()));
           if (event.getTypeInt() == Event.ONKEYUP) {
-
             if (event.getNativeEvent().getKeyCode() == 13) {
               if (DtcTestPageView.this.validateRequestData() == 0) {
-                DtcTestPageView.this.createRequestData();
                 DtcTestPageView.this.readyRequestDataCb.onReadyRequestData();
               }
             }
@@ -303,7 +289,6 @@ public class DtcTestPageView {
       @Override
       public void onClick(ClickEvent event) {
         if (DtcTestPageView.this.validateRequestData() == 0) {
-          DtcTestPageView.this.createRequestData();
           DtcTestPageView.this.readyRequestDataCb.onReadyRequestData();
         }
       }
@@ -342,10 +327,6 @@ public class DtcTestPageView {
     this.layout.setLayoutMargin(10);
     this.layout.redraw();
     this.layout.setVisible(true);
-  }
-
-  public void DtcTestPageView() {
-
   }
 
   public Map<String, String> getRequestParameter() {
