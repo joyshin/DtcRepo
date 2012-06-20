@@ -79,7 +79,6 @@ public class DtcIni {
    * @param dtcProperty
    */
   public void setBaseProp(DtcBaseProperty prop) {
-    System.out.println(prop);
     this.baseProps.add(prop);
   }
 
@@ -88,7 +87,6 @@ public class DtcIni {
   }
 
   public void setListAttr(String attr) {
-    System.out.println("List Attr:" + attr);
     this.listAttrs.add(attr);
   }
 
@@ -97,7 +95,6 @@ public class DtcIni {
   }
 
   public void setResponseProp(DtcResponseProperty prop) {
-    System.out.println(prop);
     this.responseProps.add(prop);
   }
 

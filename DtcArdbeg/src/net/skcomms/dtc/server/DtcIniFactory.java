@@ -150,7 +150,6 @@ public class DtcIniFactory {
       return;
     }
 
-    System.out.println("LIST_START: " + line);
     Matcher matcher = DtcIniFactory.ATTRIBUTE_PATTERN.matcher(line);
     while (matcher.find()) {
       this.ini.setListAttr(matcher.group(1));
@@ -245,7 +244,6 @@ public class DtcIniFactory {
     String line = this.reader.getRequestLine();
     if (line == null || line.startsWith("[")) {
       this.reader.ungetLine();
-      System.out.println("=== END OF SECTION ===");
       return;
     }
     this.reader.ungetLine();
@@ -266,7 +264,6 @@ public class DtcIniFactory {
       return;
     }
     this.currentHeader = line.substring(1, line.length() - 1);
-    System.out.println("HEADER:" + this.currentHeader);
   }
 
   private void responseProp() throws IOException {
