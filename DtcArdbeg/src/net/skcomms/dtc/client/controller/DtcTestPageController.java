@@ -1,5 +1,7 @@
 package net.skcomms.dtc.client.controller;
 
+import java.util.Map;
+
 import net.skcomms.dtc.client.DefaultDtcArdbegObserver;
 import net.skcomms.dtc.client.DtcArdbeg;
 import net.skcomms.dtc.client.DtcTestPageViewObserver;
@@ -15,6 +17,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 public class DtcTestPageController extends DefaultDtcArdbegObserver {
 
   private DtcTestPageView dtcTestPageView;
+  private LastRequestLoaderController lastRequestLoader;
 
   private String currentPath;
 
@@ -22,10 +25,14 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
 
   private String encoding;
 
-  public void initialize(final DtcArdbeg dtcArdbeg, DtcTestPageView dtcTestPageView) {
+  public void initialize(final DtcArdbeg dtcArdbeg,
+      DtcTestPageView dtcTestPageView,
+      LastRequestLoaderController lastRequestLoader) {
+
     dtcArdbeg.addDtcArdbegObserver(this);
     this.dtcProxyUrl = dtcArdbeg.getDtcProxyUrl();
     this.dtcTestPageView = dtcTestPageView;
+    this.lastRequestLoader = lastRequestLoader;
 
     dtcTestPageView.setOnReadyRequestDataObserver(new DtcTestPageViewObserver() {
 
@@ -37,7 +44,19 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
   }
 
   public void loadDtcTestPageView(DtcRequestInfoModel requestInfo) {
+
     this.currentPath = requestInfo.getPath();
+    final String lastRequestLoaderKey = "c" + "=" + this.currentPath;
+    GWT.log("requestLoader key: " + lastRequestLoaderKey);
+
+    boolean lastRequestExists =
+        DtcTestPageController.this.lastRequestLoader.recall(lastRequestLoaderKey);
+
+    GWT.log("requestExists: " + lastRequestExists);
+
+    if (lastRequestExists) {
+      DtcTestPageController.this.lastRequestLoader.loadLastRequest(requestInfo);
+    }
     DtcTestPageController.this.dtcTestPageView.setRequestInfo(requestInfo);
     // GWT.log(requestInfo.toString());
     DtcTestPageController.this.dtcTestPageView.draw();
@@ -57,7 +76,8 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
 
   protected void sendRequest() {
     StringBuffer requestData = new StringBuffer();
-    String testURL = "c" + "=" + URL.encode(this.currentPath);
+    final String testURL = "c" + "=" + URL.encode(this.currentPath);
+    final String lastRequestKey = "c" + "=" + this.currentPath;
     String process = "process=1";
     String targetUrl = URL.encode(this.dtcProxyUrl + "response.html");
 
@@ -94,6 +114,12 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
             GWT.log(convertedHTML);
             DtcTestPageController.this.dtcTestPageView.chronoStop();
             DtcTestPageController.this.dtcTestPageView.setHTMLData(convertedHTML);
+
+            Map<String, String> requestParam =
+                DtcTestPageController.this.dtcTestPageView.getRequestParameter();
+            DtcTestPageController.this.lastRequestLoader.createLastRequest(lastRequestKey,
+                requestParam);
+            DtcTestPageController.this.lastRequestLoader.persist();
           }
         });
   }

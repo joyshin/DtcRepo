@@ -28,6 +28,7 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
@@ -362,9 +363,12 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
 
     URL conUrl;
 
+    int TIMEOUT = 5000;
     try {
       conUrl = new URL(httpRequestInfo.getUrl());
       HttpURLConnection httpCon = (HttpURLConnection) conUrl.openConnection();
+      httpCon.setConnectTimeout(TIMEOUT);
+      httpCon.setReadTimeout(TIMEOUT);
       httpCon.setDoInput(true);
       httpCon.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
       if (httpRequestInfo.getEncoding() != "") {
@@ -377,7 +381,6 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
       if (httpRequestInfo.getHttpMethod().toUpperCase().equals("POST")) {
         httpCon.setDoOutput(true);
         OutputStream postStream = httpCon.getOutputStream();
-
         postStream.write(httpRequestInfo.getRequestData().getBytes());
         postStream.flush();
         postStream.close();
@@ -396,9 +399,14 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
       }
       reader.close();
 
+    } catch (SocketTimeoutException e) {
+      System.out.println("SocketTimeoutException: " + e.getLocalizedMessage());
+      e.printStackTrace();
     } catch (IOException e) {
       System.out.println("IOException: " + e.getLocalizedMessage());
       e.printStackTrace();
+      return e.getLocalizedMessage();
+
     }
 
     Pattern regExp = Pattern.compile("src=\"([^\"]*)");
@@ -469,6 +477,7 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
       } else if (responseUrl.contains("response_xml.html")) {
 
         try {
+
           htmlData = DtcServiceImpl.getHtmlFromXml(response.getBytes(encoding));
         } catch (UnsupportedEncodingException e) {
           e.printStackTrace();
@@ -561,6 +570,7 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
       e.printStackTrace();
     } catch (SAXException e) {
       e.printStackTrace();
+
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -636,7 +646,7 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
       DtcNodeMetaModel node = new DtcNodeMetaModel();
       node.setName(item.getName());
       if (item.isDirectory()) {
-        node.setDescription("디렉토리");
+        node.setDescription("�����━");
         node.setPath(parentPath.substring(root.length() - 1) + item.getName() + "/");
       } else {
         DtcIni ini = new DtcIniFactory().createFrom(new FileInputStream(item));

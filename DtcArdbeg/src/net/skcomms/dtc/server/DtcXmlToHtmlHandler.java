@@ -123,7 +123,10 @@ public class DtcXmlToHtmlHandler extends DefaultHandler {
       }
       else {
         node = this.divFormStack.pop();
-        nodeItem.append("<div class=table_row>");
+        nodeItem.append("<div class=\"table_row ");
+        nodeItem.append(node.getNodeName());
+        nodeItem.append("\"");
+        nodeItem.append(">");
         nodeItem.append("<div class=key_");
         nodeItem.append(node.getNodeName());
         nodeItem.append(" name=");
@@ -149,12 +152,17 @@ public class DtcXmlToHtmlHandler extends DefaultHandler {
 
           if (node.isRoot()) {
             nodeItem.append("<div id=");
+            nodeItem.append("\"");
           }
           else {
             nodeItem.append("<div class=");
-            nodeItem.append("depth_" + node.getDepth() + "_");
+            nodeItem.append("\"");
+            nodeItem.append("depth_");
+            nodeItem.append(node.getDepth());
+            nodeItem.append(" ");
           }
           nodeItem.append(node.getNodeName());
+          nodeItem.append("\"");
           nodeItem.append(" name=");
           nodeItem.append(node.getNodeName());
           nodeItem.append(node.getAttribute());

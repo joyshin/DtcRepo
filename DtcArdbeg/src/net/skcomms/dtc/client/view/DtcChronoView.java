@@ -98,7 +98,7 @@ public class DtcChronoView extends Label {
     private void updateTimeText() {
       long currentTime = new Date().getTime();
       this.elapsedTimeText = " " + Long.toString(currentTime - this.startTime) + " ms";
-      GWT.log("elapsedTime: " + this.elapsedTimeText);
+      // GWT.log("elapsedTime: " + this.elapsedTimeText);
       // this.timeLabel.clear();
       this.contents.setLength(0);
       this.contents.append("<font color=\"red\" family=\"normal\" size=\"2\" weight=\"bold\">");
