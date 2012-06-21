@@ -52,9 +52,19 @@ a.navi-bar {
 	height: 200px;
 }
 
-div#dtcContainer iframe { /* 영화 "인터뷰" 포스터 */
-	background-image:
-		url('http://www.scotlandinfo.eu/wallpaper/islay/ardbegdistillery1024x768.jpg');
+@keyframes myText
+{
+from {color: black;}
+to {color: red;}
+}
+
+@-webkit-keyframes myText {
+	from {color: black;}
+	to {
+		color: red;
+		margin-left: -100px;
+		display: none;
+	}
 }
 
 .dtc-line-wrap {

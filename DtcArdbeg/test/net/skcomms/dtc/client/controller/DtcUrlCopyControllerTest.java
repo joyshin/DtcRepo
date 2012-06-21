@@ -12,7 +12,6 @@ import org.junit.Test;
 
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.FlowPanel;
 
 /**
  * @author jujang@sk.com
@@ -23,11 +22,6 @@ public class DtcUrlCopyControllerTest {
 
     @Override
     protected String calculateBaseUrl() {
-      return null;
-    }
-
-    @Override
-    protected FlowPanel createFlowPanel() {
       return null;
     }
 

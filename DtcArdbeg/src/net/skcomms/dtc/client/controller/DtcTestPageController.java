@@ -17,6 +17,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 public class DtcTestPageController extends DefaultDtcArdbegObserver {
 
   private DtcTestPageView dtcTestPageView;
+
   private LastRequestLoaderController lastRequestLoader;
 
   private String currentPath;
@@ -58,7 +59,6 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
       DtcTestPageController.this.lastRequestLoader.loadLastRequest(requestInfo);
     }
     DtcTestPageController.this.dtcTestPageView.setRequestInfo(requestInfo);
-    // GWT.log(requestInfo.toString());
     DtcTestPageController.this.dtcTestPageView.draw();
     DtcTestPageController.this.encoding = requestInfo.getEncoding();
   }
@@ -75,7 +75,7 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
   }
 
   protected void sendRequest() {
-    StringBuffer requestData = new StringBuffer();
+    StringBuilder requestData = new StringBuilder();
     final String testURL = "c" + "=" + URL.encode(this.currentPath);
     final String lastRequestKey = "c" + "=" + this.currentPath;
     String process = "process=1";

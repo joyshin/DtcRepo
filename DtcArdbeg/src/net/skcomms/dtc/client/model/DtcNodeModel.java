@@ -7,14 +7,13 @@ import java.util.List;
 
 import net.skcomms.dtc.client.DtcArdbeg;
 import net.skcomms.dtc.client.DtcArdbeg.Pair;
+import net.skcomms.dtc.client.DtcNodeObserver;
 import net.skcomms.dtc.client.PersistenceManager;
 import net.skcomms.dtc.client.service.DtcService;
-import net.skcomms.dtc.client.view.DtcNodeMetaCellView;
 import net.skcomms.dtc.shared.DtcNodeMetaModel;
 import net.skcomms.dtc.shared.DtcRequestInfoModel;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class DtcNodeModel {
@@ -24,12 +23,6 @@ public class DtcNodeModel {
   private final List<DtcNodeMetaModel> dtcNodeList = new ArrayList<DtcNodeMetaModel>();
 
   private static DtcNodeModel instance = new DtcNodeModel();
-
-  private static final CellList<DtcNodeMetaModel> dtcNodeCellList = new CellList<DtcNodeMetaModel>(
-      DtcNodeMetaCellView.getInstance());
-
-  private static final CellList<DtcNodeMetaModel> dtcFavoriteNodeCellList = new CellList<DtcNodeMetaModel>(
-      DtcNodeMetaCellView.getInstance());
 
   public static DtcNodeModel getInstance() {
     return DtcNodeModel.instance;
@@ -50,7 +43,13 @@ public class DtcNodeModel {
 
   DtcArdbeg owner;
 
+  private final List<DtcNodeObserver> observers = new ArrayList<DtcNodeObserver>();
+
   private DtcNodeModel() {
+  }
+
+  public void addObserver(DtcNodeObserver observer) {
+    this.observers.add(observer);
   }
 
   private void categorizeNodesByVisitCount(List<DtcNodeMetaModel> nodeInfos) {
@@ -76,16 +75,28 @@ public class DtcNodeModel {
       this.moveToDtcFavoriteNodeList(selected);
     }
 
-    this.setDtcNodeCellList();
-    this.setDtcFavoriteNodeCellList();
+    this.fireNodeListChanged();
+    this.fireFavoriteNodeListChanged();
   }
 
-  public CellList<DtcNodeMetaModel> getDtcFavoriteNodeCellList() {
-    return DtcNodeModel.dtcFavoriteNodeCellList;
+  private void fireFavoriteNodeListChanged() {
+    for (DtcNodeObserver observer : this.observers) {
+      observer.onFavoriteNodeListChanged();
+    }
   }
 
-  public CellList<DtcNodeMetaModel> getDtcNodeCellList() {
-    return DtcNodeModel.dtcNodeCellList;
+  private void fireNodeListChanged() {
+    for (DtcNodeObserver observer : this.observers) {
+      observer.onNodeListChanged();
+    }
+  }
+
+  public List<DtcNodeMetaModel> getFavoriteNodeList() {
+    return this.dtcFavoriteNodeList;
+  }
+
+  public List<DtcNodeMetaModel> getNodeList() {
+    return this.dtcNodeList;
   }
 
   public void goToPageBasedOn(DtcNodeMetaModel selected) {
@@ -117,33 +128,28 @@ public class DtcNodeModel {
 
       @Override
       public void onFailure(Throwable caught) {
-        caught.printStackTrace();
         GWT.log(caught.getMessage());
       }
 
       @Override
       public void onSuccess(List<DtcNodeMetaModel> nodeInfos) {
         DtcNodeModel.this.setDtcNodeList(nodeInfos);
-        DtcNodeModel.this.setDtcNodeCellList();
+        DtcNodeModel.this.fireNodeListChanged();
 
-        System.out.println("Callback : " + path);
         if (path.equals("/")) {
         }
         else {
           DtcNodeModel.this.owner.fireDtcServiceDirectoryPageLoaded(path);
         }
-
       }
     });
   }
 
   public void refreshDtcHomePageNode() {
-
     DtcService.Util.getInstance().getDir("/", new AsyncCallback<List<DtcNodeMetaModel>>() {
 
       @Override
       public void onFailure(Throwable caught) {
-        caught.printStackTrace();
         GWT.log(caught.getMessage());
       }
 
@@ -152,8 +158,8 @@ public class DtcNodeModel {
         DtcNodeModel.this.categorizeNodesByVisitCount(nodeInfos);
         DtcNodeModel.this.sortDtcFavoriteNodeList();
 
-        DtcNodeModel.this.setDtcNodeCellList();
-        DtcNodeModel.this.setDtcFavoriteNodeCellList();
+        DtcNodeModel.this.fireNodeListChanged();
+        DtcNodeModel.this.fireFavoriteNodeListChanged();
         DtcNodeModel.this.owner.fireDtcHomePageLoaded();
       }
     });
@@ -165,26 +171,14 @@ public class DtcNodeModel {
 
           @Override
           public void onFailure(Throwable caught) {
-            caught.printStackTrace();
             GWT.log(caught.getMessage());
           }
 
           @Override
-          public void onSuccess(final DtcRequestInfoModel requestInfo) {
+          public void onSuccess(DtcRequestInfoModel requestInfo) {
             DtcNodeModel.this.owner.fireDtcTestPageLoaded(requestInfo);
           }
         });
-  }
-
-  private void setDtcFavoriteNodeCellList() {
-    DtcNodeModel.dtcFavoriteNodeCellList.setRowData(this.dtcFavoriteNodeList);
-    DtcNodeModel.dtcFavoriteNodeCellList.setRowCount(this.dtcFavoriteNodeList.size(),
-        true);
-  }
-
-  private void setDtcNodeCellList() {
-    DtcNodeModel.dtcNodeCellList.setRowData(this.dtcNodeList);
-    DtcNodeModel.dtcNodeCellList.setRowCount(this.dtcNodeList.size(), true);
   }
 
   private void setDtcNodeList(List<DtcNodeMetaModel> nodeInfos) {
