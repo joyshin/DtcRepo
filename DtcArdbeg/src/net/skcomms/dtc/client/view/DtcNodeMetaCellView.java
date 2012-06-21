@@ -13,17 +13,25 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Image;
 
 public final class DtcNodeMetaCellView extends AbstractCell<DtcNodeMetaModel> {
+
   private static final DtcNodeMetaCellView instance = new DtcNodeMetaCellView();
+
   private static final String CELL_STYLE_OPENER = "<div style=\"position: relative; width:280px; height:74px; border: 1px solid; border-radius: 15px; float: left; \">";
+
   private static final String CELL_STYLE_CLOSER = "</div>";
 
   private static final String CELL_IMAGE_URL = "https://encrypted-tbn2.google.com/images?q=tbn:ANd9GcScwAPeLjzjxfXlOmzXBIZZ65qTSKib647JumG-J8f2o1CBOhYD";
+
   private static final String CELL_IMAGE_STYLE_OPENER = "<div style=\"width:62px; height:69px; float:left; margin:2px;\">";
+
   private static final String CELL_IMAGE_STYLE_CLOSER = "</div>";
 
   private static final String CELL_BUTTON_ID = "dtc_favorite_btn";
+
   private static final String CELL_BUTTON_IMAGE_SRC = "UpDownArrow.png";
+
   private static final String CELL_BUTTON_STYLE_OPENER = "<div style=\"height:26px; float:right;  \">";
+
   private static final String CELL_BUTTON_STYLE_BODY = "<img id=\""
       + DtcNodeMetaCellView.CELL_BUTTON_ID + "\" src=\""
       + DtcNodeMetaCellView.CELL_BUTTON_IMAGE_SRC + "\" ></img>";
@@ -31,21 +39,26 @@ public final class DtcNodeMetaCellView extends AbstractCell<DtcNodeMetaModel> {
   private static final String CELL_BUTTON_STYLE_CLOSER = "</div>";
 
   private static final String CELL_BOX_STYLE_OPENER = "<div style=\"width:280px; height:74px; \">";
+
   private static final String CELL_BOX_STYLE_CLOSER = "</div>";
 
   private static final String CELL_NAME_STYLE_OPENER = "<div style=\"height:26px; display:table; vertical-align:middle; \"><b>";
+
   private static final String CELL_NAME_STYLE_CLOSER = "</b></div>";
 
   private static final String CELL_DESCRIPTION_STYLE_OPENER = "<div style=\"height:22px; display:table; vertical-align:middle; \">";
+
   private static final String CELL_DESCRIPTION_STYLE_CLOSER = "</div>";
 
   private static final String CELL_UPDATETIME_STYLE_OPENER = "<div style=\"height:22px; display:table; vertical-align:middle; \">";
+
   private static final String CELL_UPDATETIME_STYLE_CLOSER = "</div>";
 
   public static DtcNodeMetaCellView getInstance() {
     return DtcNodeMetaCellView.instance;
   }
 
+  // FIXME View는 Model과 직접 통신해서는 안된다.
   private final DtcNodeModel dtcNodeData = DtcNodeModel.getInstance();
 
   private DtcNodeMetaCellView() {
@@ -59,11 +72,13 @@ public final class DtcNodeMetaCellView extends AbstractCell<DtcNodeMetaModel> {
 
     if (DtcNodeMetaCellView.CELL_BUTTON_ID.equals(Element.as(event.getEventTarget()).getId())) {
       if (!selected.isDirectoryPageNode()) {
+        // FIXME View는 Model과 직접 통신해서는 안된다.
         this.dtcNodeData.changeNodeListOf(selected);
       } else {
         Window.alert("누르지마!!");
       }
     } else {
+      // FIXME View는 Model과 직접 통신해서는 안된다.
       this.dtcNodeData.goToPageBasedOn(selected);
     }
     event.preventDefault();

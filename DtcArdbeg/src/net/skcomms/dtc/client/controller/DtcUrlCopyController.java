@@ -25,41 +25,42 @@ public class DtcUrlCopyController {
   private String combineUrl() {
     StringBuilder sb = new StringBuilder();
 
-    String href = this.module.getHref();
+    String href = module.getHref();
     if (href.indexOf('?') == -1) {
       sb.append(href);
     } else {
       sb.append(href.substring(0, href.indexOf('?')));
     }
 
-    if (this.module.getCurrentPath().equals("/")) {
+    if (module.getCurrentPath().equals("/")) {
     }
-    else if (this.module.getCurrentPath().endsWith("/")) {
-      sb.append("?b=");
+    else if (module.getCurrentPath().endsWith("/")) {
+      sb.append("?path=");
+      sb.append(URL.encode(module.getCurrentPath().substring(1)));
     } else {
-      sb.append("?c=");
+      sb.append("?path=");
+      sb.append(URL.encode(module.getCurrentPath().substring(1)));
+      Map<String, String> params = dtcTestPageView.getRequestParameter();
+      for (Entry<String, String> entry : params.entrySet()) {
+        sb.append('&');
+        sb.append(entry.getKey());
+        sb.append('=');
+        sb.append(URL.encode(entry.getValue()));
+      }
     }
-    sb.append(URL.encode(this.module.getCurrentPath().substring(1)));
 
-    Map<String, String> params = this.dtcTestPageView.getRequestParameter();
-    for (Entry<String, String> entry : params.entrySet()) {
-      sb.append('&');
-      sb.append(entry.getKey());
-      sb.append('=');
-      sb.append(URL.encode(entry.getValue()));
-    }
     System.out.println(sb.toString());
     return sb.toString();
   }
 
   public void initialize(DtcArdbeg dtcArdbeg, DtcTestPageView dtcTestPageView,
       DtcUrlCopyButtonView aButton, DtcUrlCopyDialogBoxView aDialogBox) {
-    this.module = dtcArdbeg;
+    module = dtcArdbeg;
     this.dtcTestPageView = dtcTestPageView;
-    this.button = aButton;
-    this.dialogBox = aDialogBox;
+    button = aButton;
+    dialogBox = aDialogBox;
 
-    this.button.addUrlCopyButtonClickHandler(new ClickHandler() {
+    button.addUrlCopyButtonClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         DtcUrlCopyController.this.onClickUrlCopyButton();
@@ -68,7 +69,7 @@ public class DtcUrlCopyController {
   }
 
   private void onClickUrlCopyButton() {
-    String url = this.combineUrl();
-    this.dialogBox.showUrlText(url);
+    String url = combineUrl();
+    dialogBox.showUrlText(url);
   }
 }

@@ -24,6 +24,7 @@ public class DtcNodeModel {
 
   private static DtcNodeModel instance = new DtcNodeModel();
 
+  // FIXME 객체의 유일성을 보장하는 장점보다, 접근남용의 단점이 커진 듯...
   public static DtcNodeModel getInstance() {
     return DtcNodeModel.instance;
   }
@@ -99,11 +100,13 @@ public class DtcNodeModel {
     return this.dtcNodeList;
   }
 
+  // FIXME 모델에서는 직접 메써드를 호출하는 대신 선택된 노드 혹은 경로를 통지하자.
   public void goToPageBasedOn(DtcNodeMetaModel selected) {
-    DtcNodeModel.this.owner.setDtcFramePath(selected.getPath());
+    DtcNodeModel.this.owner.setPath(selected.getPath());
   }
 
   public void initialize(DtcArdbeg dtcArdbeg) {
+    // FIXME DtcArdbeg이 필요없도록 만들자.
     this.owner = dtcArdbeg;
   }
 

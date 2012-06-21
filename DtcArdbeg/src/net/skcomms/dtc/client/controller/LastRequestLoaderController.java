@@ -14,7 +14,9 @@ import com.google.gwt.core.client.GWT;
 public class LastRequestLoaderController {
 
   private static final char FORM_VALUE_DELIMETER = 0x0b;
+
   private static final char FORM_FIELD_DELIMETER = 0x0C;
+
   private static final String PREFIX = "LastRequestLoaderController.";
 
   private static String findKey(String string) {
@@ -41,7 +43,6 @@ public class LastRequestLoaderController {
       String[] pair = element.split(Character
           .toString(LastRequestLoaderController.FORM_VALUE_DELIMETER));
       if (pair.length == 2) {
-        // GWT.log("Name :" + pair[0] + " Value :" + pair[1]);
         map.put(pair[0], pair[1]);
       }
     }
@@ -56,56 +57,47 @@ public class LastRequestLoaderController {
   Map<String, String> storedParams;
 
   public LastRequestLoaderController() {
-    requestKey = null;
-    requestData = new StringBuilder();
+    this.requestKey = null;
+    this.requestData = new StringBuilder();
   }
 
   public void createLastRequest(String requestKey, Map<String, String> param) {
 
-    String key = null;
-    String value = null;
-
     this.requestKey = null;
     this.requestData.setLength(0);
-
     this.requestKey = LastRequestLoaderController.findKey(requestKey);
 
+    // FIXME entrySet()에 대해 for each 구문을 사용하자.
     Iterator<String> keyItor = param.keySet().iterator();
-
     for (int i = 0; i < param.keySet().size(); i++) {
-      key = keyItor.next();
-      value = param.get(key);
+      String key = keyItor.next();
+      String value = param.get(key);
       this.requestData.append(key);
       this.requestData.append(LastRequestLoaderController.FORM_VALUE_DELIMETER);
       this.requestData.append(value);
       this.requestData.append(LastRequestLoaderController.FORM_FIELD_DELIMETER);
     }
-
-    // GWT.log("Create LastRequest: " + this.requestData.toString());
   }
 
   public void loadLastRequest(DtcRequestInfoModel requestInfo) {
-
     // set value
     List<DtcRequestParameterModel> requestParamList = requestInfo.getParams();
     DtcRequestParameterModel requestParam = null;
 
     String storedValue = null;
 
+    // FIXME for each 방식을 사용할 것.
     for (int i = 0; i < requestParamList.size(); i++) {
       requestParam = requestParamList.get(i);
-      // GWT.log("requestParam name: " + requestParam.getKey() + " value: " +
-      // requestParam.getValue());
-
-      storedValue = storedParams.get(requestParam.getKey());
-      if (storedValue == null)
+      storedValue = this.storedParams.get(requestParam.getKey());
+      if (storedValue == null) {
         storedValue = "";
+      }
       requestParam.setValue(storedValue);
     }
 
     // set ip
-    // IpInfoModel requestIp = requestInfo.getIpInfo();
-    String storedIp = storedParams.get("IP");
+    String storedIp = this.storedParams.get("IP");
     requestInfo.getIpInfo().setIpText(storedIp);
   }
 
@@ -118,14 +110,8 @@ public class LastRequestLoaderController {
   }
 
   public boolean recall(String lastRequestKey) {
-
     String key = LastRequestLoaderController.findKey(lastRequestKey);
     this.storedParams = LastRequestLoaderController.getLastParameters(key);
-
-    // GWT.log("storedParams: " + this.storedParams.toString());
-    if (this.storedParams.size() > 0)
-      return true;
-    else
-      return false;
+    return this.storedParams.size() > 0;
   }
 }

@@ -1,5 +1,6 @@
 package net.skcomms.dtc.client.controller;
 
+import java.util.List;
 import java.util.Map;
 
 import net.skcomms.dtc.client.DefaultDtcArdbegObserver;
@@ -8,6 +9,7 @@ import net.skcomms.dtc.client.DtcTestPageViewObserver;
 import net.skcomms.dtc.client.service.DtcService;
 import net.skcomms.dtc.client.view.DtcTestPageView;
 import net.skcomms.dtc.shared.DtcRequestInfoModel;
+import net.skcomms.dtc.shared.DtcRequestParameterModel;
 import net.skcomms.dtc.shared.HttpRequestInfoModel;
 
 import com.google.gwt.core.client.GWT;
@@ -26,14 +28,53 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
 
   private String encoding;
 
-  public void initialize(final DtcArdbeg dtcArdbeg,
-      DtcTestPageView dtcTestPageView,
-      LastRequestLoaderController lastRequestLoader) {
+  private Map<String, List<String>> initialRequestParameters = null;
 
+  private void adjustRequestInfo(DtcRequestInfoModel requestInfo) {
+    if (this.initialRequestParameters != null) {
+      this.adjustRequestInfoByInitialParameters(requestInfo);
+      this.initialRequestParameters = null;
+    } else {
+      this.adjustRequestInfoByLastRequest(requestInfo);
+    }
+
+  }
+
+  private void adjustRequestInfoByInitialParameters(DtcRequestInfoModel requestInfo) {
+    // IP
+    if (this.initialRequestParameters.containsKey("IP")) {
+      requestInfo.getIpInfo().setIpText(this.initialRequestParameters.get("IP").get(0));
+    }
+
+    // other
+    for (DtcRequestParameterModel param : requestInfo.getParams()) {
+      if (this.initialRequestParameters.containsKey(param.getKey())) {
+        param.setValue(this.initialRequestParameters.get(param.getKey()).get(0));
+      }
+    }
+  }
+
+  private void adjustRequestInfoByLastRequest(DtcRequestInfoModel requestInfo) {
+    final String lastRequestLoaderKey = "c" + "=" + requestInfo.getPath();
+    GWT.log("requestLoader key: " + lastRequestLoaderKey);
+
+    boolean lastRequestExists =
+        DtcTestPageController.this.lastRequestLoader.recall(lastRequestLoaderKey);
+
+    GWT.log("requestExists: " + lastRequestExists);
+
+    if (lastRequestExists) {
+      DtcTestPageController.this.lastRequestLoader.loadLastRequest(requestInfo);
+    }
+  }
+
+  public void initialize(final DtcArdbeg dtcArdbeg, DtcTestPageView dtcTestPageView,
+      LastRequestLoaderController lastRequestLoader) {
     dtcArdbeg.addDtcArdbegObserver(this);
     this.dtcProxyUrl = dtcArdbeg.getDtcProxyUrl();
     this.dtcTestPageView = dtcTestPageView;
     this.lastRequestLoader = lastRequestLoader;
+    this.initialRequestParameters = dtcArdbeg.getRequestParameters();
 
     dtcTestPageView.setOnReadyRequestDataObserver(new DtcTestPageViewObserver() {
 
@@ -45,19 +86,9 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
   }
 
   public void loadDtcTestPageView(DtcRequestInfoModel requestInfo) {
-
+    this.adjustRequestInfo(requestInfo);
     this.currentPath = requestInfo.getPath();
-    final String lastRequestLoaderKey = "c" + "=" + this.currentPath;
-    GWT.log("requestLoader key: " + lastRequestLoaderKey);
 
-    boolean lastRequestExists =
-        DtcTestPageController.this.lastRequestLoader.recall(lastRequestLoaderKey);
-
-    GWT.log("requestExists: " + lastRequestExists);
-
-    if (lastRequestExists) {
-      DtcTestPageController.this.lastRequestLoader.loadLastRequest(requestInfo);
-    }
     DtcTestPageController.this.dtcTestPageView.setRequestInfo(requestInfo);
     DtcTestPageController.this.dtcTestPageView.draw();
     DtcTestPageController.this.encoding = requestInfo.getEncoding();
@@ -77,7 +108,6 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
   protected void sendRequest() {
     StringBuilder requestData = new StringBuilder();
     final String testURL = "c" + "=" + URL.encode(this.currentPath);
-    final String lastRequestKey = "c" + "=" + this.currentPath;
     String process = "process=1";
     String targetUrl = URL.encode(this.dtcProxyUrl + "response.html");
 
@@ -117,6 +147,9 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
 
             Map<String, String> requestParam =
                 DtcTestPageController.this.dtcTestPageView.getRequestParameter();
+            // FIXME 키 생성방법을 은닉시킬 것.
+            String lastRequestKey = "c" + "=" + DtcTestPageController.this.currentPath;
+            // FIXME 한 개 메써드로 합치자.
             DtcTestPageController.this.lastRequestLoader.createLastRequest(lastRequestKey,
                 requestParam);
             DtcTestPageController.this.lastRequestLoader.persist();

@@ -318,8 +318,6 @@ public class DtcTestPageView {
     this.htmlPane.setTop(40);
     this.htmlPane.setWidth100();
     this.htmlPane.setStyleName("response_panel");
-    // this.htmlPane.setContentsURL(URL.encode(this.module.getDtcProxyUrl()
-    // + "response.html"));
 
     this.hLayoutRight.addMember(this.htmlPane);
 
@@ -342,7 +340,6 @@ public class DtcTestPageView {
       } else {
         value = record.getAttribute("value");
       }
-
       params.put(record.getAttribute("key"), (value == null ? "" : value));
     }
 
@@ -350,14 +347,11 @@ public class DtcTestPageView {
   }
 
   public void setHTMLData(String convertedHTML) {
-
     this.htmlPane.setContents(convertedHTML);
-
   }
 
   public void setOnReadyRequestDataObserver(DtcTestPageViewObserver cb) {
     this.readyRequestDataCb = cb;
-
   }
 
   public void setRequestInfo(DtcRequestInfoModel requestInfo) {
@@ -365,14 +359,8 @@ public class DtcTestPageView {
   }
 
   public int validateRequestData() {
-
     for (ListGridRecord record : this.requestFormGrid.getRecords()) {
-
-      // GWT.log("Key: " + record.getAttribute("key"));
       if (record.getAttribute("key").toLowerCase().equals("query")) {
-
-        // GWT.log("Value: " + record.getAttribute("value"));
-
         if (record.getAttribute("value") == null) {
           this.invalidRecordIdx = this.requestFormGrid.getRecordIndex(record);
           SC.warn("Invalid Query", new BooleanCallback() {

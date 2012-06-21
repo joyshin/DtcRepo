@@ -42,7 +42,7 @@ public class DtcNavigationBarView extends DefaultDtcArdbegObserver {
       @Override
       public void onClick(ClickEvent event) {
         event.stopPropagation();
-        DtcNavigationBarView.this.owner.setDtcFramePath(path);
+        DtcNavigationBarView.this.owner.setPath(path);
       }
     });
 
