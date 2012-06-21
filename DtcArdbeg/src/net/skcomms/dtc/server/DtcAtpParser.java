@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import net.skcomms.dtc.server.model.DtcAtp;
+import net.skcomms.dtc.server.model.DtcAtpRecord;
 
 public class DtcAtpParser {
 
@@ -29,6 +30,8 @@ public class DtcAtpParser {
   private int binarySize;
 
   private InputStream inputStream;
+
+  private DtcAtpRecord currRecord;
 
   private DtcAtpParser(byte[] bytes) {
     this.inputStream = new ByteArrayInputStream(bytes);
@@ -66,8 +69,8 @@ public class DtcAtpParser {
   private void field() {
     String token = this.tokenizer.getToken();
     System.out.println("field: " + token);
+    this.currRecord.addField(token);
     this.match(this.tokenizer.getToken(), DtcAtpParser.FT);
-
   }
 
   private DtcAtp getAtp() {
@@ -106,7 +109,8 @@ public class DtcAtpParser {
   }
 
   private void record() {
-    System.out.println("Record START !! ");
+    this.currRecord = new DtcAtpRecord();
+
     do {
       this.field();
       String token = this.tokenizer.getToken();
@@ -116,8 +120,9 @@ public class DtcAtpParser {
       this.tokenizer.ungetToken(token);
 
     } while (true);
-    System.out.println("Record END !! ");
 
+    this.atp.addRecord(this.currRecord);
+    this.currRecord = null;
   }
 
   private void responseCode() {
@@ -138,10 +143,6 @@ public class DtcAtpParser {
   }
 
   private void signature() {
-    System.out.println("Signature: " + this.tokenizer.getTokenNoSpace());
-  }
-
-  private void ungetToken() {
-
+    this.atp.setSignature(this.tokenizer.getTokenNoSpace());
   }
 }
