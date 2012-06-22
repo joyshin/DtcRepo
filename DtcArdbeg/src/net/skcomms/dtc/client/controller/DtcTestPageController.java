@@ -126,6 +126,9 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
     httpRequestInfo.setEncoding(this.encoding);
     DtcTestPageController.this.dtcTestPageView.chronoStart();
 
+    // FIXME HttpRequestInfoModel이 DtcRequestParams로 더 추상화되거나 GWT RPC를 쓰지 않고 일반
+    // http 요청을 하자. 어느 쪽이든지 아래 비동기 요청은 Model의 역할이니 옮겨주자.
+
     DtcService.Util.getInstance().getDtcTestPageResponse(httpRequestInfo,
         new AsyncCallback<String>() {
 
