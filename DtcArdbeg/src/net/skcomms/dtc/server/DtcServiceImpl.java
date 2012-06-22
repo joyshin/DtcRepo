@@ -20,14 +20,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -38,9 +36,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,11 +46,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
-import javax.swing.text.MutableAttributeSet;
-import javax.swing.text.html.HTML;
-import javax.swing.text.html.HTML.Tag;
-import javax.swing.text.html.HTMLEditorKit.ParserCallback;
-import javax.swing.text.html.parser.ParserDelegator;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -60,6 +53,7 @@ import javax.xml.parsers.SAXParserFactory;
 import net.skcomms.dtc.client.service.DtcService;
 import net.skcomms.dtc.server.model.DtcIni;
 import net.skcomms.dtc.server.model.DtcLog;
+import net.skcomms.dtc.server.model.DtcRequestProperty;
 import net.skcomms.dtc.shared.DtcNodeMetaModel;
 import net.skcomms.dtc.shared.DtcRequestInfoModel;
 import net.skcomms.dtc.shared.DtcRequestParameterModel;
@@ -71,7 +65,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.xml.sax.SAXException;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 @SuppressWarnings("serial")
@@ -125,234 +118,6 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
       sb.append("&");
     }
     return sb.toString().substring(0, sb.length() - 1);
-  }
-
-  private static ParserCallback
-      createDtcDirectoryParserCallback(final List<DtcNodeMetaModel> items) {
-    return new ParserCallback() {
-
-      private int textCount;
-
-      private DtcNodeMetaModel currentItem = null;
-
-      private boolean beforeHeaderRow = true;
-
-      @Override
-      public void handleEndOfLineString(String eol) {
-        this.reset();
-      }
-
-      @Override
-      public void handleEndTag(HTML.Tag tag, int pos) {
-        if (tag == Tag.TR) {
-          if (this.currentItem != null) {
-            GWT.log("path:" + this.currentItem.getPath());
-            items.add(this.currentItem);
-            this.currentItem = null;
-          }
-        }
-      }
-
-      @Override
-      public void handleStartTag(HTML.Tag tag, MutableAttributeSet a, int pos) {
-        if (this.beforeHeaderRow) {
-          if (tag == Tag.TR) {
-            this.beforeHeaderRow = false;
-          }
-          return;
-        }
-
-        if (tag == Tag.TR) {
-          this.currentItem = new DtcNodeMetaModel();
-          this.textCount = 0;
-        } else if (tag == Tag.A) {
-          String href = DtcServiceImpl.getAttributeByName(a, "href");
-          int index = href.indexOf('=');
-          this.currentItem.setPath("/" + href.substring(index + 1));
-        }
-      }
-
-      @Override
-      public void handleText(char[] data, int pos) {
-        if (this.currentItem != null) {
-          this.setColumn(String.valueOf(data));
-        }
-      }
-
-      private void reset() {
-        this.textCount = 0;
-        this.currentItem = null;
-        this.beforeHeaderRow = true;
-      }
-
-      private void setColumn(String value) {
-        switch (this.textCount++) {
-        case 0:
-          this.currentItem.setName(value);
-          if (!this.currentItem.isLeaf()) {
-            this.textCount++;
-          }
-          break;
-        case 2:
-          this.currentItem.setDescription(value);
-          break;
-        case 3:
-          this.currentItem.setUpdateTime(value);
-        }
-      }
-    };
-  }
-
-  /**
-   * @param path
-   * @param contents
-   * @return
-   * @throws IOException
-   */
-  static List<DtcNodeMetaModel> createDtcNodeInfosFrom(byte[] contents) throws IOException {
-    final List<DtcNodeMetaModel> nodeInfos = new ArrayList<DtcNodeMetaModel>();
-
-    ParserCallback callback = DtcServiceImpl.createDtcDirectoryParserCallback(nodeInfos);
-
-    new ParserDelegator().parse(
-        new InputStreamReader(new ByteArrayInputStream(contents), "windows-949"), callback, true);
-    return nodeInfos;
-  }
-
-  /**
-   * @param requestInfo
-   * @param contents
-   * @return
-   */
-  private static ParserCallback createDtcRequestFrameParserCallback(
-      final DtcRequestInfoModel requestInfo,
-      final byte[] contents) {
-    return new ParserCallback() {
-
-      private int scriptStart = 0;
-
-      private int scriptEnd = 0;
-
-      private boolean insideRequestTable;
-
-      private List<DtcRequestParameterModel> params;
-
-      private String currentKey;
-
-      private IpInfoModel createIpInfoFrom(String javascript) {
-        IpInfoModel ipInfo = new IpInfoModel();
-
-        Pattern pattern = Pattern.compile("<input .* id=\"ip_text\" value=\"([0-9.]+)\" .*>");
-        Matcher m = pattern.matcher(javascript);
-        if (m.find()) {
-          ipInfo.setIpText(m.group(1));
-        }
-
-        pattern = Pattern.compile("<option value=\"(.*)\">(.*)</option>");
-        m = pattern.matcher(javascript);
-        while (m.find()) {
-          ipInfo.addOption(m.group(1), m.group(2));
-        }
-
-        return ipInfo;
-      }
-
-      @Override
-      public void handleEndOfLineString(String eol) {
-        this.reset();
-      }
-
-      @Override
-      public void handleEndTag(HTML.Tag tag, int pos) {
-        if (tag == Tag.SCRIPT) {
-          if (this.scriptStart == 0) {
-            this.scriptStart = pos;
-          }
-        }
-        else if (tag == Tag.TABLE) {
-          this.insideRequestTable = false;
-          requestInfo.setParams(this.params);
-        }
-      }
-
-      @Override
-      public void handleSimpleTag(HTML.Tag tag, MutableAttributeSet a, int pos) {
-        if (tag == Tag.INPUT) {
-          if (this.insideRequestTable) {
-            String value = DtcServiceImpl.getAttributeByName(a, "value");
-            String name = DtcServiceImpl.getAttributeByName(a, "name");
-            this.params.add(new DtcRequestParameterModel(this.currentKey, name, value));
-          }
-        }
-      }
-
-      @Override
-      public void handleStartTag(HTML.Tag tag, MutableAttributeSet a, int pos) {
-        if (tag == Tag.STYLE) {
-          if (this.scriptEnd == 0) {
-            this.scriptEnd = pos;
-            try {
-              String encoding = DtcServiceImpl.guessCharacterEncoding(contents);
-              requestInfo.setEncoding(encoding);
-
-              String javascript = new String(contents, this.scriptStart, this.scriptEnd
-                  - this.scriptStart, encoding);
-              IpInfoModel ipInfo = this.createIpInfoFrom(javascript);
-              requestInfo.setIpInfo(ipInfo);
-            } catch (UnsupportedEncodingException e) {
-              e.printStackTrace();
-            } catch (IOException e) {
-              e.printStackTrace();
-            }
-
-          }
-        }
-        else if (tag == Tag.TD) {
-        }
-        else if (tag == Tag.TABLE) {
-          String id = DtcServiceImpl.getAttributeByName(a, "id");
-          if ("tblREQUEST".equals(id)) {
-            this.insideRequestTable = true;
-            this.params = new ArrayList<DtcRequestParameterModel>();
-          }
-        }
-      }
-
-      @Override
-      public void handleText(char[] data, int pos) {
-        if (this.insideRequestTable) {
-          this.currentKey = new String(data);
-        }
-      }
-
-      private void reset() {
-        this.scriptStart = 0;
-        this.scriptEnd = 0;
-        this.insideRequestTable = false;
-        this.currentKey = null;
-        this.params = null;
-      }
-    };
-  }
-
-  /**
-   * @param path
-   * @param contents
-   * @throws IOException
-   * @throws UnsupportedEncodingException
-   */
-  static DtcRequestInfoModel createDtcRequestInfoFrom(String path, byte[] contents)
-      throws UnsupportedEncodingException, IOException {
-    DtcRequestInfoModel requestInfo = new DtcRequestInfoModel();
-    requestInfo.setPath(path);
-
-    String encoding = DtcServiceImpl.guessCharacterEncoding(contents);
-    ParserCallback callback = DtcServiceImpl.createDtcRequestFrameParserCallback(requestInfo,
-        contents);
-    new ParserDelegator().parse(
-        new InputStreamReader(new ByteArrayInputStream(contents), encoding), callback, true);
-
-    return requestInfo;
   }
 
   static String createDtcResponse(HttpRequestInfoModel httpRequestInfo) {
@@ -492,19 +257,7 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     return src.replaceAll("\\\\u000B", "&#11;").replaceAll("\\\\f", "&#12;");
   }
 
-  private static String getAttributeByName(MutableAttributeSet a, String name) {
-    Enumeration<?> attrs = a.getAttributeNames();
-    while (attrs.hasMoreElements()) {
-      Object attr = attrs.nextElement();
-      if (attr.toString().equals(name)) {
-        return (String) a.getAttribute(attr);
-      }
-    }
-    return null;
-  }
-
   private static String getEncodedQuery(String query, String encoding) {
-
     // decode UTF-8 query
     StringBuilder paramList = new StringBuilder();
     String decodedQuery = null;
@@ -615,6 +368,29 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
 
   private EntityManagerFactory emf;
 
+  private DtcRequestInfoModel createRequestInfo(DtcIni ini) {
+    DtcRequestInfoModel requestInfo = new DtcRequestInfoModel();
+
+    ArrayList<DtcRequestParameterModel> params = new ArrayList<DtcRequestParameterModel>();
+    int index = 0;
+    for (DtcRequestProperty prop : ini.getRequestProps()) {
+      index++;
+      params.add(new DtcRequestParameterModel(prop.getKey(), "REQUEST" + index, prop.getValue()));
+    }
+    params.add(new DtcRequestParameterModel("Port", "port", ini.getBaseProp("PORT").getValue()));
+    requestInfo.setParams(params);
+
+    requestInfo.setEncoding(ini.getCharacterSet());
+
+    IpInfoModel ipInfo = new IpInfoModel();
+    for (Entry<String, String> entry : ini.getIps().entrySet()) {
+      ipInfo.addOption(entry.getKey(), entry.getKey() + " - " + entry.getValue());
+    }
+    requestInfo.setIpInfo(ipInfo);
+
+    return requestInfo;
+  }
+
   @Override
   public List<DtcNodeMetaModel> getDir(String path) {
     if (!DtcServiceVerifier.isValidDirectoryPath(path)) {
@@ -642,23 +418,32 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     List<DtcNodeMetaModel> nodes = new ArrayList<DtcNodeMetaModel>();
     File[] files = file.listFiles(new DtcNodeFilter());
     Arrays.sort(files, DtcServiceImpl.NODE_COMPARATOR);
-    for (File item : files) {
+    for (File child : files) {
       DtcNodeMetaModel node = new DtcNodeMetaModel();
-      node.setName(item.getName());
-      if (item.isDirectory()) {
+      node.setName(child.getName());
+      if (child.isDirectory()) {
         node.setDescription("디렉토리");
-        node.setPath(parentPath.substring(root.length() - 1) + item.getName() + "/");
+        node.setPath(parentPath.substring(root.length() - 1) + child.getName() + "/");
       } else {
-        DtcIni ini = new DtcIniFactory().createFrom(new FileInputStream(item));
+        DtcIni ini = new DtcIniFactory().createFrom(child.getPath());
         node.setDescription(ini.getBaseProp("DESCRIPTION").getValue());
-        node.setPath(parentPath.substring(root.length() - 1) + item.getName());
+        node.setPath(parentPath.substring(root.length() - 1) + child.getName());
       }
-      String updateTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new Date(item
+      String updateTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new Date(child
           .lastModified()));
       node.setUpdateTime(updateTime);
       nodes.add(node);
     }
     return nodes;
+  }
+
+  DtcRequestInfoModel getDtcRequestInfoImpl(String path) throws IOException {
+    String filePath = DtcServiceImpl.getRootPath() + path.substring(1);
+    DtcIni ini = new DtcIniFactory().createFrom(filePath);
+    // FIXME DtcRequestInfoModel을 DtcIni로 대체하는 것을 검토하자.
+    DtcRequestInfoModel requestInfo = this.createRequestInfo(ini);
+    requestInfo.setPath(path);
+    return requestInfo;
   }
 
   @Override
@@ -667,15 +452,10 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
       throw new IllegalArgumentException("Invalid test page:" + path);
     }
     try {
-      String href = DtcServiceImpl.DTC_URL + "request.html?c=" + path.substring(1);
-      byte[] contents = DtcServiceImpl.getHtmlContents(href);
-      return DtcServiceImpl.createDtcRequestInfoFrom(path, contents);
-    } catch (MalformedURLException e) {
-      e.printStackTrace();
-      throw new IllegalArgumentException(e);
+      return this.getDtcRequestInfoImpl(path);
     } catch (IOException e) {
       e.printStackTrace();
-      throw new IllegalArgumentException(e);
+      throw new IllegalStateException(e);
     }
   }
 

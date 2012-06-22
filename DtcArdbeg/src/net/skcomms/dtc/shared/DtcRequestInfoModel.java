@@ -8,7 +8,6 @@ import java.util.List;
 
 /**
  * @author jujang@sk.com
- * 
  */
 @SuppressWarnings("serial")
 public class DtcRequestInfoModel implements Serializable {

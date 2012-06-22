@@ -5,6 +5,8 @@ package net.skcomms.dtc.server;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -116,11 +118,13 @@ public class DtcIniFactory {
   }
 
   public DtcIni createFrom(InputStream is) throws IOException {
-
     byte[] bytes = DtcServiceImpl.readAllBytes(is);
-
     String encoding = DtcIniFactory.examineCharset(bytes);
     return this.parse(bytes, encoding);
+  }
+
+  public DtcIni createFrom(String filePath) throws FileNotFoundException, IOException {
+    return this.createFrom(new FileInputStream(filePath));
   }
 
   private void ini() throws IOException {

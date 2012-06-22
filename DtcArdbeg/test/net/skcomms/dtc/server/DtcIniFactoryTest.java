@@ -9,15 +9,11 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import net.skcomms.dtc.server.model.DtcIni;
-import net.skcomms.dtc.shared.DtcNodeMetaModel;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -101,46 +97,6 @@ public class DtcIniFactoryTest {
 
   public DtcIniFactoryTest(Map<String, String> map) {
     this.map = map;
-  }
-
-  @Ignore
-  @Test
-  public void testAllInis() throws IOException {
-    DtcIniFactory p = new DtcIniFactory();
-    InputStream is = new FileInputStream("sample/dtc/ejej_kkbs_adult/101.ini");
-    DtcIni ini = p.createFrom(is);
-    System.out.println(ini.getErrors());
-    Assert.assertEquals(0, ini.getErrors().size());
-
-    byte[] htmlContents = DtcServiceImpl.getHtmlContents("http://dtc.skcomms.net");
-    List<DtcNodeMetaModel> nodes = DtcServiceImpl.createDtcNodeInfosFrom(htmlContents);
-    List<DtcNodeMetaModel> queue = new LinkedList<DtcNodeMetaModel>();
-    queue.addAll(nodes);
-    while (!queue.isEmpty()) {
-      DtcNodeMetaModel node = queue.remove(0);
-      if (node.isLeaf()) {
-        if (node.getPath().equals("/ejej_kkbs_adult/101.ini") ||
-            node.getPath().equals("/kterm3s/10000_100.ini") ||
-            node.getPath().equals("/semdtc/ESTATE/210.ini") ||
-            node.getPath().equals("/semdtc2/JOB/200.ini") ||
-            node.getPath().equals("/kuccfrontbs/1200-100.ini") ||
-            node.getPath().equals("/ksfclubbrds/API2000_100_BROKER_XML.ini") ||
-            node.getPath().equals("/ksfclubbrds/API2001_100_BROKER_XML.ini") ||
-            node.getPath().equals("/kemails/100_xml.ini") ||
-            node.getPath().equals("/kemail2s/100_xml.ini")) {
-          continue;
-        }
-        System.out.println(node.getPath());
-        is = new FileInputStream("sample/dtc" + node.getPath());
-        p.createFrom(is);
-      } else {
-        System.out.println(node.getPath());
-        byte[] contents = DtcServiceImpl.getHtmlContents("http://dtc.skcomms.net/?b="
-            + node.getPath().substring(1));
-        List<DtcNodeMetaModel> subnodes = DtcServiceImpl.createDtcNodeInfosFrom(contents);
-        queue.addAll(subnodes);
-      }
-    }
   }
 
   @Test

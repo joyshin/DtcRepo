@@ -23,6 +23,17 @@ public class DtcRequestParameterModel implements Serializable {
     this.value = aValue;
   }
 
+  @Override
+  public boolean equals(Object other) {
+    if (!(other instanceof DtcRequestParameterModel)) {
+      return false;
+    }
+
+    DtcRequestParameterModel o = (DtcRequestParameterModel) other;
+
+    return this.key.equals(o.key) && this.name.equals(o.name) && this.value.equals(o.value);
+  }
+
   public String getKey() {
     return this.key;
   }

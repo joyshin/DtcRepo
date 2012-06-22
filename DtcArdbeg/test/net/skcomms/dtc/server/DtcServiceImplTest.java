@@ -6,8 +6,6 @@ package net.skcomms.dtc.server;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -34,8 +32,7 @@ public class DtcServiceImplTest {
 
   @Test
   public void testExtractItemsFrom() throws IOException, ParseException {
-    byte[] contents = DtcServiceImpl.getHtmlContents("http://dtc.skcomms.net/");
-    List<DtcNodeMetaModel> items = DtcServiceImpl.createDtcNodeInfosFrom(contents);
+    List<DtcNodeMetaModel> items = new DtcServiceImpl().getDirImpl("/");
     for (DtcNodeMetaModel item : items) {
       Assert.assertNotNull(item.getName());
       Assert.assertNotNull(item.getDescription());
@@ -60,9 +57,7 @@ public class DtcServiceImplTest {
 
     Assert.assertFalse(items.isEmpty());
 
-    contents = DtcServiceImpl.getHtmlContents("http://dtc.skcomms.net/?b=kshop2s/");
-    items = DtcServiceImpl.createDtcNodeInfosFrom(contents);
-
+    items = new DtcServiceImpl().getDirImpl("/kshop2s/");
     for (DtcNodeMetaModel item : items) {
       Assert.assertNotNull(item.getName());
       Assert.assertNotNull(item.getDescription());
@@ -121,20 +116,12 @@ public class DtcServiceImplTest {
 
   @Test
   public void testParseTestPage() throws IOException {
-    String href = "http://10.141.6.198/request.html?c=kadcpts/100.ini";
-    URL url = new URL(href);
-    URLConnection conn = url.openConnection();
-    byte[] contents = DtcServiceImpl.readAllBytes(conn.getInputStream());
-    DtcRequestInfoModel requestInfo = DtcServiceImpl.createDtcRequestInfoFrom("/kadcpts/100.ini",
-        contents);
+    DtcRequestInfoModel requestInfo = new DtcServiceImpl()
+        .getDtcRequestPageInfo("/kadcpts/100.ini");
     System.out.println(requestInfo.getParams().toString());
     System.out.println(requestInfo.getIpInfo());
 
-    href = "http://10.141.6.198/request.html?c=kegloos_new/100.ini";
-    url = new URL(href);
-    conn = url.openConnection();
-    contents = DtcServiceImpl.readAllBytes(conn.getInputStream());
-    requestInfo = DtcServiceImpl.createDtcRequestInfoFrom("/kegloos_new/100.ini", contents);
+    requestInfo = new DtcServiceImpl().getDtcRequestPageInfo("/kegloos_new/100.ini");
     System.out.println(requestInfo.getParams().toString());
     System.out.println(requestInfo.getIpInfo());
   }
@@ -164,4 +151,5 @@ public class DtcServiceImplTest {
       }
     });
   }
+
 }
