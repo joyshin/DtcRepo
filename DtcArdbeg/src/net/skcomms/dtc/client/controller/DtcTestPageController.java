@@ -20,7 +20,7 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
 
   private DtcTestPageView dtcTestPageView;
 
-  private LastRequestLoaderController lastRequestLoader;
+  private SearchHistoryController lastRequestLoader;
 
   private String currentPath;
 
@@ -34,10 +34,7 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
     if (this.initialRequestParameters != null) {
       this.adjustRequestInfoByInitialParameters(requestInfo);
       this.initialRequestParameters = null;
-    } else {
-      this.adjustRequestInfoByLastRequest(requestInfo);
     }
-
   }
 
   private void adjustRequestInfoByInitialParameters(DtcRequestInfoModel requestInfo) {
@@ -54,22 +51,8 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
     }
   }
 
-  private void adjustRequestInfoByLastRequest(DtcRequestInfoModel requestInfo) {
-    final String lastRequestLoaderKey = "c" + "=" + requestInfo.getPath();
-    GWT.log("requestLoader key: " + lastRequestLoaderKey);
-
-    boolean lastRequestExists =
-        DtcTestPageController.this.lastRequestLoader.recall(lastRequestLoaderKey);
-
-    GWT.log("requestExists: " + lastRequestExists);
-
-    if (lastRequestExists) {
-      DtcTestPageController.this.lastRequestLoader.loadLastRequest(requestInfo);
-    }
-  }
-
   public void initialize(final DtcArdbeg dtcArdbeg, DtcTestPageView dtcTestPageView,
-      LastRequestLoaderController lastRequestLoader) {
+      SearchHistoryController lastRequestLoader) {
     dtcArdbeg.addDtcArdbegObserver(this);
     this.dtcProxyUrl = dtcArdbeg.getDtcProxyUrl();
     this.dtcTestPageView = dtcTestPageView;
@@ -126,6 +109,8 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
     httpRequestInfo.setEncoding(this.encoding);
     DtcTestPageController.this.dtcTestPageView.chronoStart();
 
+    // TODO : return type이 String이 아닌, Response 정보(웅답시간, 성공여부 등)를 담고있는 클래스 객체로
+    // 바꾸자.
     DtcService.Util.getInstance().getDtcTestPageResponse(httpRequestInfo,
         new AsyncCallback<String>() {
 
@@ -147,12 +132,8 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
 
             Map<String, String> requestParam =
                 DtcTestPageController.this.dtcTestPageView.getRequestParameter();
-            // FIXME 키 생성방법을 은닉시킬 것.
-            String lastRequestKey = "c" + "=" + DtcTestPageController.this.currentPath;
-            // FIXME 한 개 메써드로 합치자.
-            DtcTestPageController.this.lastRequestLoader.createLastRequest(lastRequestKey,
-                requestParam);
-            DtcTestPageController.this.lastRequestLoader.persist();
+            DtcTestPageController.this.lastRequestLoader.persist(
+                DtcTestPageController.this.currentPath, requestParam);
           }
         });
   }
