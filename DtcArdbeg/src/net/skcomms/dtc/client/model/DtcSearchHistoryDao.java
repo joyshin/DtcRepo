@@ -1,8 +1,9 @@
 package net.skcomms.dtc.client.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import net.skcomms.dtc.client.PersistenceManager;
 
@@ -10,14 +11,17 @@ import com.google.gwt.core.client.GWT;
 
 public class DtcSearchHistoryDao {
 
-  public static final char FORM_VALUE_DELIMETER = 0x0b;
+  public static final String PREFIX = "DtcSearchHistoryDao.";
 
-  public static final char FORM_FIELD_DELIMETER = 0x0C;
+  private static final int MAX_HISTORY_SIZE = 20;
 
-  public static final String PREFIX = "LastRequestLoaderController.";
+  public static String combineKey(DtcSearchHistory searchHistory) {
+    return DtcSearchHistoryDao.combineKeyPrefix(searchHistory.getPath())
+        + searchHistory.getSearchTime().getTime();
+  }
 
-  public static String findKey(String string) {
-    return DtcSearchHistoryDao.PREFIX + string;
+  public static String combineKeyPrefix(String path) {
+    return DtcSearchHistoryDao.PREFIX + path + ".";
   }
 
   public static Map<String, String> getLastParameters(String key) {
@@ -30,15 +34,13 @@ public class DtcSearchHistoryDao {
       return map;
     }
 
-    String[] formFields = data.split(Character
-        .toString(DtcSearchHistoryDao.FORM_FIELD_DELIMETER));
+    String[] formFields = data.split(DtcSearchHistory.FORM_FIELD_DELIMETER);
     if (formFields == null) {
       return map;
     }
 
     for (String element : formFields) {
-      String[] pair = element.split(Character
-          .toString(DtcSearchHistoryDao.FORM_VALUE_DELIMETER));
+      String[] pair = element.split(DtcSearchHistory.FORM_VALUE_DELIMETER);
       if (pair.length == 2) {
         map.put(pair[0], pair[1]);
       }
@@ -47,15 +49,30 @@ public class DtcSearchHistoryDao {
     return map;
   }
 
-  public void persist(DtcSearchHistory searchHistory) {
+  public List<DtcSearchHistory> getSearchHistroies(String path) {
+    List<DtcSearchHistory> searchHistories = new ArrayList<DtcSearchHistory>();
+    for (String key : PersistenceManager.getInstance().getItemKeys()) {
+      if (key.startsWith(DtcSearchHistoryDao.combineKeyPrefix(path))) {
+        DtcSearchHistory history = DtcSearchHistory.deserialize(PersistenceManager.getInstance()
+            .getItem(key));
 
+        searchHistories.add(history);
+      }
+    }
+    for (int i = 0; i < searchHistories.size() - DtcSearchHistoryDao.MAX_HISTORY_SIZE; i++) {
+      PersistenceManager.getInstance().removeItem(
+          DtcSearchHistoryDao.combineKey(searchHistories.get(i)));
+    }
+    return searchHistories.subList(searchHistories.size() - DtcSearchHistoryDao.MAX_HISTORY_SIZE,
+        searchHistories.size());
   }
 
-  public void persist(String path, Map<String, String> param) {
+  public void persist(DtcSearchHistory searchHistory) {
+    PersistenceManager.getInstance().setItem(
+        DtcSearchHistoryDao.combineKey(searchHistory), searchHistory.serialize());
+  }
 
-    StringBuilder requestData = new StringBuilder();
-    String requestKey = DtcSearchHistoryDao.findKey("c" + "=" + path);
-
+  public void persist(String path, Map<String, String> params) {
     // FIXME entrySet()에 대해 for each 구문을 사용하자.
     // Iterator<String> keyItor = param.keySet().iterator();
     // for (int i = 0; i < param.keySet().size(); i++) {
@@ -66,14 +83,6 @@ public class DtcSearchHistoryDao {
     // requestData.append(value);
     // requestData.append(DtcSearchHistoryDao.FORM_FIELD_DELIMETER);
     // }
-
-    for (Entry<String, String> entry : param.entrySet()) {
-      requestData.append(entry.getKey());
-      requestData.append(DtcSearchHistoryDao.FORM_VALUE_DELIMETER);
-      requestData.append(entry.getValue());
-      requestData.append(DtcSearchHistoryDao.FORM_FIELD_DELIMETER);
-    }
-    PersistenceManager.getInstance().setItem(requestKey, requestData.toString());
-
+    this.persist(DtcSearchHistory.create(path, params));
   }
 }
