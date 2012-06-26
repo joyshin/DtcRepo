@@ -31,13 +31,12 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
   private Map<String, List<String>> initialRequestParameters = null;
 
   private void adjustRequestInfo(DtcRequestInfoModel requestInfo) {
-    if (this.initialRequestParameters != null) {
+    if (this.initialRequestParameters != null && this.initialRequestParameters.size() > 0) {
       this.adjustRequestInfoByInitialParameters(requestInfo);
-      this.initialRequestParameters = null;
     } else {
       this.adjustRequestInfoByLastRequest(requestInfo);
     }
-
+    this.initialRequestParameters = null;
   }
 
   private void adjustRequestInfoByInitialParameters(DtcRequestInfoModel requestInfo) {
