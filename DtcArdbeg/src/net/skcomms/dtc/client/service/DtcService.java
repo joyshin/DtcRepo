@@ -57,5 +57,5 @@ public interface DtcService extends RemoteService {
 
   DtcRequestInfoModel getDtcRequestPageInfo(String path);
 
-  String getDtcTestPageResponse(HttpRequestInfoModel httpRequestInfo);
+  String getDtcTestPageResponse(HttpRequestInfoModel httpRequestInfo) throws Exception;
 }

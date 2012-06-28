@@ -26,7 +26,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
@@ -46,7 +45,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
@@ -120,7 +118,7 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     return sb.toString().substring(0, sb.length() - 1);
   }
 
-  static String createDtcResponse(HttpRequestInfoModel httpRequestInfo) {
+  static String createDtcResponse(HttpRequestInfoModel httpRequestInfo) throws IOException {
 
     String response = null;
     String encoding = null;
@@ -129,50 +127,39 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     URL conUrl;
 
     int TIMEOUT = 5000;
-    try {
-      conUrl = new URL(httpRequestInfo.getUrl());
-      HttpURLConnection httpCon = (HttpURLConnection) conUrl.openConnection();
-      httpCon.setConnectTimeout(TIMEOUT);
-      httpCon.setReadTimeout(TIMEOUT);
-      httpCon.setDoInput(true);
-      httpCon.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-      if (httpRequestInfo.getEncoding() != "") {
-        httpCon.setRequestProperty("Content-Type", "text/html; charset="
-            + httpRequestInfo.getEncoding());
-      }
-
-      httpCon.setRequestMethod(httpRequestInfo.getHttpMethod().toUpperCase());
-
-      if (httpRequestInfo.getHttpMethod().toUpperCase().equals("POST")) {
-        httpCon.setDoOutput(true);
-        OutputStream postStream = httpCon.getOutputStream();
-        postStream.write(httpRequestInfo.getRequestData().getBytes());
-        postStream.flush();
-        postStream.close();
-      }
-
-      byte[] content = DtcServiceImpl.readAllBytes(httpCon.getInputStream());
-      encoding = DtcServiceImpl.guessCharacterEncoding(content);
-
-      BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
-          content), encoding));
-      String line;
-
-      while ((line = reader.readLine()) != null) {
-        responseBuffer.append(line);
-        // System.out.println(line);
-      }
-      reader.close();
-
-    } catch (SocketTimeoutException e) {
-      System.out.println("SocketTimeoutException: " + e.getLocalizedMessage());
-      e.printStackTrace();
-    } catch (IOException e) {
-      System.out.println("IOException: " + e.getLocalizedMessage());
-      e.printStackTrace();
-      return e.getLocalizedMessage();
-
+    conUrl = new URL(httpRequestInfo.getUrl());
+    HttpURLConnection httpCon = (HttpURLConnection) conUrl.openConnection();
+    httpCon.setConnectTimeout(TIMEOUT);
+    httpCon.setReadTimeout(TIMEOUT);
+    httpCon.setDoInput(true);
+    httpCon.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+    if (httpRequestInfo.getEncoding() != "") {
+      httpCon.setRequestProperty("Content-Type", "text/html; charset="
+          + httpRequestInfo.getEncoding());
     }
+
+    httpCon.setRequestMethod(httpRequestInfo.getHttpMethod().toUpperCase());
+
+    if (httpRequestInfo.getHttpMethod().toUpperCase().equals("POST")) {
+      httpCon.setDoOutput(true);
+      OutputStream postStream = httpCon.getOutputStream();
+      postStream.write(httpRequestInfo.getRequestData().getBytes());
+      postStream.flush();
+      postStream.close();
+    }
+
+    byte[] content = DtcServiceImpl.readAllBytes(httpCon.getInputStream());
+    encoding = DtcServiceImpl.guessCharacterEncoding(content);
+
+    BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
+        content), encoding));
+    String line;
+
+    while ((line = reader.readLine()) != null) {
+      responseBuffer.append(line);
+      // System.out.println(line);
+    }
+    reader.close();
 
     Pattern regExp = Pattern.compile("src=\"([^\"]*)");
     Matcher matcher = regExp.matcher(responseBuffer.toString());
@@ -187,12 +174,8 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
       String responseUrl = null;
       String htmlData = null;
 
-      try {
-        responseUrl = URLDecoder.decode(matcher.group(0).split("/")[1], "utf-8");
-        System.out.println("Response URL: " + responseUrl);
-      } catch (UnsupportedEncodingException e1) {
-        e1.printStackTrace();
-      }
+      responseUrl = URLDecoder.decode(matcher.group(0).split("/")[1], "utf-8");
+      System.out.println("Response URL: " + responseUrl);
 
       HttpRequestInfoModel responseRequestInfo = new HttpRequestInfoModel();
       responseRequestInfo.setEncoding(encoding);
@@ -208,11 +191,7 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
 
       query = requestUrl + "?" + query;
 
-      try {
-        targetUrl = DtcServiceImpl.DTC_URL + url + "?u=" + URLEncoder.encode(query, "utf-8");
-      } catch (UnsupportedEncodingException e) {
-        e.printStackTrace();
-      }
+      targetUrl = DtcServiceImpl.DTC_URL + url + "?u=" + URLEncoder.encode(query, "utf-8");
 
       System.out.println("Target URL: " + targetUrl);
       responseRequestInfo.setUrl(targetUrl);
@@ -240,12 +219,14 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
         htmlData = response;
 
       } else if (responseUrl.contains("response_xml.html")) {
-
         try {
-
           htmlData = DtcServiceImpl.getHtmlFromXml(response.getBytes(encoding));
-        } catch (UnsupportedEncodingException e) {
+        } catch (SAXException e) {
           e.printStackTrace();
+          throw new IllegalStateException("Invalid XML:" + response);
+        } catch (Exception e) {
+          e.printStackTrace();
+          throw new IllegalStateException(e);
         }
       }
       return htmlData;
@@ -257,7 +238,7 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     return src.replaceAll("\\\\u000B", "&#11;").replaceAll("\\\\f", "&#12;");
   }
 
-  private static String getEncodedQuery(String query, String encoding) {
+  private static String getEncodedQuery(String query, String encoding) throws IOException {
     // decode UTF-8 query
     StringBuilder paramList = new StringBuilder();
     String decodedQuery = null;
@@ -272,19 +253,14 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     for (String param : params) {
       String[] pair = param.split("=");
       if (pair.length == 2) {
-        try {
-
-          decodedQuery = URLDecoder.decode(pair[1], "utf-8");
-          encodedQuery = URLEncoder.encode(decodedQuery, encoding);
-          // System.out.println("decodedQuery: " + decodedQuery);
-          // System.out.println("encodedQuery: " + encodedQuery);
-          paramList.append(pair[0]);
-          paramList.append("=");
-          paramList.append(encodedQuery);
-          paramList.append("&");
-        } catch (UnsupportedEncodingException e) {
-          e.printStackTrace();
-        }
+        decodedQuery = URLDecoder.decode(pair[1], "utf-8");
+        encodedQuery = URLEncoder.encode(decodedQuery, encoding);
+        // System.out.println("decodedQuery: " + decodedQuery);
+        // System.out.println("encodedQuery: " + encodedQuery);
+        paramList.append(pair[0]);
+        paramList.append("=");
+        paramList.append(encodedQuery);
+        paramList.append("&");
       } else {
         paramList.append(pair[0]);
         paramList.append("=");
@@ -309,24 +285,15 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     return contents;
   }
 
-  public static String getHtmlFromXml(byte[] content) {
+  public static String getHtmlFromXml(byte[] content) throws Exception, SAXException {
     DtcXmlToHtmlHandler dp = new DtcXmlToHtmlHandler();
     ByteArrayInputStream bufferInputStream = new ByteArrayInputStream(content);
     SAXParserFactory sf = SAXParserFactory.newInstance();
     SAXParser sp;
-    try {
 
-      sp = sf.newSAXParser();
-      sp.parse(bufferInputStream, dp);
+    sp = sf.newSAXParser();
+    sp.parse(bufferInputStream, dp);
 
-    } catch (ParserConfigurationException e) {
-      e.printStackTrace();
-    } catch (SAXException e) {
-      e.printStackTrace();
-
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
     return dp.getHtml().toString();
   }
 
@@ -460,7 +427,8 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
   }
 
   @Override
-  public String getDtcTestPageResponse(HttpRequestInfoModel httpRequestInfo) {
+  public String getDtcTestPageResponse(HttpRequestInfoModel httpRequestInfo)
+      throws IllegalArgumentException {
 
     String rawHtml = null;
     if (!DtcServiceVerifier.isValidMethod(httpRequestInfo.getHttpMethod())) {
@@ -468,16 +436,23 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     }
 
     // change encoding
-    String encodedData =
-        DtcServiceImpl.getEncodedQuery(httpRequestInfo.getRequestData(),
-            httpRequestInfo.getEncoding());
-    httpRequestInfo.setRequestData(encodedData);
+    try {
+      String encodedData = DtcServiceImpl.getEncodedQuery(httpRequestInfo.getRequestData(),
+          httpRequestInfo.getEncoding());
+      httpRequestInfo.setRequestData(encodedData);
 
-    // replace URL
-    String targetUrl = DtcServiceImpl.DTC_URL + "response.html";
-    httpRequestInfo.setUrl(targetUrl);
-    rawHtml = DtcServiceImpl.createDtcResponse(httpRequestInfo);
-    return rawHtml;
+      // replace URL
+      String targetUrl = DtcServiceImpl.DTC_URL + "response.html";
+      httpRequestInfo.setUrl(targetUrl);
+      rawHtml = DtcServiceImpl.createDtcResponse(httpRequestInfo);
+      return rawHtml;
+    } catch (IOException e) {
+      e.printStackTrace();
+      throw new IllegalArgumentException(e);
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new IllegalArgumentException(e);
+    }
   }
 
   @Override

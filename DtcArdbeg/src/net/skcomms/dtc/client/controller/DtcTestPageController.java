@@ -135,6 +135,7 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
           public void onFailure(Throwable caught) {
             caught.printStackTrace();
             DtcTestPageController.this.dtcTestPageView.chronoStop();
+            DtcTestPageController.this.dtcTestPageView.setHTMLData(caught.getMessage());
             GWT.log("getDtcTestPageResponse Failed: " + caught.getMessage());
           }
 
