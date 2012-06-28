@@ -34,6 +34,13 @@ public class DtcIniTest {
     Assert.assertEquals(5, ini.getIps().size());
     Assert.assertEquals(1, ini.getErrors().size());
     System.out.println(ini.getErrors());
+
+    ini.setBaseProp(new DtcBaseProperty(
+        "IP",
+        "{10.141.151.52 ssttlb02} {10.141.151.51 ssttlb01} {10.141.242.38 vm2} {10.141.144.120 LB} {10.141.15.250 xcschtest20}"));
+    System.out.println(ini.getIps());
+    Assert.assertEquals(10, ini.getIps().size());
+
   }
 
 }

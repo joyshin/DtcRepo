@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 public class DtcIni {
 
   private static final Pattern IP_PATTERN = Pattern
-      .compile("^([.0-9]+)$|(\\s*\\{\\s*\"([.0-9]+)\"\\s*(\"([^\"]*)\")?\\s*\\})");
+      .compile("^([.0-9]+)$|(\\s*\\{\\s*(\")?([.0-9]+)(\")?\\s*((\")?([^\"}]*)(\")?)?\\s*\\})");
 
   private String charset = "euckr";
 
@@ -103,8 +103,8 @@ public class DtcIni {
         if (matcher.group(1) != null) {
           this.ips.put(matcher.group(1), "");
         }
-        if (matcher.group(3) != null) {
-          this.ips.put(matcher.group(3), (matcher.group(5) == null ? "" : matcher.group(5)));
+        if (matcher.group(4) != null) {
+          this.ips.put(matcher.group(4), (matcher.group(8) == null ? "" : matcher.group(8)));
         }
       }
       matcher.reset();
