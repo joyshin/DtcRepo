@@ -25,22 +25,22 @@ public class DtcUrlCopyController {
   private String combineUrl() {
     StringBuilder sb = new StringBuilder();
 
-    String href = module.getHref();
+    String href = this.module.getHref();
     if (href.indexOf('?') == -1) {
       sb.append(href);
     } else {
       sb.append(href.substring(0, href.indexOf('?')));
     }
 
-    if (module.getCurrentPath().equals("/")) {
+    if (this.module.getCurrentPath().equals("/")) {
     }
-    else if (module.getCurrentPath().endsWith("/")) {
+    else if (this.module.getCurrentPath().endsWith("/")) {
       sb.append("?path=");
-      sb.append(URL.encode(module.getCurrentPath().substring(1)));
+      sb.append(URL.encode(this.module.getCurrentPath()));
     } else {
       sb.append("?path=");
-      sb.append(URL.encode(module.getCurrentPath().substring(1)));
-      Map<String, String> params = dtcTestPageView.getRequestParameter();
+      sb.append(URL.encode(this.module.getCurrentPath()));
+      Map<String, String> params = this.dtcTestPageView.getRequestParameter();
       for (Entry<String, String> entry : params.entrySet()) {
         sb.append('&');
         sb.append(entry.getKey());
@@ -55,12 +55,13 @@ public class DtcUrlCopyController {
 
   public void initialize(DtcArdbeg dtcArdbeg, DtcTestPageView dtcTestPageView,
       DtcUrlCopyButtonView aButton, DtcUrlCopyDialogBoxView aDialogBox) {
-    module = dtcArdbeg;
+    this.module = dtcArdbeg;
     this.dtcTestPageView = dtcTestPageView;
-    button = aButton;
-    dialogBox = aDialogBox;
+    this.button = aButton;
+    this.dialogBox = aDialogBox;
 
-    button.addUrlCopyButtonClickHandler(new ClickHandler() {
+    this.button.addUrlCopyButtonClickHandler(new ClickHandler() {
+
       @Override
       public void onClick(ClickEvent event) {
         DtcUrlCopyController.this.onClickUrlCopyButton();
@@ -69,7 +70,7 @@ public class DtcUrlCopyController {
   }
 
   private void onClickUrlCopyButton() {
-    String url = combineUrl();
-    dialogBox.showUrlText(url);
+    String url = this.combineUrl();
+    this.dialogBox.showUrlText(url);
   }
 }

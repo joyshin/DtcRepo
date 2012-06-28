@@ -220,7 +220,7 @@ public class DtcArdbeg implements EntryPoint {
   private void initializePath() {
     String path;
     if (Window.Location.getParameter("path") != null) {
-      path = "/" + Window.Location.getParameter("path");
+      path = Window.Location.getParameter("path");
     } else {
       path = "/";
     }
