@@ -25,10 +25,16 @@
 			<arguments>
 			</arguments>
 		</buildCommand>
+		<buildCommand>
+			<name>com.stateofflow.eclipse.metrics.MetricsBuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
 	</buildSpec>
 	<natures>
 		<nature>org.springframework.ide.eclipse.core.springnature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 		<nature>com.google.gwt.eclipse.core.gwtNature</nature>
+		<nature>com.stateofflow.eclipse.metrics.MetricsNature</nature>
 	</natures>
 </projectDescription>

@@ -3,6 +3,7 @@ package net.skcomms.dtc.client.controller;
 import net.skcomms.dtc.client.DtcNodeObserver;
 import net.skcomms.dtc.client.model.DtcNodeModel;
 import net.skcomms.dtc.client.view.DtcNodeView;
+import net.skcomms.dtc.shared.DtcRequestInfoModel;
 
 public class DtcNodeController implements DtcNodeObserver {
 
@@ -18,6 +19,10 @@ public class DtcNodeController implements DtcNodeObserver {
 
     this.dtcNodeModel = DtcNodeModel.getInstance();
     this.dtcNodeModel.addObserver(this);
+  }
+
+  @Override
+  public void onDtcTestPageLoaded(DtcRequestInfoModel requestInfo) {
   }
 
   @Override

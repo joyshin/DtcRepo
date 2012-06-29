@@ -179,7 +179,9 @@ public class DtcNodeModel {
 
           @Override
           public void onSuccess(DtcRequestInfoModel requestInfo) {
-            DtcNodeModel.this.owner.fireDtcTestPageLoaded(requestInfo);
+            for (DtcNodeObserver observer : DtcNodeModel.this.observers) {
+              observer.onDtcTestPageLoaded(requestInfo);
+            }
           }
         });
   }

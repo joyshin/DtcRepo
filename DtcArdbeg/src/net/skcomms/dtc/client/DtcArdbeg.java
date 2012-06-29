@@ -5,11 +5,12 @@ import java.util.List;
 import java.util.Map;
 
 import net.skcomms.dtc.client.controller.DtcNodeController;
+import net.skcomms.dtc.client.controller.DtcSearchHistoryController;
 import net.skcomms.dtc.client.controller.DtcTestPageController;
 import net.skcomms.dtc.client.controller.DtcUrlCopyController;
-import net.skcomms.dtc.client.controller.IpHistoryController;
-import net.skcomms.dtc.client.controller.LastRequestLoaderController;
 import net.skcomms.dtc.client.model.DtcNodeModel;
+import net.skcomms.dtc.client.model.DtcSearchHistoryDao;
+import net.skcomms.dtc.client.model.DtcTestPageModel;
 import net.skcomms.dtc.client.view.DtcNavigationBarView;
 import net.skcomms.dtc.client.view.DtcNodeView;
 import net.skcomms.dtc.client.view.DtcTestPageView;
@@ -26,7 +27,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
  */
-public class DtcArdbeg implements EntryPoint {
+public class DtcArdbeg implements EntryPoint, DtcNodeObserver {
 
   public enum DtcPageType {
     HOME, DIRECTORY, TEST;
@@ -155,16 +156,6 @@ public class DtcArdbeg implements EntryPoint {
     }
   }
 
-  public void fireDtcTestPageLoaded(DtcRequestInfoModel requestInfo) {
-    this.currentPath = requestInfo.getPath();
-    for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
-      observer.onDtcTestPageLoaded(requestInfo);
-    }
-
-    this.hideSplash();
-    this.displayTestPage();
-  }
-
   public String getCurrentPath() {
     return this.currentPath;
   }
@@ -192,7 +183,6 @@ public class DtcArdbeg implements EntryPoint {
     this.initializeDtcNodeView();
     this.initializePath();
 
-    this.initializeIpHistory();
     this.initializeNavigationBar();
     this.initializeTestPage();
 
@@ -207,14 +197,11 @@ public class DtcArdbeg implements EntryPoint {
     this.dtcFavoriteNodeView.initialize("Favorites", "favoriteNodeContainer");
     new DtcNodeController().initialize(this.dtcNodeView, this.dtcFavoriteNodeView);
     DtcNodeModel.getInstance().initialize(this);
-  }
-
-  private void initializeIpHistory() {
-    new IpHistoryController().initialize(this);
+    DtcNodeModel.getInstance().addObserver(this);
   }
 
   private void initializeNavigationBar() {
-    new DtcNavigationBarView().initialize(this);
+    new DtcNavigationBarView().initialize(this, DtcNodeModel.getInstance());
   }
 
   private void initializePath() {
@@ -228,8 +215,12 @@ public class DtcArdbeg implements EntryPoint {
   }
 
   private void initializeTestPage() {
-    LastRequestLoaderController lastRequestLoaderController = new LastRequestLoaderController();
-    new DtcTestPageController().initialize(this, this.dtcTestPageView, lastRequestLoaderController);
+    DtcSearchHistoryDao searchHistoryDao = new DtcSearchHistoryDao();
+    DtcSearchHistoryController searchHistoryController = new DtcSearchHistoryController();
+    DtcTestPageModel testPageModel = new DtcTestPageModel();
+    searchHistoryController.initialize(searchHistoryDao, testPageModel);
+    new DtcTestPageController().initialize(this, this.dtcTestPageView,
+        DtcNodeModel.getInstance(), testPageModel);
   }
 
   private void initializeUrlCopy() {
@@ -237,6 +228,17 @@ public class DtcArdbeg implements EntryPoint {
     DtcUrlCopyDialogBoxView dialogBox = new DtcUrlCopyDialogBoxView();
     DtcUrlCopyController controller = new DtcUrlCopyController();
     controller.initialize(this, this.dtcTestPageView, button, dialogBox);
+  }
+
+  @Override
+  public void onDtcTestPageLoaded(DtcRequestInfoModel requestInfo) {
+    this.currentPath = requestInfo.getPath();
+    this.hideSplash();
+    this.displayTestPage();
+  }
+
+  @Override
+  public void onFavoriteNodeListChanged() {
   }
 
   public void onLoadDtcResponseFrame(boolean success) {
@@ -250,10 +252,8 @@ public class DtcArdbeg implements EntryPoint {
     this.initializeComponents();
   }
 
-  public void onSubmitRequestForm() {
-    for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
-      observer.onSubmitRequestForm();
-    }
+  @Override
+  public void onNodeListChanged() {
   }
 
   public void removeDtcArdbegObserver(DtcArdbegObserver observer) {

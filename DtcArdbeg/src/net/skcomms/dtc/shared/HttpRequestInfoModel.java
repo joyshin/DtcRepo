@@ -1,6 +1,7 @@
 package net.skcomms.dtc.shared;
 
 import java.io.Serializable;
+import java.util.Map;
 
 @SuppressWarnings("serial")
 public class HttpRequestInfoModel implements Serializable {
@@ -9,6 +10,8 @@ public class HttpRequestInfoModel implements Serializable {
   private String url;
   private String requestData;
   private String encoding;
+  private Map<String, String> requestParameter;
+  private String path;
 
   public HttpRequestInfoModel() {
     this.httpMethod = "";
@@ -25,19 +28,27 @@ public class HttpRequestInfoModel implements Serializable {
   }
 
   public String getEncoding() {
-    return encoding;
+    return this.encoding;
   }
 
   public String getHttpMethod() {
-    return httpMethod;
+    return this.httpMethod;
+  }
+
+  public String getPath() {
+    return this.path;
   }
 
   public String getRequestData() {
-    return requestData;
+    return this.requestData;
+  }
+
+  public Map<String, String> getRequestParameter() {
+    return this.requestParameter;
   }
 
   public String getUrl() {
-    return url;
+    return this.url;
   }
 
   public void setEncoding(String encoding) {
@@ -48,8 +59,16 @@ public class HttpRequestInfoModel implements Serializable {
     this.httpMethod = httpMethod;
   }
 
+  public void setPath(String currentPath) {
+    this.path = currentPath;
+  }
+
   public void setRequestData(String requestData) {
     this.requestData = requestData;
+  }
+
+  public void setRequestParameter(Map<String, String> requestParameter) {
+    this.requestParameter = requestParameter;
   }
 
   public void setUrl(String url) {
