@@ -5,12 +5,12 @@ import java.util.List;
 import java.util.Map;
 
 import net.skcomms.dtc.client.controller.DtcNodeController;
+import net.skcomms.dtc.client.controller.DtcSearchHistoryController;
 import net.skcomms.dtc.client.controller.DtcTestPageController;
 import net.skcomms.dtc.client.controller.DtcUrlCopyController;
-import net.skcomms.dtc.client.controller.IpHistoryController;
-import net.skcomms.dtc.client.controller.SearchHistoryController;
 import net.skcomms.dtc.client.model.DtcNodeModel;
 import net.skcomms.dtc.client.model.DtcSearchHistoryDao;
+import net.skcomms.dtc.client.model.DtcTestPageModel;
 import net.skcomms.dtc.client.view.DtcNavigationBarView;
 import net.skcomms.dtc.client.view.DtcNodeView;
 import net.skcomms.dtc.client.view.DtcTestPageView;
@@ -27,7 +27,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
  */
-public class DtcArdbeg implements EntryPoint {
+public class DtcArdbeg implements EntryPoint, DtcNodeObserver {
 
   public enum DtcPageType {
     HOME, DIRECTORY, TEST;
@@ -77,9 +77,9 @@ public class DtcArdbeg implements EntryPoint {
     }
   }
 
-  private final String BASE_URL = calculateBaseUrl();
+  private final String BASE_URL = this.calculateBaseUrl();
 
-  private final String DTC_PROXY_URL = BASE_URL + "_dtcproxy_/";
+  private final String DTC_PROXY_URL = this.BASE_URL + "_dtcproxy_/";
 
   private final DtcTestPageView dtcTestPageView = new DtcTestPageView();
 
@@ -96,7 +96,7 @@ public class DtcArdbeg implements EntryPoint {
   private DtcNodeView dtcFavoriteNodeView;
 
   public void addDtcArdbegObserver(DtcArdbegObserver observer) {
-    dtcArdbegObservers.add(observer);
+    this.dtcArdbegObservers.add(observer);
   }
 
   protected String calculateBaseUrl() {
@@ -112,42 +112,42 @@ public class DtcArdbeg implements EntryPoint {
   }
 
   void displayDirectoryPage() {
-    dtcFavoriteNodeView.setVisible(false);
-    dtcNodeView.setVisible(true);
+    this.dtcFavoriteNodeView.setVisible(false);
+    this.dtcNodeView.setVisible(true);
     RootPanel.get("dtcContainer").setVisible(false);
   }
 
   void displayHomePage() {
-    dtcFavoriteNodeView.setVisible(true);
-    dtcNodeView.setVisible(true);
+    this.dtcFavoriteNodeView.setVisible(true);
+    this.dtcNodeView.setVisible(true);
     RootPanel.get("dtcContainer").setVisible(false);
   }
 
   private void displayTestPage() {
-    dtcFavoriteNodeView.setVisible(false);
-    dtcNodeView.setVisible(false);
+    this.dtcFavoriteNodeView.setVisible(false);
+    this.dtcNodeView.setVisible(false);
     RootPanel.get("dtcContainer").setVisible(true);
 
   }
 
   public void fireDtcHomePageLoaded() {
-    currentPath = "/";
-    for (DtcArdbegObserver observer : dtcArdbegObservers) {
+    this.currentPath = "/";
+    for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
       observer.onDtcHomeLoaded();
     }
 
-    hideSplash();
-    displayHomePage();
+    this.hideSplash();
+    this.displayHomePage();
   }
 
   public void fireDtcServiceDirectoryPageLoaded(String path) {
-    currentPath = path;
-    for (DtcArdbegObserver observer : dtcArdbegObservers) {
+    this.currentPath = path;
+    for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
       observer.onDtcDirectoryLoaded(path);
     }
 
-    hideSplash();
-    displayDirectoryPage();
+    this.hideSplash();
+    this.displayDirectoryPage();
 
     String[] nodes = path.split("/");
     if (nodes.length == 2) {
@@ -156,22 +156,12 @@ public class DtcArdbeg implements EntryPoint {
     }
   }
 
-  public void fireDtcTestPageLoaded(DtcRequestInfoModel requestInfo) {
-    currentPath = requestInfo.getPath();
-    for (DtcArdbegObserver observer : dtcArdbegObservers) {
-      observer.onDtcTestPageLoaded(requestInfo);
-    }
-
-    hideSplash();
-    displayTestPage();
-  }
-
   public String getCurrentPath() {
-    return currentPath;
+    return this.currentPath;
   }
 
   public String getDtcProxyUrl() {
-    return DTC_PROXY_URL;
+    return this.DTC_PROXY_URL;
   }
 
   /**
@@ -190,32 +180,28 @@ public class DtcArdbeg implements EntryPoint {
   }
 
   protected void initializeComponents() {
-    initializeDtcNodeView();
-    initializePath();
+    this.initializeDtcNodeView();
+    this.initializePath();
 
-    initializeIpHistory();
-    initializeNavigationBar();
-    initializeTestPage();
+    this.initializeNavigationBar();
+    this.initializeTestPage();
 
-    initializeUrlCopy();
-    usernameSubmissionManager.initialize();
+    this.initializeUrlCopy();
+    this.usernameSubmissionManager.initialize();
   }
 
   private void initializeDtcNodeView() {
-    dtcNodeView = new DtcNodeView();
-    dtcFavoriteNodeView = new DtcNodeView();
-    dtcNodeView.initialize("Services", "nodeContainer");
-    dtcFavoriteNodeView.initialize("Favorites", "favoriteNodeContainer");
-    new DtcNodeController().initialize(dtcNodeView, dtcFavoriteNodeView);
+    this.dtcNodeView = new DtcNodeView();
+    this.dtcFavoriteNodeView = new DtcNodeView();
+    this.dtcNodeView.initialize("Services", "nodeContainer");
+    this.dtcFavoriteNodeView.initialize("Favorites", "favoriteNodeContainer");
+    new DtcNodeController().initialize(this.dtcNodeView, this.dtcFavoriteNodeView);
     DtcNodeModel.getInstance().initialize(this);
-  }
-
-  private void initializeIpHistory() {
-    new IpHistoryController().initialize(this);
+    DtcNodeModel.getInstance().addObserver(this);
   }
 
   private void initializeNavigationBar() {
-    new DtcNavigationBarView().initialize(this);
+    new DtcNavigationBarView().initialize(this, DtcNodeModel.getInstance());
   }
 
   private void initializePath() {
@@ -225,58 +211,69 @@ public class DtcArdbeg implements EntryPoint {
     } else {
       path = "/";
     }
-    setPath(path);
+    this.setPath(path);
   }
 
   private void initializeTestPage() {
     DtcSearchHistoryDao searchHistoryDao = new DtcSearchHistoryDao();
-    SearchHistoryController searchHistoryController = new SearchHistoryController();
-    searchHistoryController.initialize(searchHistoryDao);
-    new DtcTestPageController().initialize(this, dtcTestPageView, searchHistoryController);
+    DtcSearchHistoryController searchHistoryController = new DtcSearchHistoryController();
+    DtcTestPageModel testPageModel = new DtcTestPageModel();
+    searchHistoryController.initialize(searchHistoryDao, testPageModel);
+    new DtcTestPageController().initialize(this, this.dtcTestPageView, searchHistoryController,
+        DtcNodeModel.getInstance(), testPageModel);
   }
 
   private void initializeUrlCopy() {
     DtcUrlCopyButtonView button = new DtcUrlCopyButtonView();
     DtcUrlCopyDialogBoxView dialogBox = new DtcUrlCopyDialogBoxView();
     DtcUrlCopyController controller = new DtcUrlCopyController();
-    controller.initialize(this, dtcTestPageView, button, dialogBox);
+    controller.initialize(this, this.dtcTestPageView, button, dialogBox);
+  }
+
+  @Override
+  public void onDtcTestPageLoaded(DtcRequestInfoModel requestInfo) {
+    this.currentPath = requestInfo.getPath();
+    this.hideSplash();
+    this.displayTestPage();
+  }
+
+  @Override
+  public void onFavoriteNodeListChanged() {
   }
 
   public void onLoadDtcResponseFrame(boolean success) {
-    for (DtcArdbegObserver observer : dtcArdbegObservers) {
+    for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
       observer.onDtcResponseFrameLoaded(success);
     }
   }
 
   @Override
   public void onModuleLoad() {
-    initializeComponents();
+    this.initializeComponents();
   }
 
-  public void onSubmitRequestForm() {
-    for (DtcArdbegObserver observer : dtcArdbegObservers) {
-      observer.onSubmitRequestForm();
-    }
+  @Override
+  public void onNodeListChanged() {
   }
 
   public void removeDtcArdbegObserver(DtcArdbegObserver observer) {
-    dtcArdbegObservers.remove(observer);
+    this.dtcArdbegObservers.remove(observer);
   }
 
   /**
    * @param path
    */
   public void setPath(String path) {
-    showSplash();
+    this.showSplash();
 
     DtcPageType type = DtcArdbeg.getTypeOfSelected(path, !path.endsWith("/"));
 
     if (type == DtcPageType.HOME) {
-      dtcArdbegNodeModel.refreshDtcHomePageNode();
+      this.dtcArdbegNodeModel.refreshDtcHomePageNode();
     } else if (type == DtcPageType.DIRECTORY) {
-      dtcArdbegNodeModel.refreshDtcDirectoryPageNode(path);
+      this.dtcArdbegNodeModel.refreshDtcDirectoryPageNode(path);
     } else {
-      dtcArdbegNodeModel.refreshDtcTestPage(path);
+      this.dtcArdbegNodeModel.refreshDtcTestPage(path);
     }
   }
 

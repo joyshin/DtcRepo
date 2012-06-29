@@ -5,6 +5,8 @@ package net.skcomms.dtc.client.view;
 
 import net.skcomms.dtc.client.DefaultDtcArdbegObserver;
 import net.skcomms.dtc.client.DtcArdbeg;
+import net.skcomms.dtc.client.DtcNodeObserver;
+import net.skcomms.dtc.client.model.DtcNodeModel;
 import net.skcomms.dtc.shared.DtcRequestInfoModel;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -18,7 +20,7 @@ import com.google.gwt.user.client.ui.RootPanel;
  * @author jujang@sk.com
  * 
  */
-public class DtcNavigationBarView extends DefaultDtcArdbegObserver {
+public class DtcNavigationBarView extends DefaultDtcArdbegObserver implements DtcNodeObserver {
 
   static String[] getNavigationNodes(String path) {
     return ("Home" + path).split("/");
@@ -70,8 +72,9 @@ public class DtcNavigationBarView extends DefaultDtcArdbegObserver {
     this.addLabel(nodes[nodes.length - 1]);
   }
 
-  public void initialize(DtcArdbeg dtcArdbeg) {
+  public void initialize(DtcArdbeg dtcArdbeg, DtcNodeModel nodeModel) {
     dtcArdbeg.addDtcArdbegObserver(this);
+    nodeModel.addObserver(this);
 
     this.naviPanel.clear();
     this.naviPanel.setSpacing(3);
@@ -94,5 +97,13 @@ public class DtcNavigationBarView extends DefaultDtcArdbegObserver {
   @Override
   public void onDtcTestPageLoaded(DtcRequestInfoModel requestInfo) {
     this.addPath(requestInfo.getPath());
+  }
+
+  @Override
+  public void onFavoriteNodeListChanged() {
+  }
+
+  @Override
+  public void onNodeListChanged() {
   }
 }

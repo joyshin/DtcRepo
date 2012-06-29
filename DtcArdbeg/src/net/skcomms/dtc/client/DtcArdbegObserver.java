@@ -1,6 +1,5 @@
 package net.skcomms.dtc.client;
 
-import net.skcomms.dtc.shared.DtcRequestInfoModel;
 
 public interface DtcArdbegObserver {
 
@@ -9,9 +8,4 @@ public interface DtcArdbegObserver {
   void onDtcHomeLoaded();
 
   void onDtcResponseFrameLoaded(boolean success);
-
-  void onDtcTestPageLoaded(DtcRequestInfoModel requestInfo);
-
-  void onSubmitRequestForm();
-
 }

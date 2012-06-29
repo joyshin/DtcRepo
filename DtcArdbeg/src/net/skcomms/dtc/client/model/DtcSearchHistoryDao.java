@@ -1,19 +1,19 @@
 package net.skcomms.dtc.client.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import net.skcomms.dtc.client.PersistenceManager;
 
-import com.google.gwt.core.client.GWT;
-
 public class DtcSearchHistoryDao {
 
   public static final String PREFIX = "DtcSearchHistoryDao.";
 
-  private static final int MAX_HISTORY_SIZE = 20;
+  private static final int MAX_HISTORY_SIZE = 5;
 
   public static String combineKey(DtcSearchHistory searchHistory) {
     return DtcSearchHistoryDao.combineKeyPrefix(searchHistory.getPath())
@@ -27,7 +27,7 @@ public class DtcSearchHistoryDao {
   public static Map<String, String> getLastParameters(String key) {
     String data = PersistenceManager.getInstance().getItem(key);
 
-    GWT.log("data: " + data);
+    System.out.println("data: " + data);
     Map<String, String> map = new HashMap<String, String>();
 
     if (data == null) {
@@ -49,22 +49,23 @@ public class DtcSearchHistoryDao {
     return map;
   }
 
-  public List<DtcSearchHistory> getSearchHistroies(String path) {
+  private List<DtcSearchHistory> getAllSearchHistories(String path) {
     List<DtcSearchHistory> searchHistories = new ArrayList<DtcSearchHistory>();
     for (String key : PersistenceManager.getInstance().getItemKeys()) {
       if (key.startsWith(DtcSearchHistoryDao.combineKeyPrefix(path))) {
         DtcSearchHistory history = DtcSearchHistory.deserialize(PersistenceManager.getInstance()
             .getItem(key));
-
         searchHistories.add(history);
       }
     }
-    for (int i = 0; i < searchHistories.size() - DtcSearchHistoryDao.MAX_HISTORY_SIZE; i++) {
-      PersistenceManager.getInstance().removeItem(
-          DtcSearchHistoryDao.combineKey(searchHistories.get(i)));
-    }
-    return searchHistories.subList(searchHistories.size() - DtcSearchHistoryDao.MAX_HISTORY_SIZE,
-        searchHistories.size());
+    return searchHistories;
+  }
+
+  public List<DtcSearchHistory> getSearchHistroies(String path) {
+    List<DtcSearchHistory> searchHistories = this.getAllSearchHistories(path);
+    this.sortHistoriesOrderByTimeDesc(searchHistories);
+    this.removeOldHistories(searchHistories);
+    return searchHistories;
   }
 
   public void persist(DtcSearchHistory searchHistory) {
@@ -72,17 +73,24 @@ public class DtcSearchHistoryDao {
         DtcSearchHistoryDao.combineKey(searchHistory), searchHistory.serialize());
   }
 
-  public void persist(String path, Map<String, String> params) {
-    // FIXME entrySet()에 대해 for each 구문을 사용하자.
-    // Iterator<String> keyItor = param.keySet().iterator();
-    // for (int i = 0; i < param.keySet().size(); i++) {
-    // String key = keyItor.next();
-    // String value = param.get(key);
-    // requestData.append(key);
-    // requestData.append(DtcSearchHistoryDao.FORM_VALUE_DELIMETER);
-    // requestData.append(value);
-    // requestData.append(DtcSearchHistoryDao.FORM_FIELD_DELIMETER);
-    // }
-    this.persist(DtcSearchHistory.create(path, params));
+  private void removeOldHistories(List<DtcSearchHistory> searchHistories) {
+    for (int i = DtcSearchHistoryDao.MAX_HISTORY_SIZE; i < searchHistories.size(); i++) {
+      PersistenceManager.getInstance().removeItem(
+          DtcSearchHistoryDao.combineKey(searchHistories.get(i)));
+    }
+    if (searchHistories.size() > DtcSearchHistoryDao.MAX_HISTORY_SIZE) {
+      searchHistories.subList(DtcSearchHistoryDao.MAX_HISTORY_SIZE, searchHistories.size()).clear();
+    }
   }
+
+  private void sortHistoriesOrderByTimeDesc(List<DtcSearchHistory> searchHistories) {
+    Collections.sort(searchHistories, new Comparator<DtcSearchHistory>() {
+
+      @Override
+      public int compare(DtcSearchHistory o1, DtcSearchHistory o2) {
+        return (int) (-(o1.getSearchTime().getTime() - o2.getSearchTime().getTime()));
+      }
+    });
+  }
+
 }

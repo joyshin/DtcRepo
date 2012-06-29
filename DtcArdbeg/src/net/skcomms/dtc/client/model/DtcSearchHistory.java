@@ -12,12 +12,14 @@ public class DtcSearchHistory {
   }
 
   private final String path;
+
   private final Date time;
+
   private final Map<String, String> params;
 
-  public static final String FORM_FIELD_DELIMETER = Character.toString((char) 0x0C);
+  public static final String FORM_FIELD_DELIMETER = Character.toString((char) 0x0b);
 
-  public static final String FORM_VALUE_DELIMETER = Character.toString((char) 0x0b);
+  public static final String FORM_VALUE_DELIMETER = Character.toString((char) 0x0c);
 
   public static DtcSearchHistory create(String path, Map<String, String> params) {
     return DtcSearchHistory.create(path, new Date(), params);
@@ -37,10 +39,10 @@ public class DtcSearchHistory {
 
     for (int i = 2; i < elements.length; i++) {
       String[] pair = elements[i].split(DtcSearchHistory.FORM_VALUE_DELIMETER);
-      if (pair.length != 2) {
+      if (pair.length == 0) {
         throw new IllegalArgumentException("Error: Invalid format near: " + elements[i]);
       }
-      params.put(pair[0], pair[1]);
+      params.put(pair[0], ((pair.length == 2) ? pair[1] : ""));
     }
 
     return DtcSearchHistory.create(path, time, params);
@@ -50,6 +52,16 @@ public class DtcSearchHistory {
     this.time = time;
     this.path = path;
     this.params = params;
+  }
+
+  public String getFormattedString(String... fields) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(this.time);
+    for (String field : fields) {
+      sb.append(", ");
+      sb.append(this.params.get(field));
+    }
+    return sb.toString();
   }
 
   public String getPath() {
