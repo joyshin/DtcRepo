@@ -124,8 +124,25 @@ public class DtcTestPageView {
     this.chronoView.end();
   }
 
-  private void createGridRecord() {
+  private FormItem createComboBoxControl() {
+    ComboBoxItem cbItem = new ComboBoxItem();
+    cbItem.setType("comboBox");
+    String[] ipList = new String[DtcTestPageView.this.requestInfo.getIpInfo()
+        .getOptions().size()];
 
+    for (int i = 0; i < ipList.length; i++) {
+      cbItem.setAttribute("key",
+          DtcTestPageView.this.requestInfo.getIpInfo().getOptions().get(i).getKey());
+      cbItem.setAttribute("name", DtcTestPageView.this.requestInfo.getIpInfo().getOptions()
+          .get(i).getName());
+      ipList[i] = DtcTestPageView.this.requestInfo.getIpInfo().getOptions().get(i).getValue();
+    }
+
+    cbItem.setValueMap(ipList);
+    return cbItem;
+  }
+
+  private void createGridRecord() {
     List<DtcRequestParameterModel> params = this.requestInfo.getParams();
     List<RequestGridRecord> records = new ArrayList<RequestGridRecord>();
 
@@ -135,56 +152,34 @@ public class DtcTestPageView {
           .add(new RequestGridRecord(index++, param.getKey(), param.getName(), param.getValue()));
     }
 
-    this.requestFormGrid.setData(records
-        .toArray(new RequestGridRecord[0]));
+    this.requestFormGrid.setData(records.toArray(new RequestGridRecord[0]));
 
     // add IP combo box
     RequestGridRecord ipRrecord = new RequestGridRecord(params.size(), "IP", "ip_select",
         this.requestInfo.getIpInfo().getIpText());
 
     this.requestFormGrid.addData(ipRrecord);
-    this.requestFormGrid.setEditorCustomizer(new ListGridEditorCustomizer() {
+    this.requestFormGrid.setEditorCustomizer(this.createListGridEditorCustomizer());
+  }
+
+  private ListGridEditorCustomizer createListGridEditorCustomizer() {
+    return new ListGridEditorCustomizer() {
 
       @Override
       public FormItem getEditor(ListGridEditorContext context) {
-
         ListGridField field = context.getEditField();
 
         if (field.getName().equals("value")) {
-
           RequestGridRecord record = (RequestGridRecord) context.getEditedRecord();
           if (record.getAttributeAsString("key").equals("IP")) {
-
-            ComboBoxItem cbItem = new ComboBoxItem();
-            cbItem.setType("comboBox");
-            String[] ipList = new String[DtcTestPageView.this.requestInfo.getIpInfo()
-                .getOptions().size()];
-
-            for (int i = 0; i < ipList.length; i++) {
-
-              cbItem.setAttribute("key", DtcTestPageView.this.requestInfo.getIpInfo()
-                  .getOptions().get(i).getKey());
-
-              cbItem.setAttribute("name", DtcTestPageView.this.requestInfo.getIpInfo()
-                  .getOptions().get(i).getName());
-
-              ipList[i] = DtcTestPageView.this.requestInfo.getIpInfo().getOptions()
-                  .get(i).getValue();
-
-            }
-
-            cbItem.setValueMap(ipList);
-            return cbItem;
-
+            return DtcTestPageView.this.createComboBoxControl();
           } else {
-
-            TextItem textItem = new TextItem();
-            return textItem;
+            return new TextItem();
           }
         }
         return context.getDefaultProperties();
       }
-    });
+    };
   }
 
   public String createRequestData() {
@@ -210,127 +205,16 @@ public class DtcTestPageView {
   }
 
   public void draw() {
-    if (this.layout != null) {
-      RootPanel.get("dtcContainer").remove(this.layout);
-    }
+    this.setupVLayoutLeft();
+    this.setupHLayoutRight();
+    this.setupLayout();
 
-    this.layout = new HLayout();
-    RootPanel.get("dtcContainer").add(this.layout);
-
-    this.layout.setWidth100();
-    this.layout.setHeight(800);
-    this.layout.setMembersMargin(20);
-
-    this.vLayoutLeft = new VLayout();
-    this.vLayoutLeft.setShowEdges(true);
-    this.vLayoutLeft.setWidth(300);
-    this.vLayoutLeft.setMembersMargin(10);
-    this.vLayoutLeft.setLayoutMargin(10);
-
-    this.chronoView = new DtcChronoView();
-    this.chronoView.setWidth(300);
-    this.chronoView.setHeight(10);
-
-    this.requestFormGrid = new ListGrid();
-    this.requestFormGrid.setWidth(300);
-    this.requestFormGrid.setShowAllRecords(true);
-
-    this.requestFormGrid.setCanEdit(true);
-    this.requestFormGrid.setEditEvent(ListGridEditEvent.CLICK);
-    this.requestFormGrid.setEditByCell(true);
-
-    Event.addNativePreviewHandler(new Event.NativePreviewHandler() {
-
-      @Override
-      public void onPreviewNativeEvent(NativePreviewEvent event) {
-        if (event.isFirstHandler()) {
-          if (event.getTypeInt() == Event.ONKEYUP) {
-            if (event.getNativeEvent().getKeyCode() == 13) {
-              if (DtcTestPageView.this.validateRequestData() == 0) {
-                DtcTestPageView.this.readyRequestDataCb.onReadyRequestData();
-              }
-            }
-          }
-        }
-      }
-    });
-
-    this.requestFormGrid.setHeight(1);
-    this.requestFormGrid.setShowAllRecords(true);
-    this.requestFormGrid.setBodyOverflow(Overflow.VISIBLE);
-    this.requestFormGrid.setOverflow(Overflow.VISIBLE);
-    this.requestFormGrid.setLeaveScrollbarGap(false);
-    this.requestFormGrid.setCanAutoFitFields(false);
-    this.requestFormGrid.setCanCollapseGroup(false);
-
-    this.createGridRecord();
-
-    this.nameField = new ListGridField("key", "Name", 120);
-    this.nameField.setCanEdit(false);
-    this.nameField.setCanFilter(false);
-    this.nameField.setCanSort(false);
-    this.nameField.setCanReorder(false);
-    this.nameField.setCanGroupBy(false);
-
-    this.valueField = new ListGridField("value", "Value", 180);
-    this.valueField.setCanFilter(false);
-    this.valueField.setCanSort(false);
-    this.valueField.setCanReorder(false);
-    this.valueField.setCanGroupBy(false);
-
-    this.requestFormGrid.setFields(this.nameField, this.valueField);
-
-    this.searchButton = new Button("Search");
-    this.searchButton.setWidth(120);
-    this.searchButton.setLeft(60);
-    this.searchButton.setTop(45);
-
-    this.searchButton.addClickHandler(new ClickHandler() {
-
-      @Override
-      public void onClick(ClickEvent event) {
-        if (DtcTestPageView.this.validateRequestData() == 0) {
-          DtcTestPageView.this.readyRequestDataCb.onReadyRequestData();
-        }
-      }
-    });
-
-    this.vLayoutLeftBottom = new VLayout();
-    this.vLayoutLeftBottom.setShowEdges(true);
-    this.vLayoutLeftBottom.setWidth(300);
-    this.vLayoutLeftBottom.setHeight100();
-
-    this.vLayoutLeftBottom.setMembersMargin(5);
-    this.vLayoutLeftBottom.setLayoutMargin(0);
-
-    this.vLayoutLeft.addMember(this.chronoView);
-    this.vLayoutLeft.addMember(this.requestFormGrid);
-    this.vLayoutLeft.addMember(this.searchButton);
-    this.vLayoutLeft.addMember(this.vLayoutLeftBottom);
-
-    this.hLayoutRight = new HLayout();
-    this.hLayoutRight.setShowEdges(true);
-
-    this.hLayoutRight.setMembersMargin(5);
-    this.hLayoutRight.setLayoutMargin(10);
-
-    this.htmlPane = new HTMLPane();
-    this.htmlPane.setTop(40);
-    this.htmlPane.setWidth100();
-    this.htmlPane.setStyleName("response_panel");
-
-    this.hLayoutRight.addMember(this.htmlPane);
-
-    this.layout.addMember(this.vLayoutLeft);
-    this.layout.addMember(this.hLayoutRight);
-    this.layout.setLayoutMargin(10);
     this.layout.redraw();
     this.layout.setVisible(true);
   }
 
   public Map<String, String> getRequestParameter() {
     Map<String, String> params = new HashMap<String, String>();
-
     for (ListGridRecord record : this.requestFormGrid.getRecords()) {
       String value;
       if (record.getAttribute("name").toLowerCase().equals("ip_select")) {
@@ -356,6 +240,144 @@ public class DtcTestPageView {
 
   public void setRequestInfo(DtcRequestInfoModel requestInfo) {
     this.requestInfo = requestInfo;
+  }
+
+  private void setupChronoView() {
+    this.chronoView = new DtcChronoView();
+    this.chronoView.setWidth(300);
+    this.chronoView.setHeight(10);
+  }
+
+  private void setupHLayoutRight() {
+    this.hLayoutRight = new HLayout();
+    this.hLayoutRight.setShowEdges(true);
+
+    this.hLayoutRight.setMembersMargin(5);
+    this.hLayoutRight.setLayoutMargin(10);
+
+    this.htmlPane = new HTMLPane();
+    this.htmlPane.setTop(40);
+    this.htmlPane.setWidth100();
+    this.htmlPane.setStyleName("response_panel");
+
+    this.hLayoutRight.addMember(this.htmlPane);
+  }
+
+  private void setupLayout() {
+    if (this.layout != null) {
+      RootPanel.get("dtcContainer").remove(this.layout);
+    }
+
+    this.layout = new HLayout();
+    RootPanel.get("dtcContainer").add(this.layout);
+
+    this.layout.setWidth100();
+    this.layout.setHeight(800);
+    this.layout.setMembersMargin(20);
+
+    this.layout.addMember(this.vLayoutLeft);
+    this.layout.addMember(this.hLayoutRight);
+    this.layout.setLayoutMargin(10);
+  }
+
+  private void setupNameField() {
+    this.nameField = new ListGridField("key", "Name", 120);
+    this.nameField.setCanEdit(false);
+    this.nameField.setCanFilter(false);
+    this.nameField.setCanSort(false);
+    this.nameField.setCanReorder(false);
+    this.nameField.setCanGroupBy(false);
+  }
+
+  private void setupRequestFormGrid() {
+    this.requestFormGrid = new ListGrid();
+    this.requestFormGrid.setWidth(300);
+    this.requestFormGrid.setShowAllRecords(true);
+
+    this.requestFormGrid.setCanEdit(true);
+    this.requestFormGrid.setEditEvent(ListGridEditEvent.CLICK);
+    this.requestFormGrid.setEditByCell(true);
+
+    Event.addNativePreviewHandler(new Event.NativePreviewHandler() {
+
+      @Override
+      public void onPreviewNativeEvent(NativePreviewEvent event) {
+        if (event.isFirstHandler() &&
+            event.getTypeInt() == Event.ONKEYUP &&
+            event.getNativeEvent().getKeyCode() == 13 &&
+            DtcTestPageView.this.validateRequestData() == 0) {
+          DtcTestPageView.this.readyRequestDataCb.onReadyRequestData();
+        }
+      }
+    });
+
+    this.requestFormGrid.setHeight(1);
+    this.requestFormGrid.setShowAllRecords(true);
+    this.requestFormGrid.setBodyOverflow(Overflow.VISIBLE);
+    this.requestFormGrid.setOverflow(Overflow.VISIBLE);
+    this.requestFormGrid.setLeaveScrollbarGap(false);
+    this.requestFormGrid.setCanAutoFitFields(false);
+    this.requestFormGrid.setCanCollapseGroup(false);
+
+    this.createGridRecord();
+    this.setupNameField();
+    this.setupValueField();
+
+    this.requestFormGrid.setFields(this.nameField, this.valueField);
+  }
+
+  private void setupSearchButton() {
+    this.searchButton = new Button("Search");
+    this.searchButton.setWidth(120);
+    this.searchButton.setLeft(60);
+    this.searchButton.setTop(45);
+
+    this.searchButton.addClickHandler(new ClickHandler() {
+
+      @Override
+      public void onClick(ClickEvent event) {
+        if (DtcTestPageView.this.validateRequestData() == 0) {
+          DtcTestPageView.this.readyRequestDataCb.onReadyRequestData();
+        }
+      }
+    });
+  }
+
+  private void setupValueField() {
+    this.valueField = new ListGridField("value", "Value", 180);
+    this.valueField.setCanFilter(false);
+    this.valueField.setCanSort(false);
+    this.valueField.setCanReorder(false);
+    this.valueField.setCanGroupBy(false);
+  }
+
+  private void setupVLayoutBottom() {
+    this.vLayoutLeftBottom = new VLayout();
+    this.vLayoutLeftBottom.setShowEdges(true);
+    this.vLayoutLeftBottom.setWidth(300);
+    this.vLayoutLeftBottom.setHeight100();
+
+    this.vLayoutLeftBottom.setMembersMargin(5);
+    this.vLayoutLeftBottom.setLayoutMargin(0);
+  }
+
+  private void setupVLayoutLeft() {
+    this.setupChronoView();
+    this.setupRequestFormGrid();
+    this.setupSearchButton();
+    this.setupVLayoutBottom();
+
+    this.vLayoutLeft = new VLayout();
+    this.vLayoutLeft.setShowEdges(true);
+    this.vLayoutLeft.setWidth(300);
+    this.vLayoutLeft.setMembersMargin(10);
+    this.vLayoutLeft.setLayoutMargin(10);
+
+    this.vLayoutLeft.addMember(this.chronoView);
+    this.vLayoutLeft.addMember(this.requestFormGrid);
+    this.vLayoutLeft.addMember(this.searchButton);
+    this.vLayoutLeft.addMember(this.vLayoutLeftBottom);
+
   }
 
   public int validateRequestData() {
