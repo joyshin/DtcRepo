@@ -12,6 +12,9 @@ public interface DtcArdbegObserver {
 
   void onDtcTestPageLoaded(DtcRequestInfoModel requestInfo);
 
-  void onSubmitRequestForm();
+  void onHide();
 
+  void onShow();
+
+  void onSubmitRequestForm();
 }

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.skcomms.dtc.client.DefaultDtcArdbegObserver;
+import net.skcomms.dtc.client.DtcActivityIndicatorObserver;
 import net.skcomms.dtc.client.DtcArdbeg;
 import net.skcomms.dtc.client.DtcTestPageViewObserver;
 import net.skcomms.dtc.client.service.DtcService;
@@ -29,6 +30,8 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
   private String encoding;
 
   private Map<String, List<String>> initialRequestParameters = null;
+
+  private DtcActivityIndicatorObserver dtcActivityIndicatorObserver;
 
   private void adjustRequestInfo(DtcRequestInfoModel requestInfo) {
     if (this.initialRequestParameters != null && this.initialRequestParameters.size() > 0) {
@@ -100,8 +103,8 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
 
   @Override
   public void onSubmitRequestForm() {
+    this.dtcActivityIndicatorObserver.onShow();
     this.sendRequest();
-
   }
 
   protected void sendRequest() {
@@ -136,6 +139,8 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
             caught.printStackTrace();
             DtcTestPageController.this.dtcTestPageView.chronoStop();
             GWT.log("getDtcTestPageResponse Failed: " + caught.getMessage());
+
+            DtcTestPageController.this.dtcActivityIndicatorObserver.onHide();
           }
 
           @Override
@@ -155,7 +160,14 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
             DtcTestPageController.this.lastRequestLoader.createLastRequest(lastRequestKey,
                 requestParam);
             DtcTestPageController.this.lastRequestLoader.persist();
+
+            DtcTestPageController.this.dtcActivityIndicatorObserver.onHide();
           }
         });
+  }
+
+  public void setOnIndicatorActivityObserver(
+      DtcActivityIndicatorObserver cb) {
+    this.dtcActivityIndicatorObserver = cb;
   }
 }
