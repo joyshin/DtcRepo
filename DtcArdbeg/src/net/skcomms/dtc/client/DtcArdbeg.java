@@ -249,9 +249,10 @@ public class DtcArdbeg implements EntryPoint {
 
   private void initializeTestPage() {
     LastRequestLoaderController lastRequestLoaderController = new LastRequestLoaderController();
-    this.dtcTestPageController.initialize(this, this.dtcTestPageView, lastRequestLoaderController);
 
-    this.dtcTestPageView.addDtcArdbegObserver(this.dtcActivityIndicatorController);
+    this.dtcTestPageController.initialize(this, this.dtcTestPageView, lastRequestLoaderController);
+    this.dtcTestPageController.addObserver(this.dtcActivityIndicatorController);
+
   }
 
   private void initializeUrlCopy() {

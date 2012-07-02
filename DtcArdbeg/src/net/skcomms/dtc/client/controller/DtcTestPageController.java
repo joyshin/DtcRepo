@@ -1,10 +1,12 @@
 package net.skcomms.dtc.client.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import net.skcomms.dtc.client.DefaultDtcArdbegObserver;
 import net.skcomms.dtc.client.DtcArdbeg;
+import net.skcomms.dtc.client.DtcTestPageControllerObserver;
 import net.skcomms.dtc.client.DtcTestPageViewObserver;
 import net.skcomms.dtc.client.service.DtcService;
 import net.skcomms.dtc.client.view.DtcTestPageView;
@@ -30,6 +32,12 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver implements
   private String encoding;
 
   private Map<String, List<String>> initialRequestParameters = null;
+
+  private final List<DtcTestPageControllerObserver> dtcTestPageControllerObservers = new ArrayList<DtcTestPageControllerObserver>();
+
+  public void addObserver(DtcTestPageControllerObserver observer) {
+    this.dtcTestPageControllerObservers.add(observer);
+  }
 
   private void adjustRequestInfo(DtcRequestInfoModel requestInfo) {
     if (this.initialRequestParameters != null && this.initialRequestParameters.size() > 0) {
@@ -75,6 +83,8 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver implements
     this.dtcTestPageView = dtcTestPageView;
     this.lastRequestLoader = lastRequestLoader;
     this.initialRequestParameters = dtcArdbeg.getRequestParameters();
+
+    this.dtcTestPageView.addObserver(this);
   }
 
   public void loadDtcTestPageView(DtcRequestInfoModel requestInfo) {
@@ -93,19 +103,20 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver implements
 
   @Override
   public void onReadyRequestData() {
+    this.onSearchStart();
     this.sendRequest();
   }
 
-  @Override
-  public void onSearchStart() {
-    // TODO Auto-generated method stub
-
+  private void onSearchStart() {
+    for (DtcTestPageControllerObserver observer : this.dtcTestPageControllerObservers) {
+      observer.onSearchStart();
+    }
   }
 
-  @Override
-  public void onSearchStop() {
-    // TODO Auto-generated method stub
-
+  private void onSearchStop() {
+    for (DtcTestPageControllerObserver observer : this.dtcTestPageControllerObservers) {
+      observer.onSearchStop();
+    }
   }
 
   protected void sendRequest() {
@@ -141,6 +152,8 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver implements
             DtcTestPageController.this.dtcTestPageView.chronoStop();
             GWT.log("getDtcTestPageResponse Failed: " + caught.getMessage());
             DtcTestPageController.this.dtcTestPageView.setHTMLData("ERROR");
+
+            DtcTestPageController.this.onSearchStop();
           }
 
           @Override
@@ -150,8 +163,10 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver implements
                 replaceAll("\\]\\]>", "");
             GWT.log(convertedHTML);
             DtcTestPageController.this.dtcTestPageView.chronoStop();
-            DtcTestPageController.this.dtcTestPageView.setHTMLData(convertedHTML);
 
+            DtcTestPageController.this.onSearchStop();
+
+            DtcTestPageController.this.dtcTestPageView.setHTMLData(convertedHTML);
             Map<String, String> requestParam =
                 DtcTestPageController.this.dtcTestPageView.getRequestParameter();
             // FIXME 키 생성방법을 은닉시킬 것.
@@ -160,6 +175,7 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver implements
             DtcTestPageController.this.lastRequestLoader.createLastRequest(lastRequestKey,
                 requestParam);
             DtcTestPageController.this.lastRequestLoader.persist();
+
           }
         });
   }

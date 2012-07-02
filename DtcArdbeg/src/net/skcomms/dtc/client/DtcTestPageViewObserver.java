@@ -4,7 +4,4 @@ public interface DtcTestPageViewObserver {
 
   void onReadyRequestData();
 
-  void onSearchStart();
-
-  void onSearchStop();
 }
