@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.Map;
 
 import net.skcomms.dtc.client.DtcTestPageModelObserver;
+import net.skcomms.dtc.client.model.DtcResponse;
 import net.skcomms.dtc.client.model.DtcSearchHistory;
 import net.skcomms.dtc.client.model.DtcSearchHistoryDao;
 import net.skcomms.dtc.client.model.DtcTestPageModel;
-import net.skcomms.dtc.client.model.DtcTestPageResponse;
 
 import com.google.gwt.core.client.GWT;
 
@@ -25,18 +25,18 @@ public class DtcSearchHistoryController implements DtcTestPageModelObserver {
   }
 
   @Override
-  public void onTestPageResponseReceived(DtcTestPageResponse response) {
-    Map<String, String> params = response.getRequest().getRequestParameter();
-    String path = response.getRequest().getPath();
-    this.persist(path, params);
-    this.redrawSearchHistoryView(path);
+  public void onTestPageResponseReceived(DtcResponse response) {
+    this.persist(response);
+    this.redrawSearchHistoryView(response.getRequest().getPath());
   }
 
-  public void persist(String path, Map<String, String> param) {
+  private void persist(DtcResponse response) {
     GWT.log("DtcSearchHistoryController.persist() called");
-    DtcSearchHistory searchHistory = DtcSearchHistory.create(path, param);
+    String path = response.getRequest().getPath();
+    Map<String, String> params = response.getRequest().getRequestParameter();
+    DtcSearchHistory searchHistory = DtcSearchHistory.create(path, params,
+        response.getResponseTime());
     this.searchHistoryDao.persist(searchHistory);
-    // TODO SearchHistoryView에 searchHistory 객제를 추가한다.
   }
 
   private void redrawSearchHistoryView(String path) {

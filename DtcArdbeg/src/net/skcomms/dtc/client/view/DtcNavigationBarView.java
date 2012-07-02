@@ -7,7 +7,7 @@ import net.skcomms.dtc.client.DefaultDtcArdbegObserver;
 import net.skcomms.dtc.client.DtcArdbeg;
 import net.skcomms.dtc.client.DtcNodeObserver;
 import net.skcomms.dtc.client.model.DtcNodeModel;
-import net.skcomms.dtc.shared.DtcRequestInfoModel;
+import net.skcomms.dtc.shared.DtcRequestMeta;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -95,7 +95,7 @@ public class DtcNavigationBarView extends DefaultDtcArdbegObserver implements Dt
   }
 
   @Override
-  public void onDtcTestPageLoaded(DtcRequestInfoModel requestInfo) {
+  public void onDtcTestPageLoaded(DtcRequestMeta requestInfo) {
     this.addPath(requestInfo.getPath());
   }
 

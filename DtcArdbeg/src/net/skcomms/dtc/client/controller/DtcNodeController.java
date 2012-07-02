@@ -3,7 +3,7 @@ package net.skcomms.dtc.client.controller;
 import net.skcomms.dtc.client.DtcNodeObserver;
 import net.skcomms.dtc.client.model.DtcNodeModel;
 import net.skcomms.dtc.client.view.DtcNodeView;
-import net.skcomms.dtc.shared.DtcRequestInfoModel;
+import net.skcomms.dtc.shared.DtcRequestMeta;
 
 public class DtcNodeController implements DtcNodeObserver {
 
@@ -22,7 +22,7 @@ public class DtcNodeController implements DtcNodeObserver {
   }
 
   @Override
-  public void onDtcTestPageLoaded(DtcRequestInfoModel requestInfo) {
+  public void onDtcTestPageLoaded(DtcRequestMeta requestInfo) {
   }
 
   @Override

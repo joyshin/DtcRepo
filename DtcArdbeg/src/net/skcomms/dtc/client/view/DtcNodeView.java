@@ -2,7 +2,7 @@ package net.skcomms.dtc.client.view;
 
 import java.util.List;
 
-import net.skcomms.dtc.shared.DtcNodeMetaModel;
+import net.skcomms.dtc.shared.DtcNodeMeta;
 
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -13,7 +13,7 @@ import com.google.gwt.user.client.ui.Widget;
 public class DtcNodeView {
   private FlowPanel dtcNodePanel = null;
 
-  private CellList<DtcNodeMetaModel> dtcNodeCellList = null;
+  private CellList<DtcNodeMeta> dtcNodeCellList = null;
 
   private String containerName = "";
 
@@ -25,7 +25,7 @@ public class DtcNodeView {
   }
 
   public void initialize(String label, String containerName) {
-    this.dtcNodeCellList = new CellList<DtcNodeMetaModel>(DtcNodeMetaCellView.getInstance());
+    this.dtcNodeCellList = new CellList<DtcNodeMeta>(DtcNodeMetaCellView.getInstance());
 
     this.dtcNodePanel = new FlowPanel();
     this.dtcNodePanel.add(this.dtcNodeCellList);
@@ -37,7 +37,7 @@ public class DtcNodeView {
     this.containerName = containerName;
   }
 
-  public void setDtcNodeWidget(List<DtcNodeMetaModel> list) {
+  public void setDtcNodeWidget(List<DtcNodeMeta> list) {
     this.dtcNodeCellList.setRowData(list);
     this.dtcNodeCellList.setRowCount(list.size(), true);
   }

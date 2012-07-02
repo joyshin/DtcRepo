@@ -7,8 +7,9 @@ import java.util.Map.Entry;
 
 public class DtcSearchHistory {
 
-  public static DtcSearchHistory create(String path, Date time, Map<String, String> params) {
-    return new DtcSearchHistory(path, time, params);
+  private static DtcSearchHistory create(String path, Date time, Map<String, String> param,
+      long responseTime) {
+    return new DtcSearchHistory(path, time, param, responseTime);
   }
 
   private final String path;
@@ -17,12 +18,14 @@ public class DtcSearchHistory {
 
   private final Map<String, String> params;
 
+  private long responseTime;
+
   public static final String FORM_FIELD_DELIMETER = Character.toString((char) 0x0b);
 
   public static final String FORM_VALUE_DELIMETER = Character.toString((char) 0x0c);
 
-  public static DtcSearchHistory create(String path, Map<String, String> params) {
-    return DtcSearchHistory.create(path, new Date(), params);
+  public static DtcSearchHistory create(String path, Map<String, String> params, long responseTime) {
+    return DtcSearchHistory.create(path, new Date(), params, responseTime);
   }
 
   public static DtcSearchHistory deserialize(String source) {
@@ -35,9 +38,10 @@ public class DtcSearchHistory {
     }
     String path = elements[0];
     Date time = new Date(Long.parseLong(elements[1]));
+    long responseTime = Long.parseLong(elements[2]);
     Map<String, String> params = new HashMap<String, String>();
 
-    for (int i = 2; i < elements.length; i++) {
+    for (int i = 3; i < elements.length; i++) {
       String[] pair = elements[i].split(DtcSearchHistory.FORM_VALUE_DELIMETER);
       if (pair.length == 0) {
         throw new IllegalArgumentException("Error: Invalid format near: " + elements[i]);
@@ -45,12 +49,13 @@ public class DtcSearchHistory {
       params.put(pair[0], ((pair.length == 2) ? pair[1] : ""));
     }
 
-    return DtcSearchHistory.create(path, time, params);
+    return DtcSearchHistory.create(path, time, params, responseTime);
   }
 
-  public DtcSearchHistory(String path, Date time, Map<String, String> params) {
-    this.time = time;
+  private DtcSearchHistory(String path, Date time, Map<String, String> params, long responseTime) {
     this.path = path;
+    this.time = time;
+    this.responseTime = responseTime;
     this.params = params;
   }
 
@@ -79,6 +84,9 @@ public class DtcSearchHistory {
     result.append(DtcSearchHistory.FORM_FIELD_DELIMETER);
 
     result.append(this.time.getTime());
+    result.append(DtcSearchHistory.FORM_FIELD_DELIMETER);
+
+    result.append(this.responseTime);
     result.append(DtcSearchHistory.FORM_FIELD_DELIMETER);
 
     for (Entry<String, String> entry : this.params.entrySet()) {

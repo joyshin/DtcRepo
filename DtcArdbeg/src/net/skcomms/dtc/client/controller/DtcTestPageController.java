@@ -8,12 +8,12 @@ import net.skcomms.dtc.client.DtcNodeObserver;
 import net.skcomms.dtc.client.DtcTestPageModelObserver;
 import net.skcomms.dtc.client.DtcTestPageViewObserver;
 import net.skcomms.dtc.client.model.DtcNodeModel;
+import net.skcomms.dtc.client.model.DtcResponse;
 import net.skcomms.dtc.client.model.DtcTestPageModel;
-import net.skcomms.dtc.client.model.DtcTestPageResponse;
 import net.skcomms.dtc.client.view.DtcTestPageView;
-import net.skcomms.dtc.shared.DtcRequestInfoModel;
+import net.skcomms.dtc.shared.DtcRequest;
+import net.skcomms.dtc.shared.DtcRequestMeta;
 import net.skcomms.dtc.shared.DtcRequestParameterModel;
-import net.skcomms.dtc.shared.HttpRequestInfoModel;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.URL;
@@ -32,14 +32,14 @@ public class DtcTestPageController implements DtcNodeObserver, DtcTestPageModelO
 
   private Map<String, List<String>> initialRequestParameters = null;
 
-  private void adjustRequestInfo(DtcRequestInfoModel requestInfo) {
+  private void adjustRequestInfo(DtcRequestMeta requestInfo) {
     if (this.initialRequestParameters != null && this.initialRequestParameters.size() > 0) {
       this.adjustRequestInfoByInitialParameters(requestInfo);
       this.initialRequestParameters = null;
     }
   }
 
-  private void adjustRequestInfoByInitialParameters(DtcRequestInfoModel requestInfo) {
+  private void adjustRequestInfoByInitialParameters(DtcRequestMeta requestInfo) {
     // IP
     if (this.initialRequestParameters.containsKey("IP")) {
       requestInfo.getIpInfo().setIpText(this.initialRequestParameters.get("IP").get(0));
@@ -53,7 +53,7 @@ public class DtcTestPageController implements DtcNodeObserver, DtcTestPageModelO
     }
   }
 
-  private HttpRequestInfoModel createHttpRequestInfo() {
+  private DtcRequest createDtcRequest() {
     StringBuilder requestData = new StringBuilder();
     final String testURL = "c" + "=" + URL.encode(this.currentPath);
     String process = "process=1";
@@ -67,14 +67,14 @@ public class DtcTestPageController implements DtcNodeObserver, DtcTestPageModelO
     GWT.log("ProxyURL: " + this.dtcProxyUrl);
     // GWT.log("TargetURL: " + targetUrl);
 
-    HttpRequestInfoModel httpRequestInfo = new HttpRequestInfoModel();
-    httpRequestInfo.setRequestParameter(this.testPageView.getRequestParameter());
-    httpRequestInfo.setPath(this.currentPath);
-    httpRequestInfo.setHttpMethod("POST");
-    httpRequestInfo.setUrl(targetUrl);
-    httpRequestInfo.setRequestData(requestData.toString());
-    httpRequestInfo.setEncoding(this.encoding);
-    return httpRequestInfo;
+    DtcRequest request = new DtcRequest();
+    request.setRequestParameters(this.testPageView.getRequestParameters());
+    request.setPath(this.currentPath);
+    request.setHttpMethod("POST");
+    request.setUrl(targetUrl);
+    request.setRequestData(requestData.toString());
+    request.setEncoding(this.encoding);
+    return request;
   }
 
   public void initialize(final DtcArdbeg dtcArdbeg, DtcTestPageView dtcTestPageView,
@@ -90,14 +90,14 @@ public class DtcTestPageController implements DtcNodeObserver, DtcTestPageModelO
 
       @Override
       public void onReadyRequestData() {
-        HttpRequestInfoModel httpRequestInfo = DtcTestPageController.this.createHttpRequestInfo();
-        DtcTestPageController.this.testPageModel.sendRequest(httpRequestInfo);
+        DtcRequest request = DtcTestPageController.this.createDtcRequest();
+        DtcTestPageController.this.testPageModel.sendRequest(request);
         DtcTestPageController.this.testPageView.chronoStart();
       }
     });
   }
 
-  public void loadDtcTestPageView(DtcRequestInfoModel requestInfo) {
+  public void loadDtcTestPageView(DtcRequestMeta requestInfo) {
     this.adjustRequestInfo(requestInfo);
     this.currentPath = requestInfo.getPath();
 
@@ -107,7 +107,7 @@ public class DtcTestPageController implements DtcNodeObserver, DtcTestPageModelO
   }
 
   @Override
-  public void onDtcTestPageLoaded(DtcRequestInfoModel requestInfo) {
+  public void onDtcTestPageLoaded(DtcRequestMeta requestInfo) {
     this.loadDtcTestPageView(requestInfo);
   }
 
@@ -126,7 +126,7 @@ public class DtcTestPageController implements DtcNodeObserver, DtcTestPageModelO
   }
 
   @Override
-  public void onTestPageResponseReceived(DtcTestPageResponse response) {
+  public void onTestPageResponseReceived(DtcResponse response) {
     GWT.log("Success: " + response.getResult());
     this.redrawTestPageView(response.getResult());
   }

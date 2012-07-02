@@ -1,11 +1,11 @@
 package net.skcomms.dtc.client;
 
-import net.skcomms.dtc.client.model.DtcTestPageResponse;
+import net.skcomms.dtc.client.model.DtcResponse;
 
 public interface DtcTestPageModelObserver {
 
   void onRequestFailed(Throwable caught);
 
-  void onTestPageResponseReceived(DtcTestPageResponse response);
+  void onTestPageResponseReceived(DtcResponse response);
 
 }

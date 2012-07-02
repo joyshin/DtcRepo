@@ -1,11 +1,11 @@
 package net.skcomms.dtc.client;
 
-import net.skcomms.dtc.shared.DtcRequestInfoModel;
+import net.skcomms.dtc.shared.DtcRequestMeta;
 
 public interface DtcNodeObserver {
   void onFavoriteNodeListChanged();
 
   void onNodeListChanged();
 
-  void onDtcTestPageLoaded(DtcRequestInfoModel requestInfo);
+  void onDtcTestPageLoaded(DtcRequestMeta requestInfo);
 }

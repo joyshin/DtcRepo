@@ -48,15 +48,16 @@ import javax.servlet.ServletException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import net.skcomms.dtc.client.model.DtcResponse;
 import net.skcomms.dtc.client.service.DtcService;
 import net.skcomms.dtc.server.model.DtcIni;
 import net.skcomms.dtc.server.model.DtcLog;
 import net.skcomms.dtc.server.model.DtcRequestProperty;
-import net.skcomms.dtc.shared.DtcNodeMetaModel;
-import net.skcomms.dtc.shared.DtcRequestInfoModel;
+import net.skcomms.dtc.shared.DtcNodeMeta;
+import net.skcomms.dtc.shared.DtcRequest;
+import net.skcomms.dtc.shared.DtcRequestMeta;
 import net.skcomms.dtc.shared.DtcRequestParameterModel;
 import net.skcomms.dtc.shared.DtcServiceVerifier;
-import net.skcomms.dtc.shared.HttpRequestInfoModel;
 import net.skcomms.dtc.shared.IpInfoModel;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,7 +119,7 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     return sb.toString().substring(0, sb.length() - 1);
   }
 
-  static String createDtcResponse(HttpRequestInfoModel httpRequestInfo) throws IOException {
+  static String createDtcResponse(DtcRequest dtcRequest) throws IOException {
 
     String response = null;
     String encoding = null;
@@ -127,23 +128,23 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     URL conUrl;
 
     int TIMEOUT = 5000;
-    conUrl = new URL(httpRequestInfo.getUrl());
+    conUrl = new URL(dtcRequest.getUrl());
     HttpURLConnection httpCon = (HttpURLConnection) conUrl.openConnection();
     httpCon.setConnectTimeout(TIMEOUT);
     httpCon.setReadTimeout(TIMEOUT);
     httpCon.setDoInput(true);
     httpCon.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-    if (httpRequestInfo.getEncoding() != "") {
+    if (dtcRequest.getEncoding() != "") {
       httpCon.setRequestProperty("Content-Type", "text/html; charset="
-          + httpRequestInfo.getEncoding());
+          + dtcRequest.getEncoding());
     }
 
-    httpCon.setRequestMethod(httpRequestInfo.getHttpMethod().toUpperCase());
+    httpCon.setRequestMethod(dtcRequest.getHttpMethod().toUpperCase());
 
-    if (httpRequestInfo.getHttpMethod().toUpperCase().equals("POST")) {
+    if (dtcRequest.getHttpMethod().toUpperCase().equals("POST")) {
       httpCon.setDoOutput(true);
       OutputStream postStream = httpCon.getOutputStream();
-      postStream.write(httpRequestInfo.getRequestData().getBytes());
+      postStream.write(dtcRequest.getRequestData().getBytes());
       postStream.flush();
       postStream.close();
     }
@@ -177,7 +178,7 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
       responseUrl = URLDecoder.decode(matcher.group(0).split("/")[1], "utf-8");
       System.out.println("Response URL: " + responseUrl);
 
-      HttpRequestInfoModel responseRequestInfo = new HttpRequestInfoModel();
+      DtcRequest responseRequestInfo = new DtcRequest();
       responseRequestInfo.setEncoding(encoding);
       responseRequestInfo.setHttpMethod("GET");
 
@@ -335,8 +336,8 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
 
   private EntityManagerFactory emf;
 
-  private DtcRequestInfoModel createRequestInfo(DtcIni ini) {
-    DtcRequestInfoModel requestInfo = new DtcRequestInfoModel();
+  private DtcRequestMeta createRequestInfo(DtcIni ini) {
+    DtcRequestMeta requestInfo = new DtcRequestMeta();
 
     ArrayList<DtcRequestParameterModel> params = new ArrayList<DtcRequestParameterModel>();
     int index = 0;
@@ -359,7 +360,7 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
   }
 
   @Override
-  public List<DtcNodeMetaModel> getDir(String path) {
+  public List<DtcNodeMeta> getDir(String path) {
     if (!DtcServiceVerifier.isValidDirectoryPath(path)) {
       throw new IllegalArgumentException("Invalid directory:" + path);
     }
@@ -377,16 +378,16 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     }
   }
 
-  List<DtcNodeMetaModel> getDirImpl(String path) throws IOException {
+  List<DtcNodeMeta> getDirImpl(String path) throws IOException {
     String root = DtcServiceImpl.getRootPath();
     String parentPath = root + path.substring(1);
     System.out.println("Absolute path:" + parentPath);
     File file = new File(parentPath);
-    List<DtcNodeMetaModel> nodes = new ArrayList<DtcNodeMetaModel>();
+    List<DtcNodeMeta> nodes = new ArrayList<DtcNodeMeta>();
     File[] files = file.listFiles(new DtcNodeFilter());
     Arrays.sort(files, DtcServiceImpl.NODE_COMPARATOR);
     for (File child : files) {
-      DtcNodeMetaModel node = new DtcNodeMetaModel();
+      DtcNodeMeta node = new DtcNodeMeta();
       node.setName(child.getName());
       if (child.isDirectory()) {
         node.setDescription("디렉토리");
@@ -404,17 +405,17 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     return nodes;
   }
 
-  DtcRequestInfoModel getDtcRequestInfoImpl(String path) throws IOException {
+  DtcRequestMeta getDtcRequestInfoImpl(String path) throws IOException {
     String filePath = DtcServiceImpl.getRootPath() + path.substring(1);
     DtcIni ini = new DtcIniFactory().createFrom(filePath);
     // FIXME DtcRequestInfoModel을 DtcIni로 대체하는 것을 검토하자.
-    DtcRequestInfoModel requestInfo = this.createRequestInfo(ini);
+    DtcRequestMeta requestInfo = this.createRequestInfo(ini);
     requestInfo.setPath(path);
     return requestInfo;
   }
 
   @Override
-  public DtcRequestInfoModel getDtcRequestPageInfo(String path) {
+  public DtcRequestMeta getDtcRequestPageInfo(String path) {
     if (!DtcServiceVerifier.isValidTestPage(path)) {
       throw new IllegalArgumentException("Invalid test page:" + path);
     }
@@ -427,7 +428,7 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
   }
 
   @Override
-  public String getDtcTestPageResponse(HttpRequestInfoModel httpRequestInfo)
+  public DtcResponse getDtcResponse(DtcRequest httpRequestInfo)
       throws IllegalArgumentException {
 
     String rawHtml = null;
@@ -444,8 +445,13 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
       // replace URL
       String targetUrl = DtcServiceImpl.DTC_URL + "response.html";
       httpRequestInfo.setUrl(targetUrl);
+      Date startTime = new Date();
       rawHtml = DtcServiceImpl.createDtcResponse(httpRequestInfo);
-      return rawHtml;
+      Date endTime = new Date();
+      DtcResponse response = new DtcResponse();
+      response.setResponseTime(endTime.getTime() - startTime.getTime());
+      response.setResult(rawHtml);
+      return response;
     } catch (IOException e) {
       e.printStackTrace();
       throw new IllegalArgumentException(e);

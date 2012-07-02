@@ -9,7 +9,7 @@ import java.io.Serializable;
  * @author jujang@sk.com
  */
 @SuppressWarnings("serial")
-public class DtcNodeMetaModel implements Serializable {
+public class DtcNodeMeta implements Serializable {
 
   private String description;
 
@@ -19,7 +19,7 @@ public class DtcNodeMetaModel implements Serializable {
 
   private String updateTime;
 
-  public DtcNodeMetaModel() {
+  public DtcNodeMeta() {
   }
 
   public String getDescription() {

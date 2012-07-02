@@ -17,7 +17,7 @@ import net.skcomms.dtc.client.view.DtcTestPageView;
 import net.skcomms.dtc.client.view.DtcUrlCopyButtonView;
 import net.skcomms.dtc.client.view.DtcUrlCopyDialogBoxView;
 import net.skcomms.dtc.client.view.DtcUserSignInView;
-import net.skcomms.dtc.shared.DtcRequestInfoModel;
+import net.skcomms.dtc.shared.DtcRequestMeta;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.dom.client.Document;
@@ -231,7 +231,7 @@ public class DtcArdbeg implements EntryPoint, DtcNodeObserver {
   }
 
   @Override
-  public void onDtcTestPageLoaded(DtcRequestInfoModel requestInfo) {
+  public void onDtcTestPageLoaded(DtcRequestMeta requestInfo) {
     this.currentPath = requestInfo.getPath();
     this.hideSplash();
     this.displayTestPage();

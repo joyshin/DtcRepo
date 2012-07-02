@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Map;
 
 @SuppressWarnings("serial")
-public class HttpRequestInfoModel implements Serializable {
+public class DtcRequest implements Serializable {
 
   private String httpMethod;
   private String url;
@@ -13,14 +13,14 @@ public class HttpRequestInfoModel implements Serializable {
   private Map<String, String> requestParameter;
   private String path;
 
-  public HttpRequestInfoModel() {
+  public DtcRequest() {
     this.httpMethod = "";
     this.url = "";
     this.requestData = "";
     this.encoding = "";
   }
 
-  public HttpRequestInfoModel(String httpMethod, String url, String encoding, String requestData) {
+  public DtcRequest(String httpMethod, String url, String encoding, String requestData) {
     this.httpMethod = httpMethod;
     this.url = url;
     this.requestData = requestData;
@@ -67,7 +67,7 @@ public class HttpRequestInfoModel implements Serializable {
     this.requestData = requestData;
   }
 
-  public void setRequestParameter(Map<String, String> requestParameter) {
+  public void setRequestParameters(Map<String, String> requestParameter) {
     this.requestParameter = requestParameter;
   }
 

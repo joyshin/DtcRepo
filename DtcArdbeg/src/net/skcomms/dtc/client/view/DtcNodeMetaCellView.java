@@ -1,7 +1,7 @@
 package net.skcomms.dtc.client.view;
 
 import net.skcomms.dtc.client.model.DtcNodeModel;
-import net.skcomms.dtc.shared.DtcNodeMetaModel;
+import net.skcomms.dtc.shared.DtcNodeMeta;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ValueUpdater;
@@ -12,7 +12,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Image;
 
-public final class DtcNodeMetaCellView extends AbstractCell<DtcNodeMetaModel> {
+public final class DtcNodeMetaCellView extends AbstractCell<DtcNodeMeta> {
 
   private static final DtcNodeMetaCellView instance = new DtcNodeMetaCellView();
 
@@ -66,9 +66,9 @@ public final class DtcNodeMetaCellView extends AbstractCell<DtcNodeMetaModel> {
   }
 
   @Override
-  public void onBrowserEvent(Context context, Element parent, DtcNodeMetaModel
+  public void onBrowserEvent(Context context, Element parent, DtcNodeMeta
       selected, NativeEvent event,
-      ValueUpdater<DtcNodeMetaModel> valueUpdater) {
+      ValueUpdater<DtcNodeMeta> valueUpdater) {
 
     if (DtcNodeMetaCellView.CELL_BUTTON_ID.equals(Element.as(event.getEventTarget()).getId())) {
       if (!selected.isDirectoryPageNode()) {
@@ -88,7 +88,7 @@ public final class DtcNodeMetaCellView extends AbstractCell<DtcNodeMetaModel> {
   }
 
   @Override
-  public void render(Context context, DtcNodeMetaModel dtcNodeInfo, SafeHtmlBuilder sb) {
+  public void render(Context context, DtcNodeMeta dtcNodeInfo, SafeHtmlBuilder sb) {
     if (dtcNodeInfo == null) {
       return;
     }

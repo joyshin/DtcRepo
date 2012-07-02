@@ -14,7 +14,7 @@ public class DtcSearchHistoryTest {
     Map<String, String> params = new HashMap<String, String>();
     params.put("key1", "value1");
     params.put("key2", "value2");
-    DtcSearchHistory dtcSearchHistory = DtcSearchHistory.create(path, params);
+    DtcSearchHistory dtcSearchHistory = DtcSearchHistory.create(path, params, 5);
 
     String result = dtcSearchHistory.serialize();
     DtcSearchHistory dtcSearchHistory2 = DtcSearchHistory.deserialize(result);

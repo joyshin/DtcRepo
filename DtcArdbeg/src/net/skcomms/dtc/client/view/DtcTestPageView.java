@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.skcomms.dtc.client.DtcTestPageViewObserver;
-import net.skcomms.dtc.shared.DtcRequestInfoModel;
+import net.skcomms.dtc.shared.DtcRequestMeta;
 import net.skcomms.dtc.shared.DtcRequestParameterModel;
 
 import com.google.gwt.core.client.GWT;
@@ -110,11 +110,13 @@ public class DtcTestPageView {
 
   private HTMLPane htmlPane;
 
-  private DtcRequestInfoModel requestInfo;
+  private DtcRequestMeta requestInfo;
 
   private DtcChronoView chronoView;
 
   private DtcTestPageViewObserver readyRequestDataCb;
+
+  private static final RegExp IP_PATTERN = RegExp.compile("[0-9]+.[0-9]+.[0-9]+.[0-9]+");
 
   public void chronoStart() {
     this.chronoView.start();
@@ -190,8 +192,7 @@ public class DtcTestPageView {
       String request = "";
       GWT.log(record.getAttribute("value"));
       if (record.getAttribute("name").toLowerCase().equals("ip_select")) {
-        RegExp regExp = RegExp.compile("[0-9]+.[0-9]+.[0-9]+.[0-9]+");
-        MatchResult match = regExp.exec(record.getAttribute("value"));
+        MatchResult match = DtcTestPageView.IP_PATTERN.exec(record.getAttribute("value"));
         request = record.getAttribute("name") + "=" + match.getGroup(0);
       } else {
         String value = record.getAttribute("value");
@@ -213,13 +214,12 @@ public class DtcTestPageView {
     this.layout.setVisible(true);
   }
 
-  public Map<String, String> getRequestParameter() {
+  public Map<String, String> getRequestParameters() {
     Map<String, String> params = new HashMap<String, String>();
     for (ListGridRecord record : this.requestFormGrid.getRecords()) {
       String value;
       if (record.getAttribute("name").toLowerCase().equals("ip_select")) {
-        RegExp regExp = RegExp.compile("[0-9]+.[0-9]+.[0-9]+.[0-9]+");
-        MatchResult match = regExp.exec(record.getAttribute("value"));
+        MatchResult match = DtcTestPageView.IP_PATTERN.exec(record.getAttribute("value"));
         value = match.getGroup(0);
       } else {
         value = record.getAttribute("value");
@@ -238,7 +238,7 @@ public class DtcTestPageView {
     this.readyRequestDataCb = cb;
   }
 
-  public void setRequestInfo(DtcRequestInfoModel requestInfo) {
+  public void setRequestInfo(DtcRequestMeta requestInfo) {
     this.requestInfo = requestInfo;
   }
 
@@ -274,7 +274,6 @@ public class DtcTestPageView {
     this.layout.setWidth100();
     this.layout.setHeight(800);
     this.layout.setMembersMargin(20);
-
     this.layout.addMember(this.vLayoutLeft);
     this.layout.addMember(this.hLayoutRight);
     this.layout.setLayoutMargin(10);
@@ -289,15 +288,7 @@ public class DtcTestPageView {
     this.nameField.setCanGroupBy(false);
   }
 
-  private void setupRequestFormGrid() {
-    this.requestFormGrid = new ListGrid();
-    this.requestFormGrid.setWidth(300);
-    this.requestFormGrid.setShowAllRecords(true);
-
-    this.requestFormGrid.setCanEdit(true);
-    this.requestFormGrid.setEditEvent(ListGridEditEvent.CLICK);
-    this.requestFormGrid.setEditByCell(true);
-
+  private void setupPreviewHandler() {
     Event.addNativePreviewHandler(new Event.NativePreviewHandler() {
 
       @Override
@@ -310,7 +301,15 @@ public class DtcTestPageView {
         }
       }
     });
+  }
 
+  private void setupRequestFormGrid() {
+    this.requestFormGrid = new ListGrid();
+    this.requestFormGrid.setWidth(300);
+    this.requestFormGrid.setShowAllRecords(true);
+    this.requestFormGrid.setCanEdit(true);
+    this.requestFormGrid.setEditEvent(ListGridEditEvent.CLICK);
+    this.requestFormGrid.setEditByCell(true);
     this.requestFormGrid.setHeight(1);
     this.requestFormGrid.setShowAllRecords(true);
     this.requestFormGrid.setBodyOverflow(Overflow.VISIBLE);
@@ -322,8 +321,9 @@ public class DtcTestPageView {
     this.createGridRecord();
     this.setupNameField();
     this.setupValueField();
-
     this.requestFormGrid.setFields(this.nameField, this.valueField);
+
+    this.setupPreviewHandler();
   }
 
   private void setupSearchButton() {
@@ -331,7 +331,6 @@ public class DtcTestPageView {
     this.searchButton.setWidth(120);
     this.searchButton.setLeft(60);
     this.searchButton.setTop(45);
-
     this.searchButton.addClickHandler(new ClickHandler() {
 
       @Override
@@ -373,10 +372,7 @@ public class DtcTestPageView {
     this.vLayoutLeft.setMembersMargin(10);
     this.vLayoutLeft.setLayoutMargin(10);
 
-    this.vLayoutLeft.addMember(this.chronoView);
-    this.vLayoutLeft.addMember(this.requestFormGrid);
-    this.vLayoutLeft.addMember(this.searchButton);
-    this.vLayoutLeft.addMember(this.vLayoutLeftBottom);
+    this.wireVLayoutLeft();
 
   }
 
@@ -417,5 +413,12 @@ public class DtcTestPageView {
       }
     }
     return 0;
+  }
+
+  private void wireVLayoutLeft() {
+    this.vLayoutLeft.addMember(this.chronoView);
+    this.vLayoutLeft.addMember(this.requestFormGrid);
+    this.vLayoutLeft.addMember(this.searchButton);
+    this.vLayoutLeft.addMember(this.vLayoutLeftBottom);
   }
 }

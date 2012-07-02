@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.skcomms.dtc.client.PersistenceManager;
-import net.skcomms.dtc.shared.DtcRequestInfoModel;
+import net.skcomms.dtc.shared.DtcRequestMeta;
 import net.skcomms.dtc.shared.DtcRequestParameterModel;
 
 import com.google.gwt.core.client.GWT;
@@ -79,7 +79,7 @@ public class LastRequestLoaderController {
     }
   }
 
-  public void loadLastRequest(DtcRequestInfoModel requestInfo) {
+  public void loadLastRequest(DtcRequestMeta requestInfo) {
     // set value
     List<DtcRequestParameterModel> requestParamList = requestInfo.getParams();
     DtcRequestParameterModel requestParam = null;

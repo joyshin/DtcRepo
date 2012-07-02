@@ -5,22 +5,22 @@ package net.skcomms.dtc.client.service;
 
 import java.util.List;
 
-import net.skcomms.dtc.shared.DtcNodeMetaModel;
-import net.skcomms.dtc.shared.DtcRequestInfoModel;
-import net.skcomms.dtc.shared.HttpRequestInfoModel;
+import net.skcomms.dtc.client.model.DtcResponse;
+import net.skcomms.dtc.shared.DtcNodeMeta;
+import net.skcomms.dtc.shared.DtcRequest;
+import net.skcomms.dtc.shared.DtcRequestMeta;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
  * @author jujang@sk.com
- * 
  */
 public interface DtcServiceAsync {
 
-  void getDir(String path, AsyncCallback<List<DtcNodeMetaModel>> callback);
+  void getDir(String path, AsyncCallback<List<DtcNodeMeta>> callback);
 
-  void getDtcRequestPageInfo(String path, AsyncCallback<DtcRequestInfoModel> callback);
+  void getDtcRequestPageInfo(String path, AsyncCallback<DtcRequestMeta> callback);
 
-  void getDtcTestPageResponse(HttpRequestInfoModel httpRequestInfo, AsyncCallback<String> callback);
+  void getDtcResponse(DtcRequest httpRequestInfo, AsyncCallback<DtcResponse> callback);
 
 }

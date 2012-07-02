@@ -15,8 +15,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import net.skcomms.dtc.shared.DtcNodeMetaModel;
-import net.skcomms.dtc.shared.DtcRequestInfoModel;
+import net.skcomms.dtc.shared.DtcNodeMeta;
+import net.skcomms.dtc.shared.DtcRequestMeta;
 import net.skcomms.dtc.shared.DtcServiceVerifier;
 
 import org.junit.Assert;
@@ -32,8 +32,8 @@ public class DtcServiceImplTest {
 
   @Test
   public void testExtractItemsFrom() throws IOException, ParseException {
-    List<DtcNodeMetaModel> items = new DtcServiceImpl().getDirImpl("/");
-    for (DtcNodeMetaModel item : items) {
+    List<DtcNodeMeta> items = new DtcServiceImpl().getDirImpl("/");
+    for (DtcNodeMeta item : items) {
       Assert.assertNotNull(item.getName());
       Assert.assertNotNull(item.getDescription());
       Assert.assertNotNull(item.getUpdateTime());
@@ -58,7 +58,7 @@ public class DtcServiceImplTest {
     Assert.assertFalse(items.isEmpty());
 
     items = new DtcServiceImpl().getDirImpl("/kshop2s/");
-    for (DtcNodeMetaModel item : items) {
+    for (DtcNodeMeta item : items) {
       Assert.assertNotNull(item.getName());
       Assert.assertNotNull(item.getDescription());
       Assert.assertNotNull(item.getUpdateTime());
@@ -85,8 +85,8 @@ public class DtcServiceImplTest {
 
   @Test
   public void testGetDir() throws IOException {
-    List<DtcNodeMetaModel> nodes = new DtcServiceImpl().getDirImpl("/common/");
-    for (DtcNodeMetaModel node : nodes) {
+    List<DtcNodeMeta> nodes = new DtcServiceImpl().getDirImpl("/common/");
+    for (DtcNodeMeta node : nodes) {
       System.out.println(node);
     }
   }
@@ -116,7 +116,7 @@ public class DtcServiceImplTest {
 
   @Test
   public void testParseTestPage() throws IOException {
-    DtcRequestInfoModel requestInfo = new DtcServiceImpl()
+    DtcRequestMeta requestInfo = new DtcServiceImpl()
         .getDtcRequestPageInfo("/kadcpts/100.ini");
     System.out.println(requestInfo.getParams().toString());
     System.out.println(requestInfo.getIpInfo());

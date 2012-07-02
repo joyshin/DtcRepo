@@ -10,17 +10,17 @@ import net.skcomms.dtc.client.DtcArdbeg.Pair;
 import net.skcomms.dtc.client.DtcNodeObserver;
 import net.skcomms.dtc.client.PersistenceManager;
 import net.skcomms.dtc.client.service.DtcService;
-import net.skcomms.dtc.shared.DtcNodeMetaModel;
-import net.skcomms.dtc.shared.DtcRequestInfoModel;
+import net.skcomms.dtc.shared.DtcNodeMeta;
+import net.skcomms.dtc.shared.DtcRequestMeta;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class DtcNodeModel {
 
-  private final List<DtcNodeMetaModel> dtcFavoriteNodeList = new ArrayList<DtcNodeMetaModel>();
+  private final List<DtcNodeMeta> dtcFavoriteNodeList = new ArrayList<DtcNodeMeta>();
 
-  private final List<DtcNodeMetaModel> dtcNodeList = new ArrayList<DtcNodeMetaModel>();
+  private final List<DtcNodeMeta> dtcNodeList = new ArrayList<DtcNodeMeta>();
 
   private static DtcNodeModel instance = new DtcNodeModel();
 
@@ -29,18 +29,18 @@ public class DtcNodeModel {
     return DtcNodeModel.instance;
   }
 
-  private static void sortFavoritesByVisitCount(List<Pair<Integer, DtcNodeMetaModel>> rows) {
-    Collections.sort(rows, new Comparator<Pair<Integer, DtcNodeMetaModel>>() {
+  private static void sortFavoritesByVisitCount(List<Pair<Integer, DtcNodeMeta>> rows) {
+    Collections.sort(rows, new Comparator<Pair<Integer, DtcNodeMeta>>() {
 
       @Override
       public int
-          compare(Pair<Integer, DtcNodeMetaModel> arg0, Pair<Integer, DtcNodeMetaModel> arg1) {
+          compare(Pair<Integer, DtcNodeMeta> arg0, Pair<Integer, DtcNodeMeta> arg1) {
         return -arg0.getKey().compareTo(arg1.getKey());
       }
     });
   }
 
-  private final List<DtcArdbeg.Pair<Integer, DtcNodeMetaModel>> favoritePairs = new ArrayList<DtcArdbeg.Pair<Integer, DtcNodeMetaModel>>();
+  private final List<DtcArdbeg.Pair<Integer, DtcNodeMeta>> favoritePairs = new ArrayList<DtcArdbeg.Pair<Integer, DtcNodeMeta>>();
 
   DtcArdbeg owner;
 
@@ -53,22 +53,22 @@ public class DtcNodeModel {
     this.observers.add(observer);
   }
 
-  private void categorizeNodesByVisitCount(List<DtcNodeMetaModel> nodeInfos) {
+  private void categorizeNodesByVisitCount(List<DtcNodeMeta> nodeInfos) {
     this.dtcNodeList.clear();
     this.favoritePairs.clear();
 
-    for (DtcNodeMetaModel nodeInfo : nodeInfos) {
+    for (DtcNodeMeta nodeInfo : nodeInfos) {
       System.out.println("name:" + nodeInfo.getName() + ", path:" + nodeInfo.getPath());
       Integer score = PersistenceManager.getInstance().getVisitCount(nodeInfo.getName());
       if (score > 0) {
-        this.favoritePairs.add(new Pair<Integer, DtcNodeMetaModel>(score, nodeInfo));
+        this.favoritePairs.add(new Pair<Integer, DtcNodeMeta>(score, nodeInfo));
       } else {
         this.dtcNodeList.add(nodeInfo);
       }
     }
   }
 
-  public void changeNodeListOf(DtcNodeMetaModel selected) {
+  public void changeNodeListOf(DtcNodeMeta selected) {
 
     if (this.isDtcFavoriteNode(selected)) {
       this.moveToDtcNodeList(selected);
@@ -92,16 +92,16 @@ public class DtcNodeModel {
     }
   }
 
-  public List<DtcNodeMetaModel> getFavoriteNodeList() {
+  public List<DtcNodeMeta> getFavoriteNodeList() {
     return this.dtcFavoriteNodeList;
   }
 
-  public List<DtcNodeMetaModel> getNodeList() {
+  public List<DtcNodeMeta> getNodeList() {
     return this.dtcNodeList;
   }
 
   // FIXME 모델에서는 직접 메써드를 호출하는 대신 선택된 노드 혹은 경로를 통지하자.
-  public void goToPageBasedOn(DtcNodeMetaModel selected) {
+  public void goToPageBasedOn(DtcNodeMeta selected) {
     DtcNodeModel.this.owner.setPath(selected.getPath());
   }
 
@@ -110,24 +110,30 @@ public class DtcNodeModel {
     this.owner = dtcArdbeg;
   }
 
-  private boolean isDtcFavoriteNode(DtcNodeMetaModel selected) {
+  private boolean isDtcFavoriteNode(DtcNodeMeta selected) {
     return this.dtcFavoriteNodeList.contains(selected);
   }
 
-  private void moveToDtcFavoriteNodeList(DtcNodeMetaModel selected) {
+  private void moveToDtcFavoriteNodeList(DtcNodeMeta selected) {
     PersistenceManager.getInstance().addVisitCount(selected.getName());
     this.dtcFavoriteNodeList.add(selected);
     this.dtcNodeList.remove(selected);
   }
 
-  private void moveToDtcNodeList(DtcNodeMetaModel selected) {
+  private void moveToDtcNodeList(DtcNodeMeta selected) {
     PersistenceManager.getInstance().removeItem(selected.getName());
     this.dtcFavoriteNodeList.remove(selected);
     this.dtcNodeList.add(selected);
   }
 
+  private void fireTestPageLoaded(DtcRequestMeta requestInfo) {
+    for (DtcNodeObserver observer : DtcNodeModel.this.observers) {
+      observer.onDtcTestPageLoaded(requestInfo);
+    }
+  }
+
   public void refreshDtcDirectoryPageNode(final String path) {
-    DtcService.Util.getInstance().getDir(path, new AsyncCallback<List<DtcNodeMetaModel>>() {
+    DtcService.Util.getInstance().getDir(path, new AsyncCallback<List<DtcNodeMeta>>() {
 
       @Override
       public void onFailure(Throwable caught) {
@@ -135,21 +141,16 @@ public class DtcNodeModel {
       }
 
       @Override
-      public void onSuccess(List<DtcNodeMetaModel> nodeInfos) {
+      public void onSuccess(List<DtcNodeMeta> nodeInfos) {
         DtcNodeModel.this.setDtcNodeList(nodeInfos);
         DtcNodeModel.this.fireNodeListChanged();
-
-        if (path.equals("/")) {
-        }
-        else {
-          DtcNodeModel.this.owner.fireDtcServiceDirectoryPageLoaded(path);
-        }
+        DtcNodeModel.this.owner.fireDtcServiceDirectoryPageLoaded(path);
       }
     });
   }
 
   public void refreshDtcHomePageNode() {
-    DtcService.Util.getInstance().getDir("/", new AsyncCallback<List<DtcNodeMetaModel>>() {
+    DtcService.Util.getInstance().getDir("/", new AsyncCallback<List<DtcNodeMeta>>() {
 
       @Override
       public void onFailure(Throwable caught) {
@@ -157,10 +158,9 @@ public class DtcNodeModel {
       }
 
       @Override
-      public void onSuccess(List<DtcNodeMetaModel> nodeInfos) {
+      public void onSuccess(List<DtcNodeMeta> nodeInfos) {
         DtcNodeModel.this.categorizeNodesByVisitCount(nodeInfos);
         DtcNodeModel.this.sortDtcFavoriteNodeList();
-
         DtcNodeModel.this.fireNodeListChanged();
         DtcNodeModel.this.fireFavoriteNodeListChanged();
         DtcNodeModel.this.owner.fireDtcHomePageLoaded();
@@ -170,7 +170,7 @@ public class DtcNodeModel {
 
   public void refreshDtcTestPage(final String path) {
     DtcService.Util.getInstance().getDtcRequestPageInfo(path,
-        new AsyncCallback<DtcRequestInfoModel>() {
+        new AsyncCallback<DtcRequestMeta>() {
 
           @Override
           public void onFailure(Throwable caught) {
@@ -178,22 +178,20 @@ public class DtcNodeModel {
           }
 
           @Override
-          public void onSuccess(DtcRequestInfoModel requestInfo) {
-            for (DtcNodeObserver observer : DtcNodeModel.this.observers) {
-              observer.onDtcTestPageLoaded(requestInfo);
-            }
+          public void onSuccess(DtcRequestMeta requestInfo) {
+            DtcNodeModel.this.fireTestPageLoaded(requestInfo);
           }
         });
   }
 
-  private void setDtcNodeList(List<DtcNodeMetaModel> nodeInfos) {
+  private void setDtcNodeList(List<DtcNodeMeta> nodeInfos) {
     this.dtcNodeList.clear();
     this.dtcNodeList.addAll(nodeInfos);
   }
 
-  private void setFavoriteListFrom(List<Pair<Integer, DtcNodeMetaModel>> favoritePairs) {
+  private void setFavoriteListFrom(List<Pair<Integer, DtcNodeMeta>> favoritePairs) {
     this.dtcFavoriteNodeList.clear();
-    for (Pair<Integer, DtcNodeMetaModel> favoritePair : favoritePairs) {
+    for (Pair<Integer, DtcNodeMeta> favoritePair : favoritePairs) {
       this.dtcFavoriteNodeList.add(favoritePair.getValue());
     }
   }

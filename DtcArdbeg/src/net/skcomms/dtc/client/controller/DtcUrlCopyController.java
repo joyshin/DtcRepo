@@ -40,7 +40,7 @@ public class DtcUrlCopyController {
     } else {
       sb.append("?path=");
       sb.append(URL.encode(this.module.getCurrentPath()));
-      Map<String, String> params = this.dtcTestPageView.getRequestParameter();
+      Map<String, String> params = this.dtcTestPageView.getRequestParameters();
       for (Entry<String, String> entry : params.entrySet()) {
         sb.append('&');
         sb.append(entry.getKey());
