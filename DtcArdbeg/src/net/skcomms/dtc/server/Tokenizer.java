@@ -10,7 +10,7 @@ public class Tokenizer {
 
   Pattern patternSpace = Pattern.compile("[^\\u000A\\u0009]+|\\u000A|\\u0009");
 
-  private Scanner scanner;
+  private final Scanner scanner;
 
   private String recalledToken = null;
 
@@ -21,6 +21,10 @@ public class Tokenizer {
 
   public byte[] getBinaryData(int binarySize) {
     // FIXME 바이너리 데이터를 처리하려면 Scanner를 걷어내고 직접 토큰을 생성한다.
+    if (!this.scanner.hasNext(".*")) {
+      return new byte[0];
+    }
+
     byte[] bytes = this.scanner.next(".*").getBytes();
     if (binarySize != bytes.length) {
       throw new IllegalArgumentException("ERROR: expectedSize:" + binarySize + ", actual:"

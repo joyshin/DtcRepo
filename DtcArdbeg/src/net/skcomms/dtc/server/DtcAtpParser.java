@@ -23,13 +23,13 @@ public class DtcAtpParser {
     return parser.getAtp();
   }
 
-  private DtcAtp atp;
+  private final DtcAtp atp;
 
-  private Tokenizer tokenizer;
+  private final Tokenizer tokenizer;
 
   private int binarySize;
 
-  private InputStream inputStream;
+  private final InputStream inputStream;
 
   private DtcAtpRecord currRecord;
 
@@ -83,7 +83,7 @@ public class DtcAtpParser {
 
   private void match(String token, String terminal) {
     if (!token.equals(terminal)) {
-      throw new IllegalArgumentException("ERROR: [" + terminal + "] expected, actual:" + token
+      throw new IllegalArgumentException("ERROR: [" + terminal + "] expected, actual:[" + token
           + "]");
     }
   }
