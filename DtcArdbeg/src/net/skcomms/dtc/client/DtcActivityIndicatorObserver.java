@@ -5,4 +5,5 @@ public interface DtcActivityIndicatorObserver {
   void onHide();
 
   void onShow();
+
 }

@@ -1,27 +1,44 @@
 package net.skcomms.dtc.client.controller;
 
-import net.skcomms.dtc.client.DtcActivityIndicatorObserver;
-import net.skcomms.dtc.client.DtcArdbeg;
+import net.skcomms.dtc.client.DefaultDtcTestPageViewObserver;
+import net.skcomms.dtc.client.DtcArdbegObserver;
+import net.skcomms.dtc.shared.DtcRequestInfoModel;
 
 import com.google.gwt.user.client.ui.RootPanel;
 
-public class DtcActivityIndicatorController {
+public class DtcActivityIndicatorController extends DefaultDtcTestPageViewObserver implements
+    DtcArdbegObserver {
 
-  DtcActivityIndicatorObserver indicator = new DtcActivityIndicatorObserver() {
+  @Override
+  public void onDtcDirectoryLoaded(String path) {
+    // TODO Auto-generated method stub
 
-    @Override
-    public void onHide() {
-      RootPanel.get("loading").setVisible(false);
-    }
+  }
 
-    @Override
-    public void onShow() {
-      RootPanel.get("loading").setVisible(true);
-    }
-  };
+  @Override
+  public void onDtcHomeLoaded() {
+    RootPanel.get("loading").setVisible(false);
+  }
 
-  public void initialize(DtcArdbeg dtcArdbeg, DtcTestPageController dtcTestPageController) {
-    dtcTestPageController.setOnIndicatorActivityObserver(this.indicator);
-    dtcArdbeg.setOnIndicatorActivityObserver(this.indicator);
+  @Override
+  public void onDtcResponseFrameLoaded(boolean success) {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public void onDtcTestPageLoaded(DtcRequestInfoModel requestInfo) {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public void onSearchStart() {
+    RootPanel.get("loading").setVisible(true);
+  }
+
+  @Override
+  public void onSearchStop() {
+    RootPanel.get("loading").setVisible(false);
   }
 }

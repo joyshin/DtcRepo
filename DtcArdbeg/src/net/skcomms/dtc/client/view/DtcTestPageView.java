@@ -56,7 +56,6 @@ public class DtcTestPageView {
       this.setKey(key);
       this.setName(name);
       this.setValue(value);
-
     }
 
     public int getId() {
@@ -115,6 +114,12 @@ public class DtcTestPageView {
   private DtcChronoView chronoView;
 
   private DtcTestPageViewObserver readyRequestDataCb;
+
+  private final List<DtcTestPageViewObserver> dtcTestPageViewObservers = new ArrayList<DtcTestPageViewObserver>();
+
+  public void addDtcArdbegObserver(DtcTestPageViewObserver observer) {
+    this.dtcTestPageViewObservers.add(observer);
+  }
 
   public void chronoStart() {
     this.chronoView.start();
@@ -247,7 +252,7 @@ public class DtcTestPageView {
           if (event.getTypeInt() == Event.ONKEYUP) {
             if (event.getNativeEvent().getKeyCode() == 13) {
               if (DtcTestPageView.this.validateRequestData() == 0) {
-                DtcTestPageView.this.readyRequestDataCb.onReadyRequestData();
+                DtcTestPageView.this.onSearchStart();
               }
             }
           }
@@ -290,7 +295,7 @@ public class DtcTestPageView {
       @Override
       public void onClick(ClickEvent event) {
         if (DtcTestPageView.this.validateRequestData() == 0) {
-          DtcTestPageView.this.readyRequestDataCb.onReadyRequestData();
+          DtcTestPageView.this.onSearchStart();
         }
       }
     });
@@ -346,8 +351,22 @@ public class DtcTestPageView {
     return params;
   }
 
+  public void onSearchStart() {
+    for (DtcTestPageViewObserver observer : this.dtcTestPageViewObservers) {
+      observer.onSearchStart();
+    }
+  }
+
+  public void onSearchStop() {
+    for (DtcTestPageViewObserver observer : this.dtcTestPageViewObservers) {
+      observer.onSearchStop();
+    }
+  }
+
   public void setHTMLData(String convertedHTML) {
+
     this.htmlPane.setContents(convertedHTML);
+    DtcTestPageView.this.onSearchStop();
   }
 
   public void setOnReadyRequestDataObserver(DtcTestPageViewObserver cb) {

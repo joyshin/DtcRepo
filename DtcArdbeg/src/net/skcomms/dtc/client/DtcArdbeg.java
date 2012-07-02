@@ -99,8 +99,6 @@ public class DtcArdbeg implements EntryPoint {
 
   private final DtcActivityIndicatorController dtcActivityIndicatorController = new DtcActivityIndicatorController();
 
-  private DtcActivityIndicatorObserver dtcActivityIndicatorObserver;
-
   public void addDtcArdbegObserver(DtcArdbegObserver observer) {
     this.dtcArdbegObservers.add(observer);
   }
@@ -191,19 +189,20 @@ public class DtcArdbeg implements EntryPoint {
     return Window.Location.getParameterMap();
   }
 
-  public void hideSplash() {
-    for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
-      observer.onHide();
-    }
-  }
+  // public void hideSplash() {
+  // for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
+  // observer.onHide();
+  // }
+  // }
 
   // public void hideSplash() {
   // RootPanel.get("loading").setVisible(false);
   // }
-
-  private void initializeActivityIndicator() {
-    this.dtcActivityIndicatorController.initialize(this, this.dtcTestPageController);
-  }
+  //
+  // private void initializeActivityIndicator() {
+  // this.dtcActivityIndicatorController.initialize(this,
+  // this.dtcTestPageController);
+  // }
 
   protected void initializeComponents() {
 
@@ -217,9 +216,8 @@ public class DtcArdbeg implements EntryPoint {
     this.initializeUrlCopy();
     this.usernameSubmissionManager.initialize();
 
-    this.initializeActivityIndicator();
+    this.addDtcArdbegObserver(this.dtcActivityIndicatorController);
 
-    this.dtcActivityIndicatorObserver.onHide();
   }
 
   private void initializeDtcNodeView() {
@@ -252,6 +250,8 @@ public class DtcArdbeg implements EntryPoint {
   private void initializeTestPage() {
     LastRequestLoaderController lastRequestLoaderController = new LastRequestLoaderController();
     this.dtcTestPageController.initialize(this, this.dtcTestPageView, lastRequestLoaderController);
+
+    this.dtcTestPageView.addDtcArdbegObserver(this.dtcActivityIndicatorController);
   }
 
   private void initializeUrlCopy() {
@@ -272,18 +272,8 @@ public class DtcArdbeg implements EntryPoint {
     this.initializeComponents();
   }
 
-  public void onSubmitRequestForm() {
-    for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
-      observer.onSubmitRequestForm();
-    }
-  }
-
   public void removeDtcArdbegObserver(DtcArdbegObserver observer) {
     this.dtcArdbegObservers.remove(observer);
-  }
-
-  public void setOnIndicatorActivityObserver(DtcActivityIndicatorObserver cb) {
-    this.dtcActivityIndicatorObserver = cb;
   }
 
   /**
@@ -302,12 +292,12 @@ public class DtcArdbeg implements EntryPoint {
       this.dtcArdbegNodeModel.refreshDtcTestPage(path);
     }
   }
-
-  public void showSplash() {
-    for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
-      observer.onShow();
-    }
-  }
+  //
+  // public void showSplash() {
+  // for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
+  // observer.onShow();
+  // }
+  // }
   // public void showSplash() {
   // RootPanel.get("loading").setVisible(true);
   // }

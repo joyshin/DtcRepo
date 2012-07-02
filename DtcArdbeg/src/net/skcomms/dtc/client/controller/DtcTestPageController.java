@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import net.skcomms.dtc.client.DefaultDtcArdbegObserver;
-import net.skcomms.dtc.client.DtcActivityIndicatorObserver;
 import net.skcomms.dtc.client.DtcArdbeg;
 import net.skcomms.dtc.client.DtcTestPageViewObserver;
 import net.skcomms.dtc.client.service.DtcService;
@@ -17,7 +16,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
-public class DtcTestPageController extends DefaultDtcArdbegObserver {
+public class DtcTestPageController extends DefaultDtcArdbegObserver implements
+    DtcTestPageViewObserver {
 
   private DtcTestPageView dtcTestPageView;
 
@@ -30,8 +30,6 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
   private String encoding;
 
   private Map<String, List<String>> initialRequestParameters = null;
-
-  private DtcActivityIndicatorObserver dtcActivityIndicatorObserver;
 
   private void adjustRequestInfo(DtcRequestInfoModel requestInfo) {
     if (this.initialRequestParameters != null && this.initialRequestParameters.size() > 0) {
@@ -77,14 +75,6 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
     this.dtcTestPageView = dtcTestPageView;
     this.lastRequestLoader = lastRequestLoader;
     this.initialRequestParameters = dtcArdbeg.getRequestParameters();
-
-    dtcTestPageView.setOnReadyRequestDataObserver(new DtcTestPageViewObserver() {
-
-      @Override
-      public void onReadyRequestData() {
-        dtcArdbeg.onSubmitRequestForm();
-      }
-    });
   }
 
   public void loadDtcTestPageView(DtcRequestInfoModel requestInfo) {
@@ -102,9 +92,20 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
   }
 
   @Override
-  public void onSubmitRequestForm() {
-    this.dtcActivityIndicatorObserver.onShow();
+  public void onReadyRequestData() {
     this.sendRequest();
+  }
+
+  @Override
+  public void onSearchStart() {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public void onSearchStop() {
+    // TODO Auto-generated method stub
+
   }
 
   protected void sendRequest() {
@@ -139,8 +140,7 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
             caught.printStackTrace();
             DtcTestPageController.this.dtcTestPageView.chronoStop();
             GWT.log("getDtcTestPageResponse Failed: " + caught.getMessage());
-
-            DtcTestPageController.this.dtcActivityIndicatorObserver.onHide();
+            DtcTestPageController.this.dtcTestPageView.setHTMLData("ERROR");
           }
 
           @Override
@@ -160,14 +160,7 @@ public class DtcTestPageController extends DefaultDtcArdbegObserver {
             DtcTestPageController.this.lastRequestLoader.createLastRequest(lastRequestKey,
                 requestParam);
             DtcTestPageController.this.lastRequestLoader.persist();
-
-            DtcTestPageController.this.dtcActivityIndicatorObserver.onHide();
           }
         });
-  }
-
-  public void setOnIndicatorActivityObserver(
-      DtcActivityIndicatorObserver cb) {
-    this.dtcActivityIndicatorObserver = cb;
   }
 }
