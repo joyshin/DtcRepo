@@ -50,6 +50,7 @@ import javax.xml.parsers.SAXParserFactory;
 
 import net.skcomms.dtc.client.model.DtcResponse;
 import net.skcomms.dtc.client.service.DtcService;
+import net.skcomms.dtc.server.model.DtcAtp;
 import net.skcomms.dtc.server.model.DtcIni;
 import net.skcomms.dtc.server.model.DtcLog;
 import net.skcomms.dtc.server.model.DtcRequestProperty;
@@ -336,6 +337,30 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
 
   private EntityManagerFactory emf;
 
+  private String createAtpResponse(DtcRequest request, DtcIni ini) {
+
+    // atp request object generation
+    DtcAtp atp = DtcAtpFactory.createFrom(request, ini);
+
+    // open socket
+
+    // send and receive
+
+    // atp response object generation
+
+    // atp -> html
+
+    // return new String(atp.getBytes());
+
+    try {
+      return new String(atp.getBytes(ini.getCharacterSet()));
+    } catch (UnsupportedEncodingException e) {
+      throw new IllegalStateException("UnsupportedEncoding:" + ini.getCharacterSet());
+    } catch (IOException e) {
+      throw new IllegalStateException(e);
+    }
+  }
+
   private DtcRequestMeta createRequestInfo(DtcIni ini) {
     DtcRequestMeta requestInfo = new DtcRequestMeta();
 
@@ -428,25 +453,34 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
   }
 
   @Override
-  public DtcResponse getDtcResponse(DtcRequest httpRequestInfo)
+  public DtcResponse getDtcResponse(DtcRequest request)
       throws IllegalArgumentException {
 
     String rawHtml = null;
-    if (!DtcServiceVerifier.isValidMethod(httpRequestInfo.getHttpMethod())) {
-      throw new IllegalArgumentException("Invalid HTTP Method: " + httpRequestInfo.getHttpMethod());
+    if (!DtcServiceVerifier.isValidMethod(request.getHttpMethod())) {
+      throw new IllegalArgumentException("Invalid HTTP Method: " + request.getHttpMethod());
     }
 
     // change encoding
     try {
-      String encodedData = DtcServiceImpl.getEncodedQuery(httpRequestInfo.getRequestData(),
-          httpRequestInfo.getEncoding());
-      httpRequestInfo.setRequestData(encodedData);
+
+      String filePath = DtcServiceImpl.getRootPath() + request.getPath().substring(1);
+      DtcIni ini = new DtcIniFactory().createFrom(filePath);
+
+      String encodedData = DtcServiceImpl.getEncodedQuery(request.getRequestData(),
+          request.getEncoding());
+      request.setRequestData(encodedData);
 
       // replace URL
       String targetUrl = DtcServiceImpl.DTC_URL + "response.html";
-      httpRequestInfo.setUrl(targetUrl);
+      request.setUrl(targetUrl);
       Date startTime = new Date();
-      rawHtml = DtcServiceImpl.createDtcResponse(httpRequestInfo);
+      if (ini.getProtocol().equals("ATP")) {
+        rawHtml = this.createAtpResponse(request, ini);
+      } else {
+        rawHtml = DtcServiceImpl.createDtcResponse(request);
+      }
+
       Date endTime = new Date();
       DtcResponse response = new DtcResponse();
       response.setResponseTime(endTime.getTime() - startTime.getTime());

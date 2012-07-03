@@ -21,17 +21,17 @@ public class DtcIni {
 
   private String charset = "euckr";
 
-  private List<DtcBaseProperty> baseProps = new ArrayList<DtcBaseProperty>();
+  private final List<DtcBaseProperty> baseProps = new ArrayList<DtcBaseProperty>();
 
-  private List<DtcRequestProperty> requestProps = new ArrayList<DtcRequestProperty>();
+  private final List<DtcRequestProperty> requestProps = new ArrayList<DtcRequestProperty>();
 
-  private List<DtcResponseProperty> responseProps = new ArrayList<DtcResponseProperty>();
+  private final List<DtcResponseProperty> responseProps = new ArrayList<DtcResponseProperty>();
 
-  private List<String> listAttrs = new ArrayList<String>();
+  private final List<String> listAttrs = new ArrayList<String>();
 
-  private List<String> errors = new ArrayList<String>();
+  private final List<String> errors = new ArrayList<String>();
 
-  private Map<String, String> ips = new HashMap<String, String>();
+  private final Map<String, String> ips = new HashMap<String, String>();
 
   public void addErrorMessage(String message) {
     this.errors.add(message);
@@ -68,6 +68,11 @@ public class DtcIni {
 
   public List<String> getListAttrs() {
     return Collections.unmodifiableList(this.listAttrs);
+  }
+
+  public String getProtocol() {
+    DtcBaseProperty protocol = this.getBaseProp("PROTOCOL");
+    return (protocol == null) ? "ATP" : protocol.getValue();
   }
 
   public DtcRequestProperty getRequestProp(String key) {
