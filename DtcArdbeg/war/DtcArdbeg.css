@@ -143,4 +143,32 @@ div[class^='value']{display:table-cell;
 					color:white; 
 					width:100%;}
 
+button.gwt-Button-copyLink {
+	background:transparent;
+	padding:0px;
+	border:0px;
+	width:30px;
+	height:30px;
+}
 
+button.gwt-Button-loginButton {
+	background:transparent;
+	padding:0px;
+	border:0px;
+	width:30px;
+	height:30px;
+}
+
+button.gwt-Button-logoutButton {
+	background:transparent;
+	padding:0px;
+	border:0px;
+	width:30px;
+	height:30px;
+}
+
+.gwt-Label-username {
+	font-family:"New Gulim";
+}
+	
+}

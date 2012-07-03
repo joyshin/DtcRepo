@@ -9,17 +9,34 @@ import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class DtcUserSignInView {
+  void didUserNameEntered(final Button loginButton, final Button logoutButton,
+      final DialogBox loginDialog, final TextBox usernameText) {
+    loginDialog.hide();
+    Label usernameLabel = new Label(usernameText.getValue());
+    usernameLabel.addStyleDependentName("username");
+    RootPanel.get("usernameContainer").clear();
+    RootPanel.get("usernameContainer").add(usernameLabel);
+    DtcConfigController.getInstance().setUsername(usernameText.getValue());
+    loginButton.setVisible(false);
+    logoutButton.setVisible(true);
+  }
+
   public void initialize() {
-    Button loginButton = new Button("login");
+    final Button loginButton = new Button("<img src='Login-icon.png' width='30' height='30'>");
+    final Button logoutButton = new Button("<img src='Logout-icon.png' width='30' height='30'>");
     RootPanel.get("loginContainer").add(loginButton);
+    RootPanel.get("loginContainer").add(logoutButton);
+    loginButton.addStyleDependentName("loginButton");
+    logoutButton.addStyleDependentName("logoutButton");
+    logoutButton.setVisible(false);
 
     loginButton.addClickHandler(new ClickHandler() {
 
@@ -49,10 +66,9 @@ public class DtcUserSignInView {
           @Override
           public void onKeyDown(KeyDownEvent event) {
             if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-              loginDialog.hide();
-              RootPanel.get("usernameContainer").clear();
-              RootPanel.get("usernameContainer").add(new HTML(usernameText.getValue()));
-              DtcConfigController.getInstance().setUsername(usernameText.getValue());
+              DtcUserSignInView.this.didUserNameEntered(loginButton, logoutButton, loginDialog,
+                  usernameText);
+
             }
           }
         });
@@ -61,10 +77,8 @@ public class DtcUserSignInView {
 
           @Override
           public void onClick(ClickEvent event) {
-            loginDialog.hide();
-            RootPanel.get("usernameContainer").clear();
-            RootPanel.get("usernameContainer").add(new HTML(usernameText.getValue()));
-            DtcConfigController.getInstance().setUsername(usernameText.getValue());
+            DtcUserSignInView.this.didUserNameEntered(loginButton, logoutButton, loginDialog,
+                usernameText);
           }
         });
 
@@ -75,6 +89,16 @@ public class DtcUserSignInView {
             loginDialog.hide();
           }
         });
+      }
+    });
+
+    logoutButton.addClickHandler(new ClickHandler() {
+
+      @Override
+      public void onClick(ClickEvent event) {
+        RootPanel.get("usernameContainer").clear();
+        loginButton.setVisible(true);
+        logoutButton.setVisible(false);
       }
     });
   }
