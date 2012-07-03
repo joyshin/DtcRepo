@@ -3,9 +3,7 @@ package net.skcomms.dtc.client.model;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import net.skcomms.dtc.client.PersistenceManager;
 
@@ -22,31 +20,6 @@ public class DtcSearchHistoryDao {
 
   public static String combineKeyPrefix(String path) {
     return DtcSearchHistoryDao.PREFIX + path + ".";
-  }
-
-  public static Map<String, String> getLastParameters(String key) {
-    String data = PersistenceManager.getInstance().getItem(key);
-
-    System.out.println("data: " + data);
-    Map<String, String> map = new HashMap<String, String>();
-
-    if (data == null) {
-      return map;
-    }
-
-    String[] formFields = data.split(DtcSearchHistory.FORM_FIELD_DELIMETER);
-    if (formFields == null) {
-      return map;
-    }
-
-    for (String element : formFields) {
-      String[] pair = element.split(DtcSearchHistory.FORM_VALUE_DELIMETER);
-      if (pair.length == 2) {
-        map.put(pair[0], pair[1]);
-      }
-    }
-
-    return map;
   }
 
   private List<DtcSearchHistory> getAllSearchHistories(String path) {
