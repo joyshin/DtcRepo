@@ -119,8 +119,10 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     return sb.toString().substring(0, sb.length() - 1);
   }
 
+  // TODO 복잡도 해소 예제
   static String createDtcResponse(DtcRequest dtcRequest) throws IOException {
 
+    // FIXME 로컬변수 선언은 변수 사용 직전에, scope이 최소화되도록 위치시킨다.
     String response = null;
     String encoding = null;
     StringBuilder responseBuffer = new StringBuilder();
@@ -165,6 +167,7 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     Pattern regExp = Pattern.compile("src=\"([^\"]*)");
     Matcher matcher = regExp.matcher(responseBuffer.toString());
 
+    // FIXME boolean 메써드는 긍정문으로 이름짓기하고, boolean 식은 == 로 비교하지 않는다.
     if (matcher.find() == false) {
       response = responseBuffer.toString();
       return response;
@@ -200,25 +203,7 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
       System.out.println("Response: " + response);
 
       if (responseUrl.contains("response_json.html")) {
-        // JSONParser parser = new JSONParser();
-        // DtcJsonToXmlHandler jsonHandler = new DtcJsonToXmlHandler();
-        //
-        // try {
-        // parser.parse(response, jsonHandler);
-        // } catch (ParseException e) {
-        // e.printStackTrace();
-        // }
-        //
-        // String xmlString = jsonHandler.toString();
-        //
-        // try {
-        // htmlData =
-        // DtcServiceImpl.getHtmlFromXml(xmlString.getBytes(encoding));
-        // } catch (UnsupportedEncodingException e) {
-        // e.printStackTrace();
-        // }
         htmlData = response;
-
       } else if (responseUrl.contains("response_xml.html")) {
         try {
           htmlData = DtcServiceImpl.getHtmlFromXml(response.getBytes(encoding));
@@ -242,6 +227,7 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
   private static String getEncodedQuery(String query, String encoding) throws IOException {
     // decode UTF-8 query
     StringBuilder paramList = new StringBuilder();
+    // FIXME block 내부에서만 사용하는 변수는 block 내부에 선언하자.
     String decodedQuery = null;
     String encodedQuery = null;
 

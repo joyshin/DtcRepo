@@ -175,8 +175,6 @@ public class DtcXmlToHtmlHandler extends DefaultHandler {
 
         }
       }
-      // System.out.println("div: " + divForm.toString());
-
     } else {
       nodeItem.append("</div>\n");
       divForm.append(nodeItem.toString());
@@ -198,6 +196,7 @@ public class DtcXmlToHtmlHandler extends DefaultHandler {
     this.rawHtml.append("<body>");
   }
 
+  // TODO 복잡도 해소 예제
   @Override
   public void startElement(String uri, String name, String qName, Attributes atts)
       throws SAXException {

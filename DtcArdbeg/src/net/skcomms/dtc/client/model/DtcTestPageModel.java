@@ -31,8 +31,6 @@ public class DtcTestPageModel {
   }
 
   public void sendRequest(final DtcRequest request) {
-    // TODO : return type이 String이 아닌, Response 정보(웅답시간, 성공여부 등)를 담고있는 클래스 객체로
-    // 바꾸자.
     DtcService.Util.getInstance().getDtcResponse(request,
         new AsyncCallback<DtcResponse>() {
 

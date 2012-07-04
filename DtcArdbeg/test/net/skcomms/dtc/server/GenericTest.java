@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -27,7 +28,7 @@ public class GenericTest {
 
   @Test
   public void test() {
-    Map<Object, Object> map = GenericTest.createHashMap();
+    Map<String, Object> map = GenericTest.createHashMap();
+    Assert.assertEquals(HashMap.class, map.getClass());
   }
-
 }

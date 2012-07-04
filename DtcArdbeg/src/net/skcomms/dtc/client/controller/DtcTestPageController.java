@@ -150,14 +150,14 @@ public class DtcTestPageController implements DtcNodeObserver, DtcTestPageModelO
   public void onTestPageResponseReceived(DtcResponse response) {
     GWT.log("Success: " + response.getResult());
     this.onSearchStop();
+    this.testPageView.chronoStop();
     this.redrawTestPageView(response.getResult());
   }
 
   private void redrawTestPageView(String result) {
     String convertedHTML = result.replaceAll("<!\\[CDATA\\[", "").replaceAll("\\]\\]>", "");
     GWT.log(convertedHTML);
-    DtcTestPageController.this.testPageView.setHTMLData(convertedHTML);
-    DtcTestPageController.this.testPageView.chronoStop();
+    this.testPageView.setHTMLData(convertedHTML);
   }
 
 }

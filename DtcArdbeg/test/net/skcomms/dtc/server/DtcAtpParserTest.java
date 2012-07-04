@@ -30,7 +30,6 @@ public class DtcAtpParserTest {
     String response = "ATP/1.2 100 Continue" + this.LT + this.LT + "0" + this.LT;
     Tokenizer t = new Tokenizer(new ByteArrayInputStream(response.getBytes()));
 
-    String token;
     Assert.assertEquals("ATP/1.2", t.getTokenNoSpace());
     Assert.assertEquals(" ", t.getTokenNoSpace());
     Assert.assertEquals("100", t.getTokenNoSpace());
@@ -40,8 +39,5 @@ public class DtcAtpParserTest {
     Assert.assertEquals(this.LT, t.getToken());
     Assert.assertEquals("0", t.getToken());
     Assert.assertEquals(this.LT, t.getToken());
-    // while ((token = t.getToken()) != null) {
-    // System.out.println("TOKEN:[" + token + "]");
-    // }
   }
 }
