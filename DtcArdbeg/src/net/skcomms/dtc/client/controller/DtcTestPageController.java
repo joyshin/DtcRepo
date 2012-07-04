@@ -1,10 +1,12 @@
 package net.skcomms.dtc.client.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import net.skcomms.dtc.client.DtcArdbeg;
 import net.skcomms.dtc.client.DtcNodeObserver;
+import net.skcomms.dtc.client.DtcTestPageControllerObserver;
 import net.skcomms.dtc.client.DtcTestPageModelObserver;
 import net.skcomms.dtc.client.DtcTestPageViewObserver;
 import net.skcomms.dtc.client.model.DtcNodeModel;
@@ -18,7 +20,8 @@ import net.skcomms.dtc.shared.DtcRequestParameterModel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.URL;
 
-public class DtcTestPageController implements DtcNodeObserver, DtcTestPageModelObserver {
+public class DtcTestPageController implements DtcNodeObserver, DtcTestPageModelObserver,
+    DtcTestPageViewObserver {
 
   private DtcTestPageView testPageView;
 
@@ -31,6 +34,12 @@ public class DtcTestPageController implements DtcNodeObserver, DtcTestPageModelO
   private String encoding;
 
   private Map<String, List<String>> initialRequestParameters = null;
+
+  private final List<DtcTestPageControllerObserver> dtcTestPageControllerObservers = new ArrayList<DtcTestPageControllerObserver>();
+
+  public void addObserver(DtcTestPageControllerObserver observer) {
+    this.dtcTestPageControllerObservers.add(observer);
+  }
 
   private void adjustRequestInfo(DtcRequestMeta requestInfo) {
     if (this.initialRequestParameters != null && this.initialRequestParameters.size() > 0) {
@@ -65,7 +74,6 @@ public class DtcTestPageController implements DtcNodeObserver, DtcTestPageModelO
 
     requestData.append(this.testPageView.createRequestData());
     GWT.log("ProxyURL: " + this.dtcProxyUrl);
-    // GWT.log("TargetURL: " + targetUrl);
 
     DtcRequest request = new DtcRequest();
     request.setRequestParameters(this.testPageView.getRequestParameters());
@@ -83,32 +91,24 @@ public class DtcTestPageController implements DtcNodeObserver, DtcTestPageModelO
     this.testPageView = dtcTestPageView;
     this.initialRequestParameters = dtcArdbeg.getRequestParameters();
     this.testPageModel = testPageModel;
+
     testPageModel.addObserver(this);
     nodeModel.addObserver(this);
-
-    dtcTestPageView.setOnReadyRequestDataObserver(new DtcTestPageViewObserver() {
-
-      @Override
-      public void onReadyRequestData() {
-        DtcRequest request = DtcTestPageController.this.createDtcRequest();
-        DtcTestPageController.this.testPageModel.sendRequest(request);
-        DtcTestPageController.this.testPageView.chronoStart();
-      }
-    });
+    this.testPageView.addObserver(this);
   }
 
-  public void loadDtcTestPageView(DtcRequestMeta requestInfo) {
-    this.adjustRequestInfo(requestInfo);
-    this.currentPath = requestInfo.getPath();
+  public void loadDtcTestPageView(DtcRequestMeta requestMeta) {
+    this.adjustRequestInfo(requestMeta);
+    this.currentPath = requestMeta.getPath();
 
-    DtcTestPageController.this.testPageView.setRequestInfo(requestInfo);
-    DtcTestPageController.this.testPageView.draw();
-    DtcTestPageController.this.encoding = requestInfo.getEncoding();
+    this.testPageView.setRequestInfo(requestMeta);
+    this.testPageView.draw();
+    this.encoding = requestMeta.getEncoding();
   }
 
   @Override
-  public void onDtcTestPageLoaded(DtcRequestMeta requestInfo) {
-    this.loadDtcTestPageView(requestInfo);
+  public void onDtcTestPageLoaded(DtcRequestMeta requestMeta) {
+    this.loadDtcTestPageView(requestMeta);
   }
 
   @Override
@@ -120,14 +120,36 @@ public class DtcTestPageController implements DtcNodeObserver, DtcTestPageModelO
   }
 
   @Override
+  public void onReadyRequestData() {
+    this.onSearchStart();
+    DtcRequest request = DtcTestPageController.this.createDtcRequest();
+    DtcTestPageController.this.testPageModel.sendRequest(request);
+    DtcTestPageController.this.testPageView.chronoStart();
+  }
+
+  @Override
   public void onRequestFailed(Throwable caught) {
     DtcTestPageController.this.testPageView.chronoStop();
     DtcTestPageController.this.testPageView.setHTMLData(caught.getMessage());
+    this.onSearchStop();
+  }
+
+  private void onSearchStart() {
+    for (DtcTestPageControllerObserver observer : this.dtcTestPageControllerObservers) {
+      observer.onSearchStart();
+    }
+  }
+
+  private void onSearchStop() {
+    for (DtcTestPageControllerObserver observer : this.dtcTestPageControllerObservers) {
+      observer.onSearchStop();
+    }
   }
 
   @Override
   public void onTestPageResponseReceived(DtcResponse response) {
     GWT.log("Success: " + response.getResult());
+    this.onSearchStop();
     this.redrawTestPageView(response.getResult());
   }
 

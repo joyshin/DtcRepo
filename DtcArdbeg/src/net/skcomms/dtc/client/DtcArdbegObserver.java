@@ -8,4 +8,5 @@ public interface DtcArdbegObserver {
   void onDtcHomeLoaded();
 
   void onDtcResponseFrameLoaded(boolean success);
+
 }

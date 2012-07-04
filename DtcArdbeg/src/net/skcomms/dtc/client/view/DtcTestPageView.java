@@ -56,7 +56,6 @@ public class DtcTestPageView {
       this.setKey(key);
       this.setName(name);
       this.setValue(value);
-
     }
 
     public int getId() {
@@ -114,9 +113,13 @@ public class DtcTestPageView {
 
   private DtcChronoView chronoView;
 
-  private DtcTestPageViewObserver readyRequestDataCb;
-
   private static final RegExp IP_PATTERN = RegExp.compile("[0-9]+.[0-9]+.[0-9]+.[0-9]+");
+
+  private final List<DtcTestPageViewObserver> dtcTestPageViewObservers = new ArrayList<DtcTestPageViewObserver>();
+
+  public void addObserver(DtcTestPageViewObserver observer) {
+    this.dtcTestPageViewObservers.add(observer);
+  }
 
   public void chronoStart() {
     this.chronoView.start();
@@ -214,6 +217,12 @@ public class DtcTestPageView {
     this.layout.setVisible(true);
   }
 
+  private void fireReadyToRequest() {
+    for (DtcTestPageViewObserver observer : this.dtcTestPageViewObservers) {
+      observer.onReadyRequestData();
+    }
+  }
+
   public Map<String, String> getRequestParameters() {
     Map<String, String> params = new HashMap<String, String>();
     for (ListGridRecord record : this.requestFormGrid.getRecords()) {
@@ -232,10 +241,6 @@ public class DtcTestPageView {
 
   public void setHTMLData(String convertedHTML) {
     this.htmlPane.setContents(convertedHTML);
-  }
-
-  public void setOnReadyRequestDataObserver(DtcTestPageViewObserver cb) {
-    this.readyRequestDataCb = cb;
   }
 
   public void setRequestInfo(DtcRequestMeta requestInfo) {
@@ -297,9 +302,10 @@ public class DtcTestPageView {
             event.getTypeInt() == Event.ONKEYUP &&
             event.getNativeEvent().getKeyCode() == 13 &&
             DtcTestPageView.this.validateRequestData() == 0) {
-          DtcTestPageView.this.readyRequestDataCb.onReadyRequestData();
+          DtcTestPageView.this.fireReadyToRequest();
         }
       }
+
     });
   }
 
@@ -336,7 +342,7 @@ public class DtcTestPageView {
       @Override
       public void onClick(ClickEvent event) {
         if (DtcTestPageView.this.validateRequestData() == 0) {
-          DtcTestPageView.this.readyRequestDataCb.onReadyRequestData();
+          DtcTestPageView.this.fireReadyToRequest();
         }
       }
     });

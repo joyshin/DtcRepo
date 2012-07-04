@@ -35,18 +35,18 @@ public class DtcUrlCopyControllerTest {
       return "http://dtc.skcomms.net/";
     }
 
-    @Override
-    public void hideSplash() {
-    }
-
+    // @Override
+    // public void hideSplash() {
+    // }
+    //
     @Override
     public void setPath(String path) {
 
     }
-
-    @Override
-    public void showSplash() {
-    }
+    //
+    // @Override
+    // public void showSplash() {
+    // }
   }
 
   static class MockDtcUrlCopyButtonView extends DtcUrlCopyButtonView {

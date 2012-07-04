@@ -3,7 +3,6 @@
  */
 package net.skcomms.dtc.client;
 
-
 /**
  * @author jujang@sk.com
  */

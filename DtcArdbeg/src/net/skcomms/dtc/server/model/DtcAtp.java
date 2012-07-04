@@ -8,7 +8,7 @@ public class DtcAtp {
   private String version;
   private int responseCode;
   private byte[] binary;
-  private List<DtcAtpRecord> records = new ArrayList<DtcAtpRecord>();
+  private final List<DtcAtpRecord> records = new ArrayList<DtcAtpRecord>();
   private String signature;
 
   public void addRecord(DtcAtpRecord record) {
