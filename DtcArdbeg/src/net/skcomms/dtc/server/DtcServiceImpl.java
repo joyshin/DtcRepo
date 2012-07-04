@@ -26,6 +26,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
@@ -121,14 +123,73 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
 
   // TODO 복잡도 해소 예제
   static String createDtcResponse(DtcRequest dtcRequest) throws IOException {
+    InputStream is = sendHttpRequest(dtcRequest);
+    String response = readHttpResponse(is, dtcRequest.getEncoding());
+    
+    Matcher matcher = HTTP_REF_PATTERN.matcher(response);
+    boolean found = matcher.find();
 
-    // FIXME 로컬변수 선언은 변수 사용 직전에, scope이 최소화되도록 위치시킨다.
-    String response = null;
-    String encoding = null;
+    if (!found) {
+      return response;
+    }
+    else {
+      String responseUrl = URLDecoder.decode(matcher.group(0).split("/")[1], "utf-8");
+      String targetUrl = getTargetUrl(responseUrl);
+      DtcRequest request = createRequest(targetUrl, dtcRequest.getEncoding());
+      response = DtcServiceImpl.createDtcResponse(request);
+      System.out.println("Response: " + response);
+
+      if (responseUrl.contains("response_json.html")) {
+        return response;
+      } else if (responseUrl.contains("response_xml.html")) {
+        return DtcServiceImpl.getHtmlFromXml(response, dtcRequest.getEncoding());
+      } else {
+        return null;
+      }
+    }
+
+  }
+
+  private static String readHttpResponse(InputStream is, String encoding)
+      throws IOException, UnsupportedEncodingException {
     StringBuilder responseBuffer = new StringBuilder();
+    byte[] content = DtcServiceImpl.readAllBytes(is);
+    BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
+        content), encoding));
+    String line;
+    while ((line = reader.readLine()) != null) {
+      responseBuffer.append(line);
+    }
+    reader.close();
+    return responseBuffer.toString();
+  }
 
+  private static String getTargetUrl(String responseUrl) throws UnsupportedEncodingException {
+    String targetUrl;
+    System.out.println("Response URL: " + responseUrl);
+
+    String url = responseUrl.split("\\?u=")[0];
+    String requestUrl = responseUrl.split("\\?u=")[1].split("\\?")[0];
+    String query = responseUrl.split("\\?u=")[1].split("\\?")[1];
+
+    query = requestUrl + "?" + query;
+
+    targetUrl = DtcServiceImpl.DTC_URL + url + "?u=" + URLEncoder.encode(query, "utf-8");
+    System.out.println("Target URL: " + targetUrl);
+    return targetUrl;
+  }
+
+  private static DtcRequest createRequest(String url, String encoding) {
+    DtcRequest request = new DtcRequest();
+    request.setEncoding(encoding);
+    request.setHttpMethod("GET");
+    request.setUrl(url);
+    return request;
+  }
+
+  protected static InputStream sendHttpRequest(DtcRequest dtcRequest)
+      throws MalformedURLException, IOException, ProtocolException {
     URL conUrl;
-
     int TIMEOUT = 5000;
     conUrl = new URL(dtcRequest.getUrl());
     HttpURLConnection httpCon = (HttpURLConnection) conUrl.openConnection();
@@ -150,74 +211,7 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
       postStream.flush();
       postStream.close();
     }
-
-    byte[] content = DtcServiceImpl.readAllBytes(httpCon.getInputStream());
-    encoding = DtcServiceImpl.guessCharacterEncoding(content);
-
-    BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
-        content), encoding));
-    String line;
-
-    while ((line = reader.readLine()) != null) {
-      responseBuffer.append(line);
-      // System.out.println(line);
-    }
-    reader.close();
-
-    Pattern regExp = Pattern.compile("src=\"([^\"]*)");
-    Matcher matcher = regExp.matcher(responseBuffer.toString());
-
-    // FIXME boolean 메써드는 긍정문으로 이름짓기하고, boolean 식은 == 로 비교하지 않는다.
-    if (matcher.find() == false) {
-      response = responseBuffer.toString();
-      return response;
-    }
-    else {
-
-      String targetUrl = null;
-      String responseUrl = null;
-      String htmlData = null;
-
-      responseUrl = URLDecoder.decode(matcher.group(0).split("/")[1], "utf-8");
-      System.out.println("Response URL: " + responseUrl);
-
-      DtcRequest responseRequestInfo = new DtcRequest();
-      responseRequestInfo.setEncoding(encoding);
-      responseRequestInfo.setHttpMethod("GET");
-
-      String url = responseUrl.split("\\?u=")[0];
-      String requestUrl = responseUrl.split("\\?u=")[1].split("\\?")[0];
-      String query = responseUrl.split("\\?u=")[1].split("\\?")[1];
-
-      System.out.println("url: " + url);
-      System.out.println("requestURL: " + requestUrl);
-      System.out.println("query: " + query);
-
-      query = requestUrl + "?" + query;
-
-      targetUrl = DtcServiceImpl.DTC_URL + url + "?u=" + URLEncoder.encode(query, "utf-8");
-
-      System.out.println("Target URL: " + targetUrl);
-      responseRequestInfo.setUrl(targetUrl);
-      response = DtcServiceImpl.createDtcResponse(responseRequestInfo);
-      System.out.println("Response: " + response);
-
-      if (responseUrl.contains("response_json.html")) {
-        htmlData = response;
-      } else if (responseUrl.contains("response_xml.html")) {
-        try {
-          htmlData = DtcServiceImpl.getHtmlFromXml(response.getBytes(encoding));
-        } catch (SAXException e) {
-          e.printStackTrace();
-          throw new IllegalStateException("Invalid XML:" + response);
-        } catch (Exception e) {
-          e.printStackTrace();
-          throw new IllegalStateException(e);
-        }
-      }
-      return htmlData;
-    }
-
+    return httpCon.getInputStream();
   }
 
   public static String escapeForXml(String src) {
@@ -272,16 +266,23 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     return contents;
   }
 
-  public static String getHtmlFromXml(byte[] content) throws Exception, SAXException {
-    DtcXmlToHtmlHandler dp = new DtcXmlToHtmlHandler();
-    ByteArrayInputStream bufferInputStream = new ByteArrayInputStream(content);
-    SAXParserFactory sf = SAXParserFactory.newInstance();
-    SAXParser sp;
+  public static String getHtmlFromXml(String xml, String encoding) {
+    try {
+      DtcXmlToHtmlHandler dp = new DtcXmlToHtmlHandler();
+      ByteArrayInputStream bufferInputStream = new ByteArrayInputStream(xml.getBytes(encoding));
+      SAXParserFactory sf = SAXParserFactory.newInstance();
+      SAXParser sp;
+      sp = sf.newSAXParser();
+      sp.parse(bufferInputStream, dp);
 
-    sp = sf.newSAXParser();
-    sp.parse(bufferInputStream, dp);
-
-    return dp.getHtml().toString();
+      return dp.getHtml().toString();
+    } catch (SAXException e) {
+      e.printStackTrace();
+      throw new IllegalStateException("Invalid XML:" + xml);
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new IllegalStateException(e);
+    }
   }
 
   public static String getRootPath() throws IOException {
@@ -321,6 +322,8 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
   }
 
   private EntityManagerFactory emf;
+
+  private static final Pattern HTTP_REF_PATTERN = Pattern.compile("src=\"([^\"]*)");
 
   private DtcRequestMeta createRequestInfo(DtcIni ini) {
     DtcRequestMeta requestInfo = new DtcRequestMeta();
