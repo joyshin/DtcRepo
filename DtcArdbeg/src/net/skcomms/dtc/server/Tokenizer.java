@@ -6,9 +6,9 @@ import java.util.regex.Pattern;
 
 public class Tokenizer {
 
-  Pattern pattern = Pattern.compile("[^ \\u000A]+|\\u000A| ");
+  Pattern pattern = Pattern.compile("[^ \\u001E\\u001F]+|\\u001E|\\u001F| ");
 
-  Pattern patternSpace = Pattern.compile("[^\\u000A\\u0009]+|\\u000A|\\u0009");
+  Pattern patternSpace = Pattern.compile("[^\\u001E\\u001F]+");
 
   private final Scanner scanner;
 

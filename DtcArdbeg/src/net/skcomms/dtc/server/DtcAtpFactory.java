@@ -12,8 +12,10 @@ import net.skcomms.dtc.shared.DtcRequest;
 public class DtcAtpFactory {
 
   private static void addArguments(DtcRequest request, DtcIni ini, DtcAtp atp) {
-    Map<String, String> actuals = request.getRequestParameter();
+    Map<String, String> actuals = request.getRequestParameters();
     for (DtcRequestProperty prop : ini.getRequestProps()) {
+
+      System.out.println(prop);
       DtcAtpRecord record = new DtcAtpRecord();
       record.addField(actuals.get(prop.getKey()));
       atp.addRecord(record);

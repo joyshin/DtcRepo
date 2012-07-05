@@ -7,9 +7,9 @@ import java.util.List;
 
 public class DtcAtp {
 
-  private static final byte LT = 0x0a;
+  private static final byte LT = 0x1E;
 
-  private static final byte FT = 0x09;
+  private static final byte FT = 0x1F;
 
   private String version;
   private int responseCode;
@@ -29,6 +29,7 @@ public class DtcAtp {
     bos.write(LT);
 
     for (DtcAtpRecord rec : this.records) {
+      System.out.println("record :" + rec);
       bos.write(rec.getBytes(charset));
     }
     bos.write(LT);

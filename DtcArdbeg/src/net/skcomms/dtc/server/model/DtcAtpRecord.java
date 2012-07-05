@@ -17,9 +17,9 @@ public class DtcAtpRecord {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     for (String str : this.fields) {
       bos.write(str.getBytes(charset));
-      bos.write((byte) 0x09);
+      bos.write((byte) 0x1F);
     }
-    bos.write((byte) 0x0a);
+    bos.write((byte) 0x1E);
     return bos.toByteArray();
   }
 

@@ -9,11 +9,11 @@ import net.skcomms.dtc.server.model.DtcAtpRecord;
 
 public class DtcAtpParser {
 
-  private static final String LT = Character.toString((char) 0x0a);
+  private static final String LT = Character.toString((char) 0x1E);
 
   private static final String SP = Character.toString((char) 0x20);
 
-  private static final String FT = Character.toString((char) 0x09);
+  private static final String FT = Character.toString((char) 0x1F);
 
   private static final String RS = Character.toString((char) 0x1E);
 
@@ -47,7 +47,7 @@ public class DtcAtpParser {
   private void argumentList() {
     while (true) {
 
-      String token = this.tokenizer.getToken();
+      String token = this.tokenizer.getTokenNoSpace();
       if (token.equals(DtcAtpParser.LT)) {
         return;
       }
@@ -61,7 +61,7 @@ public class DtcAtpParser {
 
   private void binaryData() throws IOException {
     this.number();
-    this.match(this.getToken(), DtcAtpParser.LT);
+    this.match(this.tokenizer.getTokenNoSpace(), DtcAtpParser.LT);
     this.octetStream();
 
   }
@@ -70,26 +70,22 @@ public class DtcAtpParser {
     String token = this.tokenizer.getToken();
     System.out.println("field: " + token);
     this.currRecord.addField(token);
-    this.match(this.tokenizer.getToken(), DtcAtpParser.FT);
+    this.match(this.tokenizer.getTokenNoSpace(), DtcAtpParser.FT);
   }
 
   private DtcAtp getAtp() {
     return this.atp;
   }
 
-  private String getToken() {
-    return this.tokenizer.getToken();
-  }
-
   private void match(String token, String terminal) {
     if (!token.equals(terminal)) {
-      throw new IllegalArgumentException("ERROR: [" + terminal + "] expected, actual:[" + token
-          + "]");
+      throw new IllegalArgumentException("ERROR: [" + terminal +
+          "] expected, actual:[" + token + "]");
     }
   }
 
   private void number() {
-    this.binarySize = Integer.parseInt(this.getToken());
+    this.binarySize = Integer.parseInt(this.tokenizer.getToken());
   }
 
   private void octetStream() throws IOException {
@@ -100,12 +96,13 @@ public class DtcAtpParser {
   private void parseResponse() throws IOException {
     this.responseLine();
     this.responseHeader();
-    this.match(this.getToken(), DtcAtpParser.LT);
+    this.match(this.tokenizer.getTokenNoSpace(), DtcAtpParser.LT);
     this.argumentData();
   }
 
   private void reason() {
-    System.out.println("Reason: " + this.tokenizer.getTokenNoSpace());
+    String token = this.tokenizer.getToken();
+    System.out.println("Reason:[" + token + "], size:" + token.getBytes().length);
   }
 
   private void record() {
@@ -113,7 +110,7 @@ public class DtcAtpParser {
 
     do {
       this.field();
-      String token = this.tokenizer.getToken();
+      String token = this.tokenizer.getTokenNoSpace();
       if (token.equals(DtcAtpParser.LT)) {
         break;
       }

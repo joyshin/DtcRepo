@@ -6,8 +6,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import net.skcomms.dtc.server.model.DtcAtp;
+import net.skcomms.dtc.server.model.DtcIni;
+import net.skcomms.dtc.shared.DtcRequest;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -22,16 +26,18 @@ public class DtcAtpParserTest {
 
   private static final String RS = Character.toString((char) 0x1E);
 
-  private void assertAtp(String mess) throws IOException {
+  private void assertAtp(byte[] bs) throws IOException {
     Socket soc = new Socket("10.141.10.51", 9100);
 
     OutputStream os_socket = soc.getOutputStream(); // 소켓에 쓰고
-    os_socket.write(mess.getBytes());
+    os_socket.write(bs);
     os_socket.flush();
 
-    byte[] buffer = new byte[1024 * 1024];
+    // byte[] buffer = new byte[1024 * 1024];
+    byte[] buffer = new byte[1024];
     InputStream is_socket = soc.getInputStream();
     int nRead = is_socket.read(buffer);
+    this.printByte(buffer);
     System.out.println(new String(buffer));
     byte[] copied = Arrays.copyOf(buffer, nRead);
 
@@ -39,6 +45,15 @@ public class DtcAtpParserTest {
 
     Assert.assertNotNull(atp);
     System.out.println(atp);
+  }
+
+  private void printByte(byte[] bytes) {
+    for (byte b : bytes) {
+      if (b == 0) {
+        // break;
+      }
+      System.out.println("byte:[" + b + "], char:[" + (char) b + "]");
+    }
   }
 
   // 10.141.10.51 | 9100 - 싸이블로그
@@ -63,8 +78,33 @@ public class DtcAtpParserTest {
             "0" + LT
     };
     for (String msg : messages) {
-      this.assertAtp(msg);
+      this.assertAtp(msg.getBytes());
     }
+  }
+
+  @Test
+  public void testAtpRequest() throws IOException {
+
+    Map<String, String> requestParameter = new HashMap<String, String>();
+    requestParameter.put("Version", "100");
+    requestParameter.put("Query", "블로그");
+    requestParameter.put("ResultStartPos", "1");
+    requestParameter.put("ResultCount", "2");
+    requestParameter.put("ClientCode", "TS");
+    requestParameter.put("Sort", "PD");
+    requestParameter.put("SummaryLen", "128");
+    requestParameter.put("Referer", "TEST");
+    requestParameter.put("Port", "9200");
+    requestParameter.put("IP", "10.171.10.241");
+
+    DtcRequest request = new DtcRequest();
+    request.setRequestParameters(requestParameter);
+
+    String filePath = DtcServiceImpl.getRootPath() + "kcbbs/blog.100.xml.ini";
+    DtcIni ini = new DtcIniFactory().createFrom(filePath);
+
+    DtcAtp dtcAtp = DtcAtpFactory.createFrom(request, ini);
+    this.assertAtp(dtcAtp.getBytes(ini.getCharacterSet()));
   }
 
   @Test
