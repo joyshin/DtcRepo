@@ -143,32 +143,67 @@ div[class^='value']{display:table-cell;
 					color:white; 
 					width:100%;}
 
-button.gwt-Button-copyLink {
-	background:transparent;
+button.copyButton {
+	background:url('Copy-icon.png');
+	background-size:30px 30px;
 	padding:0px;
 	border:0px;
 	width:30px;
 	height:30px;
 }
 
-button.gwt-Button-loginButton {
-	background:transparent;
+button.copyButton span {
+	display:none;
+}
+
+button.copyButton:hover span {
+    display:inline; border:1px solid #cccccc;
+    border-radius: 5px 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; 
+	box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.1); -webkit-box-shadow: 5px 5px rgba(0, 0, 0, 0.1); -moz-box-shadow: 5px 5px rgba(0, 0, 0, 0.1);
+	font-family: Calibri, Tahoma, Geneva, sans-serif;
+	position: absolute; left: 3em; top: 4em; z-index: 99;
+	margin-left: 0; width: 150px;
+}
+
+button.loginButton {
+	background:url('Login-icon.png');
+	background-size:30px 30px;
 	padding:0px;
 	border:0px;
 	width:30px;
 	height:30px;
 }
 
-button.gwt-Button-logoutButton {
-	background:transparent;
+button.logoutButton {
+	background:url('Logout-icon.png');
+	background-size:30px 30px;
 	padding:0px;
 	border:0px;
 	width:30px;
 	height:30px;
 }
 
-.gwt-Label-username {
+button[class^='gwt-Button log'] span {
+	display:none;
+}
+
+button[class^='gwt-Button log']:hover span {
+	display:inline; border:1px solid #cccccc;
+    border-radius: 5px 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; 
+	box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.1); -webkit-box-shadow: 5px 5px rgba(0, 0, 0, 0.1); -moz-box-shadow: 5px 5px rgba(0, 0, 0, 0.1);
+	font-family: Calibri, Tahoma, Geneva, sans-serif;
+	position: absolute; right: 3em; top: 3em; z-index: 99;
+	margin-left: 0; width: 50px;
+}
+
+div.username {
 	font-family:"New Gulim";
-}
+	font-weight:bold;
+	text-align:left;
 	
+}
+
+.gwt-Anchor {
+}
+
 }

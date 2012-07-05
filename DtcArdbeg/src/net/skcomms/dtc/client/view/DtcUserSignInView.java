@@ -21,7 +21,7 @@ public class DtcUserSignInView {
       final DialogBox loginDialog, final TextBox usernameText) {
     loginDialog.hide();
     Label usernameLabel = new Label(usernameText.getValue());
-    usernameLabel.addStyleDependentName("username");
+    usernameLabel.addStyleName("username");
     RootPanel.get("usernameContainer").clear();
     RootPanel.get("usernameContainer").add(usernameLabel);
     DtcConfigController.getInstance().setUsername(usernameText.getValue());
@@ -30,12 +30,14 @@ public class DtcUserSignInView {
   }
 
   public void initialize() {
-    final Button loginButton = new Button("<img src='Login-icon.png' width='30' height='30'>");
-    final Button logoutButton = new Button("<img src='Logout-icon.png' width='30' height='30'>");
+    final Button loginButton = new Button();
+    final Button logoutButton = new Button();
     RootPanel.get("loginContainer").add(loginButton);
     RootPanel.get("loginContainer").add(logoutButton);
-    loginButton.addStyleDependentName("loginButton");
-    logoutButton.addStyleDependentName("logoutButton");
+    loginButton.addStyleName("loginButton");
+    loginButton.setHTML("<span>Login</span>");
+    logoutButton.addStyleName("logoutButton");
+    logoutButton.setHTML("<span>logout</span>");
     logoutButton.setVisible(false);
 
     loginButton.addClickHandler(new ClickHandler() {
