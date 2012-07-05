@@ -24,6 +24,8 @@ import com.smartgwt.client.widgets.Button;
 import com.smartgwt.client.widgets.HTMLPane;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
+import com.smartgwt.client.widgets.events.CloseClickEvent;
+import com.smartgwt.client.widgets.events.CloseClickHandler;
 import com.smartgwt.client.widgets.form.fields.ComboBoxItem;
 import com.smartgwt.client.widgets.form.fields.FormItem;
 import com.smartgwt.client.widgets.form.fields.TextItem;
@@ -103,6 +105,8 @@ public class DtcTestPageView {
 
   private Button searchButton;
 
+  private Button modalButton;
+
   private VLayout vLayoutLeftBottom;
 
   private HLayout hLayoutRight;
@@ -112,6 +116,8 @@ public class DtcTestPageView {
   private DtcRequestMeta requestInfo;
 
   private DtcChronoView chronoView;
+
+  private DtcSelectTestPageView dtcSelectTestPageView;
 
   private static final RegExp IP_PATTERN = RegExp.compile("[0-9]+.[0-9]+.[0-9]+.[0-9]+");
 
@@ -211,7 +217,7 @@ public class DtcTestPageView {
   public void draw() {
     this.setupVLayoutLeft();
     this.setupHLayoutRight();
-    this.setupLayout();
+    this.setupContentsLayout();
 
     this.layout.redraw();
     this.layout.setVisible(true);
@@ -253,6 +259,22 @@ public class DtcTestPageView {
     this.chronoView.setHeight(10);
   }
 
+  private void setupContentsLayout() {
+    if (this.layout != null) {
+      RootPanel.get("dtcContainer").remove(this.layout);
+    }
+
+    this.layout = new HLayout();
+    RootPanel.get("dtcContainer").add(this.layout);
+
+    this.layout.setWidth100();
+    this.layout.setHeight(800);
+    this.layout.setMembersMargin(20);
+    this.layout.addMember(this.vLayoutLeft);
+    this.layout.addMember(this.hLayoutRight);
+    this.layout.setLayoutMargin(10);
+  }
+
   private void setupHLayoutRight() {
     this.hLayoutRight = new HLayout();
     this.hLayoutRight.setShowEdges(true);
@@ -268,20 +290,36 @@ public class DtcTestPageView {
     this.hLayoutRight.addMember(this.htmlPane);
   }
 
-  private void setupLayout() {
-    if (this.layout != null) {
-      RootPanel.get("dtcContainer").remove(this.layout);
-    }
+  private void setupModalButton() {
+    this.modalButton = new Button("Modal");
+    this.modalButton.setWidth(120);
+    this.modalButton.setLeft(60);
+    this.modalButton.setTop(45);
+    this.modalButton.addClickHandler(new ClickHandler() {
 
-    this.layout = new HLayout();
-    RootPanel.get("dtcContainer").add(this.layout);
+      @Override
+      public void onClick(ClickEvent event) {
 
-    this.layout.setWidth100();
-    this.layout.setHeight(800);
-    this.layout.setMembersMargin(20);
-    this.layout.addMember(this.vLayoutLeft);
-    this.layout.addMember(this.hLayoutRight);
-    this.layout.setLayoutMargin(10);
+        DtcTestPageView.this.dtcSelectTestPageView = new DtcSelectTestPageView();
+        DtcTestPageView.this.dtcSelectTestPageView.setWidth(800);
+        DtcTestPageView.this.dtcSelectTestPageView.setHeight(600);
+        DtcTestPageView.this.dtcSelectTestPageView.setTitle("Select Test Page Window");
+        DtcTestPageView.this.dtcSelectTestPageView.setShowMinimizeButton(false);
+        DtcTestPageView.this.dtcSelectTestPageView.setIsModal(true);
+        DtcTestPageView.this.dtcSelectTestPageView.setShowModalMask(true);
+        DtcTestPageView.this.dtcSelectTestPageView.centerInPage();
+        DtcTestPageView.this.dtcSelectTestPageView.setDismissOnOutsideClick(true);
+        DtcTestPageView.this.dtcSelectTestPageView.addCloseClickHandler(new CloseClickHandler() {
+          @Override
+          public void onCloseClick(CloseClickEvent event) {
+
+            DtcTestPageView.this.dtcSelectTestPageView.destroy();
+          }
+        });
+
+        DtcTestPageView.this.dtcSelectTestPageView.show();
+      }
+    });
   }
 
   private void setupNameField() {
@@ -370,6 +408,7 @@ public class DtcTestPageView {
     this.setupChronoView();
     this.setupRequestFormGrid();
     this.setupSearchButton();
+    this.setupModalButton();
     this.setupVLayoutBottom();
 
     this.vLayoutLeft = new VLayout();
@@ -425,6 +464,7 @@ public class DtcTestPageView {
     this.vLayoutLeft.addMember(this.chronoView);
     this.vLayoutLeft.addMember(this.requestFormGrid);
     this.vLayoutLeft.addMember(this.searchButton);
+    this.vLayoutLeft.addMember(this.modalButton);
     this.vLayoutLeft.addMember(this.vLayoutLeftBottom);
   }
 }
