@@ -17,8 +17,12 @@ public class DtcAtpParser {
 
   private static final String RS = Character.toString((char) 0x1E);
 
-  public static DtcAtp parse(byte[] bytes) throws IOException {
-    DtcAtpParser parser = new DtcAtpParser(bytes);
+  public static DtcAtp parse(byte[] bytes, String charset) throws IOException {
+    return DtcAtpParser.parse(new ByteArrayInputStream(bytes), charset);
+  }
+
+  public static DtcAtp parse(InputStream is, String charset) throws IOException {
+    DtcAtpParser parser = new DtcAtpParser(is, charset);
     parser.parseResponse();
     return parser.getAtp();
   }
@@ -33,9 +37,9 @@ public class DtcAtpParser {
 
   private DtcAtpRecord currRecord;
 
-  private DtcAtpParser(byte[] bytes) {
-    this.inputStream = new ByteArrayInputStream(bytes);
-    this.tokenizer = new Tokenizer(this.inputStream);
+  private DtcAtpParser(InputStream is, String charset) {
+    this.inputStream = is;
+    this.tokenizer = new Tokenizer(this.inputStream, charset);
     this.atp = new DtcAtp();
   }
 
@@ -46,31 +50,30 @@ public class DtcAtpParser {
 
   private void argumentList() {
     while (true) {
-
-      String token = this.tokenizer.getTokenNoSpace();
+      String token = this.tokenizer.getToken();
       if (token.equals(DtcAtpParser.LT)) {
         return;
       }
-
       this.tokenizer.ungetToken(token);
       this.record();
-
     }
-
   }
 
   private void binaryData() throws IOException {
     this.number();
-    this.match(this.tokenizer.getTokenNoSpace(), DtcAtpParser.LT);
+    this.match(this.tokenizer.getToken(), DtcAtpParser.LT);
     this.octetStream();
-
   }
 
   private void field() {
     String token = this.tokenizer.getToken();
-    System.out.println("field: " + token);
+    if (token.equals(DtcAtpParser.LT) || token.equals(DtcAtpParser.FT)) {
+      this.tokenizer.ungetToken(token);
+      token = "";
+    }
+    System.out.println("field:[" + token + "], size:" + token.getBytes().length);
     this.currRecord.addField(token);
-    this.match(this.tokenizer.getTokenNoSpace(), DtcAtpParser.FT);
+    this.match(this.tokenizer.getToken(), DtcAtpParser.FT);
   }
 
   private DtcAtp getAtp() {
@@ -101,23 +104,20 @@ public class DtcAtpParser {
   }
 
   private void reason() {
-    String token = this.tokenizer.getToken();
+    String token = this.tokenizer.getTokenNoSpace();
     System.out.println("Reason:[" + token + "], size:" + token.getBytes().length);
   }
 
   private void record() {
     this.currRecord = new DtcAtpRecord();
-
     do {
       this.field();
-      String token = this.tokenizer.getTokenNoSpace();
+      String token = this.tokenizer.getToken();
       if (token.equals(DtcAtpParser.LT)) {
         break;
       }
       this.tokenizer.ungetToken(token);
-
     } while (true);
-
     this.atp.addRecord(this.currRecord);
     this.currRecord = null;
   }
@@ -136,7 +136,6 @@ public class DtcAtpParser {
     this.match(this.tokenizer.getTokenNoSpace(), DtcAtpParser.SP);
     this.reason();
     this.match(this.tokenizer.getTokenNoSpace(), DtcAtpParser.LT);
-
   }
 
   private void signature() {

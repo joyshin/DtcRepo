@@ -8,14 +8,14 @@ public class Tokenizer {
 
   Pattern pattern = Pattern.compile("[^ \\u001E\\u001F]+|\\u001E|\\u001F| ");
 
-  Pattern patternSpace = Pattern.compile("[^\\u001E\\u001F]+");
+  Pattern patternSpace = Pattern.compile("[^\\u001E\\u001F]+|\\u001E|\\u001F");
 
   private final Scanner scanner;
 
   private String recalledToken = null;
 
-  public Tokenizer(InputStream is) {
-    this.scanner = new Scanner(is);
+  public Tokenizer(InputStream is, String charset) {
+    this.scanner = new Scanner(is, charset);
 
   }
 

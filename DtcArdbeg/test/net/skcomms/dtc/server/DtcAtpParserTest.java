@@ -2,10 +2,8 @@ package net.skcomms.dtc.server;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,11 +16,11 @@ import org.junit.Test;
 
 public class DtcAtpParserTest {
 
-  private static final String LT = Character.toString((char) 0x0a);
+  private static final String LT = Character.toString((char) 0x1E);
 
   private static final String SP = Character.toString((char) 0x20);
 
-  private static final String FT = Character.toString((char) 0x09);
+  private static final String FT = Character.toString((char) 0x1F);
 
   private static final String RS = Character.toString((char) 0x1E);
 
@@ -33,15 +31,7 @@ public class DtcAtpParserTest {
     os_socket.write(bs);
     os_socket.flush();
 
-    // byte[] buffer = new byte[1024 * 1024];
-    byte[] buffer = new byte[1024];
-    InputStream is_socket = soc.getInputStream();
-    int nRead = is_socket.read(buffer);
-    this.printByte(buffer);
-    System.out.println(new String(buffer));
-    byte[] copied = Arrays.copyOf(buffer, nRead);
-
-    DtcAtp atp = DtcAtpParser.parse(copied);
+    DtcAtp atp = DtcAtpParser.parse(soc.getInputStream(), "euc-kr");
 
     Assert.assertNotNull(atp);
     System.out.println(atp);
@@ -60,22 +50,24 @@ public class DtcAtpParserTest {
   @Test
   public void testAtp() throws IOException {
 
-    String[] messages = { "ATP/1.2 KCBBSD 0" + LT + LT + LT + "0" + LT,
-        "ATP/1.2 KCBBSD 100" + LT + LT +
-            "" + FT +
-            "" + FT +
-            "" + FT +
-            "" + FT + LT +
-            "100" + FT + LT +
-            "blog" + FT + LT +
-            "1" + FT + LT +
-            "1" + FT + LT +
-            "TS" + FT + LT +
-            "PD" + FT + LT +
-            "256" + FT + LT +
-            "TEST" + FT + LT +
-            LT +
-            "0" + LT
+    String[] messages = {
+        "ATP/1.2 KCBBSD 0" + DtcAtpParserTest.LT + DtcAtpParserTest.LT + DtcAtpParserTest.LT + "0"
+            + DtcAtpParserTest.LT,
+        "ATP/1.2 KCBBSD 100" + DtcAtpParserTest.LT + DtcAtpParserTest.LT +
+            "" + DtcAtpParserTest.FT +
+            "" + DtcAtpParserTest.FT +
+            "" + DtcAtpParserTest.FT +
+            "" + DtcAtpParserTest.FT + DtcAtpParserTest.LT +
+            "100" + DtcAtpParserTest.FT + DtcAtpParserTest.LT +
+            "blog" + DtcAtpParserTest.FT + DtcAtpParserTest.LT +
+            "1" + DtcAtpParserTest.FT + DtcAtpParserTest.LT +
+            "1" + DtcAtpParserTest.FT + DtcAtpParserTest.LT +
+            "TS" + DtcAtpParserTest.FT + DtcAtpParserTest.LT +
+            "PD" + DtcAtpParserTest.FT + DtcAtpParserTest.LT +
+            "256" + DtcAtpParserTest.FT + DtcAtpParserTest.LT +
+            "TEST" + DtcAtpParserTest.FT + DtcAtpParserTest.LT +
+            DtcAtpParserTest.LT +
+            "0" + DtcAtpParserTest.LT
     };
     for (String msg : messages) {
       this.assertAtp(msg.getBytes());
@@ -109,10 +101,12 @@ public class DtcAtpParserTest {
 
   @Test
   public void testParseResponse() throws IOException {
-    String response = "ATP/1.2 100 Continue" + this.LT + this.LT + "s-id" + this.FT + "s-key"
-        + this.FT + this.LT + "s-id2" + this.FT + "s-key2" + this.FT + this.LT
-        + this.LT + "3" + this.LT + "abc";
-    DtcAtp atp = DtcAtpParser.parse(response.getBytes());
+    String response = "ATP/1.2 100 Continue" + DtcAtpParserTest.LT + DtcAtpParserTest.LT + "s-id"
+        + DtcAtpParserTest.FT + "s-key"
+        + DtcAtpParserTest.FT + DtcAtpParserTest.LT + "s-id2" + DtcAtpParserTest.FT + "s-key2"
+        + DtcAtpParserTest.FT + DtcAtpParserTest.LT
+        + DtcAtpParserTest.LT + "3" + DtcAtpParserTest.LT + "abc";
+    DtcAtp atp = DtcAtpParser.parse(response.getBytes("euc-kr"), "euc-kr");
 
     Assert.assertNotNull(atp);
     System.out.println(atp);
@@ -120,8 +114,9 @@ public class DtcAtpParserTest {
 
   @Test
   public void testTokenizer() {
-    String response = "ATP/1.2 100 Continue" + this.LT + this.LT + "0" + this.LT;
-    Tokenizer t = new Tokenizer(new ByteArrayInputStream(response.getBytes()));
+    String response = "ATP/1.2 100 Continue" + DtcAtpParserTest.LT + DtcAtpParserTest.LT + "0"
+        + DtcAtpParserTest.LT;
+    Tokenizer t = new Tokenizer(new ByteArrayInputStream(response.getBytes()), "euc-kr");
 
     String token;
     Assert.assertEquals("ATP/1.2", t.getTokenNoSpace());
@@ -129,10 +124,10 @@ public class DtcAtpParserTest {
     Assert.assertEquals("100", t.getTokenNoSpace());
     Assert.assertEquals(" ", t.getTokenNoSpace());
     Assert.assertEquals("Continue", t.getTokenNoSpace());
-    Assert.assertEquals(this.LT, t.getToken());
-    Assert.assertEquals(this.LT, t.getToken());
+    Assert.assertEquals(DtcAtpParserTest.LT, t.getToken());
+    Assert.assertEquals(DtcAtpParserTest.LT, t.getToken());
     Assert.assertEquals("0", t.getToken());
-    Assert.assertEquals(this.LT, t.getToken());
+    Assert.assertEquals(DtcAtpParserTest.LT, t.getToken());
     // while ((token = t.getToken()) != null) {
     // System.out.println("TOKEN:[" + token + "]");
     // }

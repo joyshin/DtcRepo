@@ -92,6 +92,12 @@ public class DtcNodeModel {
     }
   }
 
+  private void fireTestPageLoaded(DtcRequestMeta requestInfo) {
+    for (DtcNodeObserver observer : DtcNodeModel.this.observers) {
+      observer.onDtcTestPageLoaded(requestInfo);
+    }
+  }
+
   public List<DtcNodeMeta> getFavoriteNodeList() {
     return this.dtcFavoriteNodeList;
   }
@@ -126,10 +132,18 @@ public class DtcNodeModel {
     this.dtcNodeList.add(selected);
   }
 
-  private void fireTestPageLoaded(DtcRequestMeta requestInfo) {
-    for (DtcNodeObserver observer : DtcNodeModel.this.observers) {
-      observer.onDtcTestPageLoaded(requestInfo);
-    }
+  private void onDirectoryNodesReceived(final String path, List<DtcNodeMeta> nodeInfos) {
+    DtcNodeModel.this.setDtcNodeList(nodeInfos);
+    DtcNodeModel.this.fireNodeListChanged();
+    DtcNodeModel.this.owner.fireDtcServiceDirectoryPageLoaded(path);
+  }
+
+  private void onHomeNodesReceived(List<DtcNodeMeta> nodeInfos) {
+    DtcNodeModel.this.categorizeNodesByVisitCount(nodeInfos);
+    DtcNodeModel.this.sortDtcFavoriteNodeList();
+    DtcNodeModel.this.fireNodeListChanged();
+    DtcNodeModel.this.fireFavoriteNodeListChanged();
+    DtcNodeModel.this.owner.fireDtcHomePageLoaded();
   }
 
   public void refreshDtcDirectoryPageNode(final String path) {
@@ -142,10 +156,9 @@ public class DtcNodeModel {
 
       @Override
       public void onSuccess(List<DtcNodeMeta> nodeInfos) {
-        DtcNodeModel.this.setDtcNodeList(nodeInfos);
-        DtcNodeModel.this.fireNodeListChanged();
-        DtcNodeModel.this.owner.fireDtcServiceDirectoryPageLoaded(path);
+        DtcNodeModel.this.onDirectoryNodesReceived(path, nodeInfos);
       }
+
     });
   }
 
@@ -159,12 +172,9 @@ public class DtcNodeModel {
 
       @Override
       public void onSuccess(List<DtcNodeMeta> nodeInfos) {
-        DtcNodeModel.this.categorizeNodesByVisitCount(nodeInfos);
-        DtcNodeModel.this.sortDtcFavoriteNodeList();
-        DtcNodeModel.this.fireNodeListChanged();
-        DtcNodeModel.this.fireFavoriteNodeListChanged();
-        DtcNodeModel.this.owner.fireDtcHomePageLoaded();
+        DtcNodeModel.this.onHomeNodesReceived(nodeInfos);
       }
+
     });
   }
 

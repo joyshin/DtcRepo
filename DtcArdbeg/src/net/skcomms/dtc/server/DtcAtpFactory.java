@@ -1,5 +1,6 @@
 package net.skcomms.dtc.server;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
@@ -14,8 +15,6 @@ public class DtcAtpFactory {
   private static void addArguments(DtcRequest request, DtcIni ini, DtcAtp atp) {
     Map<String, String> actuals = request.getRequestParameters();
     for (DtcRequestProperty prop : ini.getRequestProps()) {
-
-      System.out.println(prop);
       DtcAtpRecord record = new DtcAtpRecord();
       record.addField(actuals.get(prop.getKey()));
       atp.addRecord(record);
@@ -32,17 +31,15 @@ public class DtcAtpFactory {
 
   public static DtcAtp createFrom(DtcRequest request, DtcIni ini) {
     DtcAtp atp = new DtcAtp();
-
-    setSignature(ini, atp);
-    addDummyRecords(atp);
-    addArguments(request, ini, atp);
+    DtcAtpFactory.setSignature(ini, atp);
+    DtcAtpFactory.addDummyRecords(atp);
+    DtcAtpFactory.addArguments(request, ini, atp);
     atp.setBinary(new byte[0]);
-
     return atp;
   }
 
-  public static DtcAtp createFrom(InputStream is) {
-    return null;
+  public static DtcAtp createFrom(InputStream is, String charset) throws IOException {
+    return DtcAtpParser.parse(is, charset);
   }
 
   private static void setSignature(DtcIni ini, DtcAtp atp) {

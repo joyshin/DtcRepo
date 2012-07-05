@@ -26,10 +26,12 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.Socket;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -337,28 +339,32 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
 
   private EntityManagerFactory emf;
 
-  private String createAtpResponse(DtcRequest request, DtcIni ini) {
-
-    // atp request object generation
-    DtcAtp atp = DtcAtpFactory.createFrom(request, ini);
-
-    // open socket
-
-    // send and receive
-
-    // atp response object generation
+  private String createAtpResponse(DtcRequest request, DtcIni ini) throws IOException {
+    DtcAtp atpRequest = DtcAtpFactory.createFrom(request, ini);
+    Socket socket = this.openSocket(request);
+    socket.getOutputStream().write(atpRequest.getBytes(request.getEncoding()));
+    socket.getOutputStream().flush();
+    byte[] buffer = new byte[102400];
+    int nRead = socket.getInputStream().read(buffer);
+    byte[] copied = Arrays.copyOf(buffer, nRead);
+    DtcAtp atpResponse = DtcAtpFactory.createFrom(new ByteArrayInputStream(copied),
+        request.getEncoding());
+    socket.close();
 
     // atp -> html
 
     // return new String(atp.getBytes());
 
-    try {
-      return new String(atp.getBytes(ini.getCharacterSet()));
-    } catch (UnsupportedEncodingException e) {
-      throw new IllegalStateException("UnsupportedEncoding:" + ini.getCharacterSet());
-    } catch (IOException e) {
-      throw new IllegalStateException(e);
-    }
+    // try {
+    // return new String(atpResponse.getBytes(request.getEncoding()));
+    System.out.println(atpResponse.toString());
+    return atpResponse.toString();
+    // } catch (UnsupportedEncodingException e) {
+    // throw new IllegalStateException("UnsupportedEncoding:" +
+    // ini.getCharacterSet());
+    // } catch (IOException e) {
+    // throw new IllegalStateException(e);
+    // }
   }
 
   private DtcRequestMeta createRequestInfo(DtcIni ini) {
@@ -475,6 +481,7 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
       String targetUrl = DtcServiceImpl.DTC_URL + "response.html";
       request.setUrl(targetUrl);
       Date startTime = new Date();
+      System.out.println("INI Protocol:" + ini.getProtocol());
       if (ini.getProtocol().equals("ATP")) {
         rawHtml = this.createAtpResponse(request, ini);
       } else {
@@ -501,6 +508,12 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     super.init(config);
     WebApplicationContextUtils.getRequiredWebApplicationContext(this.getServletContext())
         .getAutowireCapableBeanFactory().autowireBean(this);
+  }
+
+  private Socket openSocket(DtcRequest request) throws UnknownHostException, IOException {
+    String ip = request.getRequestParameters().get("IP");
+    String port = request.getRequestParameters().get("Port");
+    return new Socket(ip, Integer.parseInt(port));
   }
 
   @Autowired
