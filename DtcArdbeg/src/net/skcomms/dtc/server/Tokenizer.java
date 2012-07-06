@@ -6,21 +6,25 @@ import java.util.regex.Pattern;
 
 public class Tokenizer {
 
-  Pattern pattern = Pattern.compile("[^ \\u000A]+|\\u000A| ");
+  Pattern pattern = Pattern.compile("[^ \\u001E\\u001F]+|\\u001E|\\u001F| ");
 
-  Pattern patternSpace = Pattern.compile("[^\\u000A\\u0009]+|\\u000A|\\u0009");
+  Pattern patternSpace = Pattern.compile("[^\\u001E\\u001F]+|\\u001E|\\u001F");
 
-  private Scanner scanner;
+  private final Scanner scanner;
 
   private String recalledToken = null;
 
-  public Tokenizer(InputStream is) {
-    this.scanner = new Scanner(is);
+  public Tokenizer(InputStream is, String charset) {
+    this.scanner = new Scanner(is, charset);
 
   }
 
   public byte[] getBinaryData(int binarySize) {
     // FIXME 바이너리 데이터를 처리하려면 Scanner를 걷어내고 직접 토큰을 생성한다.
+    if (!this.scanner.hasNext(".*")) {
+      return new byte[0];
+    }
+
     byte[] bytes = this.scanner.next(".*").getBytes();
     if (binarySize != bytes.length) {
       throw new IllegalArgumentException("ERROR: expectedSize:" + binarySize + ", actual:"

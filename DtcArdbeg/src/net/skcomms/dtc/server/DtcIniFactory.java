@@ -46,13 +46,13 @@ public class DtcIniFactory {
   private String currentHeader;
 
   private static final Pattern SINGLE_PROP_PATTERN = Pattern
-      .compile("(\\S+)\\s+(\\S+)\\s*(.*)$");
+      .compile("(\\S+)\\s+((\\S| \\S)+)(\\s|:)*(.*)$");
 
   private static final Pattern LIST_FIELD_PATTERN = Pattern
-      .compile("(\\S+)\\s+(\\S+)\\s*(.*)$");
+      .compile("(\\S+)\\s+((\\S| \\S)+)(\\s|:)*(.*)$");
 
   private static final Pattern REQUEST_PROP_PATTERN = Pattern
-      .compile("(\\S+)\\s+([\\w-]+)(=(\\S+([ \\f]\\S+)*))?\\s*(.*)?$");
+      .compile("(\\S+)\\s+([\\w-]+)(=(\\S+([ \\f]\\S+)*))?(\\s|:)*(.*)?$");
 
   private static final Pattern ATTRIBUTE_PATTERN = Pattern.compile("<#(\\w+)>");
 
@@ -172,7 +172,7 @@ public class DtcIniFactory {
 
     String type = matcher.group(1);
     String fieldName = matcher.group(2);
-    String comment = matcher.group(3);
+    String comment = matcher.group(5);
     List<String> attrs = new ArrayList<String>();
     attrs.add("LIST_FIELD");
 
@@ -231,7 +231,7 @@ public class DtcIniFactory {
     String type = matcher.group(1).trim();
     String key = matcher.group(2).trim();
     String value = matcher.group(4) == null ? "" : matcher.group(4).trim();
-    String comment = matcher.group(6) == null ? "" : matcher.group(6).trim();
+    String comment = matcher.group(7) == null ? "" : matcher.group(7).trim();
     List<String> attrs = new ArrayList<String>();
     if (comment != null) {
       Pattern attrPattern = Pattern.compile("<#(\\w+)>");
@@ -317,7 +317,7 @@ public class DtcIniFactory {
 
     String type = matcher.group(1);
     String fieldName = matcher.group(2);
-    String comment = matcher.group(3);
+    String comment = matcher.group(5);
     List<String> attrs = new ArrayList<String>();
 
     if (comment != null) {

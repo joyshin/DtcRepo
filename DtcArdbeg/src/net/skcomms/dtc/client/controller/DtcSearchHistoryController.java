@@ -33,7 +33,7 @@ public class DtcSearchHistoryController implements DtcTestPageModelObserver {
   private void persist(DtcResponse response) {
     GWT.log("DtcSearchHistoryController.persist() called");
     String path = response.getRequest().getPath();
-    Map<String, String> params = response.getRequest().getRequestParameter();
+    Map<String, String> params = response.getRequest().getRequestParameters();
     DtcSearchHistory searchHistory = DtcSearchHistory.create(path, params,
         response.getResponseTime());
     this.searchHistoryDao.persist(searchHistory);

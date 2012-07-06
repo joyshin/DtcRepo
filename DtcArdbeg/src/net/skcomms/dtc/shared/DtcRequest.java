@@ -27,7 +27,7 @@ public class DtcRequest implements Serializable {
     this.encoding = encoding;
   }
 
-  public String getEncoding() {
+  public String getCharset() {
     return this.encoding;
   }
 
@@ -43,7 +43,7 @@ public class DtcRequest implements Serializable {
     return this.requestData;
   }
 
-  public Map<String, String> getRequestParameter() {
+  public Map<String, String> getRequestParameters() {
     return this.requestParameter;
   }
 

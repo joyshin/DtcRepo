@@ -4,25 +4,28 @@
 package net.skcomms.dtc.server;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import net.skcomms.dtc.server.model.DtcIni;
+import net.skcomms.dtc.server.model.DtcRequestProperty;
+import net.skcomms.dtc.server.model.DtcResponseProperty;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 /**
  * @author jujang@sk.com
  */
-@RunWith(value = Parameterized.class)
+// @RunWith(value = Parameterized.class)
 public class DtcIniFactoryTest {
 
   private static final String CHARSET = "CHARACTER_SET";
@@ -95,12 +98,15 @@ public class DtcIniFactoryTest {
 
   private Map<String, String> map;
 
-  public DtcIniFactoryTest(Map<String, String> map) {
-    this.map = map;
+  public DtcIniFactoryTest() {
   }
 
+  // public DtcIniFactoryTest(Map<String, String> map) {
+  // this.map = map;
+  // }
+
   @Test
-  public void testApi() throws IOException {
+  public void testIni() throws IOException {
     DtcIniFactory p = new DtcIniFactory();
     InputStream is = new FileInputStream(this.map.get(DtcIniFactoryTest.PATH));
     DtcIni ini = p.createFrom(is);
@@ -150,4 +156,34 @@ public class DtcIniFactoryTest {
     Assert.assertEquals(this.map.get(DtcIniFactoryTest.LIST_ATTR2), ini.getListAttrs().get(1));
   }
 
+  @Test
+  public void testKcbbsIni() throws FileNotFoundException, IOException {
+    DtcIniFactory factory = new DtcIniFactory();
+    DtcIni ini = factory.createFrom(new FileInputStream("sample/dtc/kcbbs/blog.100.ini"));
+    for (DtcRequestProperty prop : ini.getRequestProps()) {
+      System.out.println(prop);
+    }
+
+    for (DtcResponseProperty prop : ini.getResponseProps()) {
+      System.out.println(prop);
+    }
+  }
+
+  @Test
+  public void testKKeywordIni() throws FileNotFoundException, IOException {
+    DtcIniFactory factory = new DtcIniFactory();
+    DtcIni ini = factory.createFrom(new FileInputStream("sample/dtc/kkeywords/204.ini"));
+    for (DtcResponseProperty prop : ini.getResponseProps()) {
+      System.out.println(prop);
+    }
+  }
+
+  @Test
+  public void testPattern() {
+    Pattern p = Pattern.compile("(\\S+)\\s+((\\S| \\S)+)\\s*(.*)$");
+    Matcher matcher = p.matcher("^CH  Section Limit  커멘트");
+    matcher.find();
+    Assert.assertEquals("Section Limit", matcher.group(2));
+
+  }
 }

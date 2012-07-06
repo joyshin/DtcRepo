@@ -20,11 +20,11 @@ h1 {
 	right: 0px;
 	bottom: 0px;
 	background-color: #000;
-	background-image:url('Loader.gif');
+	background-image: url('Loader.gif');
 	background-position: center center;
-	background-repeat:no-repeat;
-	filter:alpha(opacity=60);
-	opacity:0.6;
+	background-repeat: no-repeat;
+	filter: alpha(opacity = 60);
+	opacity: 0.6;
 	z-index: 2147483646;
 }
 
@@ -52,95 +52,119 @@ a.navi-bar {
 	height: 200px;
 }
 
-@keyframes myText
-{
-from {color: black;}
-to {color: red;}
+@
+keyframes myText {
+	from {color: black;
 }
 
-@-webkit-keyframes myText {
-	from {color: black;}
-	to {
-		color: red;
-		margin-left: -100px;
-		display: none;
-	}
+to {
+	color: red;
 }
 
+}
+@
+-webkit-keyframes myText {
+	from {color: black;
+}
+
+to {
+	color: red;
+	margin-left: -100px;
+	display: none;
+}
+
+}
 .dtc-line-wrap {
-    word-wrap: break-word;
+	word-wrap: break-word;
 }
 
 .gwt-DtcNodeCellImageStyle {
 	border-radius: 15px;
 }
 
+div#Results {
+	display: table;
+	font-size: 18px;
+	border: 0px;
+	padding-left: 15px;
+	background-color: #DBDBDB;
+	width: 100%;
+}
 
-div#Results{display:table;
-			font-size:18px;
-			border:0px; 
-			padding-left:15px;
-			background-color:#DBDBDB; 
-			width:100%;}
+div[class~='depth_0'] {
+	display: table;
+	font-size: 16px;
+	border: 0px;
+	padding-left: 15px;
+	background-color: #BFBFBF;
+	width: 100%;
+}
 
-div[class^='depth_0']{	display:table;
-			font-size:16px; 
-			border:0px; 
-			padding-left:15px;
-			background-color:#BFBFBF; 
-			width:100%;}
-						
-div[class^='depth_1']{	display:table;
-				font-size:16px; 
-				border:0px; 
-				padding-left:15px;
-				background-color:#8A8A8A; 
-				width:100%;}
-				
-div[class^='depth_2']{	display:table;
-			font-size:16px; 
-			border:0px; 
-			padding-left:15px;
-			background-color:#8A8A8A; 
-			width:100%;}
+div[class~='depth_1'] {
+	display: table;
+	font-size: 16px;
+	border: 0px;
+	padding-left: 15px;
+	background-color: #8A8A8A;
+	width: 100%;
+}
 
-div[class^='depth_3']{	display:table;
-				border:0px; 
-				padding-left:15px;
-				background-color:#5E5E5E; 
-				width:100%;}
-				
-div[class^='depth_4']{display:table;
-			border:0px; 
-			padding-left:15px;
-			background-color:#3B3B3B; 
-			width:100%;}
-			
-div[class^='depth_5']{	display:table;
-			border:0px; 
-			padding-left:15px;
-			background-color:#2B2B2B; 
-			color:#FFFB00;
-			width:100%;}
-			
-.table_row{	display:table-row;
-			text-align:left;
-			padding-left:5px;
-			width:100%}
+div[class~='depth_2'] {
+	display: table;
+	font-size: 16px;
+	border: 0px;
+	padding-left: 15px;
+	background-color: #8A8A8A;
+	width: 100%;
+}
 
-div[class^='key']{	display:table-cell;
-					font-size:12px; 
-					text-align:left;
-					padding:3px;
-					background-color:#1C1C1C; 
-					color:#53FF14;}
-					
-div[class^='value']{display:table-cell;
-					font-size:12px; 
-					text-align:left;
-					padding:3px; 
-					background-color:#1C1C1C; 
-					color:white; 
-					width:100%;}
+div[class~='depth_3'] {
+	display: table;
+	border: 0px;
+	padding-left: 15px;
+	background-color: #5E5E5E;
+	width: 100%;
+}
 
+div[class~='depth_4'] {
+	display: table;
+	border: 0px;
+	padding-left: 15px;
+	background-color: #3B3B3B;
+	width: 100%;
+}
 
+div[class~='depth_5'],div[class~=Document] {
+	display: table;
+	border: 0px;
+	padding-left: 15px;
+	background-color: #2B2B2B;
+	color: #FFFB00;
+	width: 100%;
+}
+
+.table_row {
+	display: table-row;
+	text-align: left;
+	padding-left: 5px;
+	width: 100%
+}
+
+div[class ^='key'] {
+	display: table-cell;
+	font-size: 12px;
+	text-align: left;
+	padding: 3px;
+	background-color: #1C1C1C;
+	color: #53FF14;
+}
+
+div[class ^='value'] {
+	display: table-cell;
+	font-size: 12px;
+	text-align: left;
+	padding: 3px;
+	background-color: #1C1C1C;
+	color: white;
+	width: 100%;
+}
