@@ -11,7 +11,9 @@ import net.skcomms.dtc.shared.DtcRequestMeta;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -23,7 +25,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 public class DtcNavigationBarView extends DefaultDtcArdbegObserver implements DtcNodeObserver {
 
   static String[] getNavigationNodes(String path) {
-    return ("Home" + path).split("/");
+    return path.split("/");
   }
 
   private final HorizontalPanel naviPanel = new HorizontalPanel();
@@ -43,6 +45,8 @@ public class DtcNavigationBarView extends DefaultDtcArdbegObserver implements Dt
     anchor.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
+        // FIXME: selectionPage 호출 코드로 변경해야할 부분
+        Window.alert("Path=" + path);
         event.stopPropagation();
         DtcNavigationBarView.this.owner.setPath(path);
       }
@@ -56,20 +60,24 @@ public class DtcNavigationBarView extends DefaultDtcArdbegObserver implements Dt
     this.naviPanel.add(label);
   }
 
-  public void addPath(String path) {
-    this.naviPanel.clear();
+  private void createHomeButton() {
+    Button homeButton = new Button();
 
-    String[] nodes = DtcNavigationBarView.getNavigationNodes(path);
+    homeButton.addStyleName("homeButton");
+    homeButton.setHTML("<span>go to Home</span>");
 
-    String nodeHistory = this.rootPath;
-    for (int i = 0; i < nodes.length - 1; i++) {
-      if (i > 0) {
-        nodeHistory = nodeHistory + nodes[i] + "/";
+    homeButton.addClickHandler(new ClickHandler() {
+
+      @Override
+      public void onClick(ClickEvent event) {
+        // FIXME: selectionPage 호출 코드로 변경해야할 부분
+        Window.alert("Path=" + DtcNavigationBarView.this.rootPath);
+        event.stopPropagation();
+        DtcNavigationBarView.this.owner.setPath(DtcNavigationBarView.this.rootPath);
       }
-      this.addAnchor(nodes[i], nodeHistory);
-      this.addLabel(DtcNavigationBarView.NAVIGATION_DELIMITER);
-    }
-    this.addLabel(nodes[nodes.length - 1]);
+    });
+
+    RootPanel.get("naviBarContainer").add(homeButton);
   }
 
   public void initialize(DtcArdbeg dtcArdbeg, DtcNodeModel nodeModel) {
@@ -80,23 +88,24 @@ public class DtcNavigationBarView extends DefaultDtcArdbegObserver implements Dt
     this.naviPanel.setSpacing(3);
     this.owner = dtcArdbeg;
 
-    this.addLabel("Home");
+    this.createHomeButton();
     RootPanel.get("naviBarContainer").add(this.naviPanel);
+    RootPanel.get("naviBarContainer").setWidth("100px");
   }
 
   @Override
   public void onDtcDirectoryLoaded(String path) {
-    this.addPath(path);
+    this.updateNavigationBar(path);
   }
 
   @Override
   public void onDtcHomeLoaded() {
-    this.addPath("/");
+    this.updateNavigationBar("/");
   }
 
   @Override
   public void onDtcTestPageLoaded(DtcRequestMeta requestInfo) {
-    this.addPath(requestInfo.getPath());
+    this.updateNavigationBar(requestInfo.getPath());
   }
 
   @Override
@@ -105,5 +114,21 @@ public class DtcNavigationBarView extends DefaultDtcArdbegObserver implements Dt
 
   @Override
   public void onNodeListChanged() {
+  }
+
+  public void updateNavigationBar(String path) {
+    this.naviPanel.clear();
+
+    String[] nodes = DtcNavigationBarView.getNavigationNodes(path);
+    String nodeHistory = this.rootPath;
+    for (int i = 1; i < nodes.length; i++) {
+      if (i == nodes.length - 1) {
+        this.addLabel(nodes[i]);
+        continue;
+      }
+      nodeHistory = nodeHistory + nodes[i] + "/";
+      this.addAnchor(nodes[i], nodeHistory);
+      this.addLabel(DtcNavigationBarView.NAVIGATION_DELIMITER);
+    }
   }
 }

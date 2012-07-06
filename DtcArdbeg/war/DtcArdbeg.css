@@ -192,8 +192,30 @@ button[class^='gwt-Button log']:hover span {
     border-radius: 5px 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; 
 	box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.1); -webkit-box-shadow: 5px 5px rgba(0, 0, 0, 0.1); -moz-box-shadow: 5px 5px rgba(0, 0, 0, 0.1);
 	font-family: Calibri, Tahoma, Geneva, sans-serif;
-	position: absolute; right: 3em; top: 3em; z-index: 99;
+	position: absolute; right: 3em; top: 4em; z-index: 99;
 	margin-left: 0; width: 50px;
+}
+
+button.homeButton {
+	background:url('Home-icon.png');
+	background-size:30px 30px;
+	padding:0px;
+	border:0px;
+	width:30px;
+	height:30px;
+}
+
+button.homeButton span {
+	display:none;
+}
+
+button.homeButton:hover span {
+	display:inline; border:1px solid #cccccc;
+    border-radius: 5px 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; 
+	box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.1); -webkit-box-shadow: 5px 5px rgba(0, 0, 0, 0.1); -moz-box-shadow: 5px 5px rgba(0, 0, 0, 0.1);
+	font-family: Calibri, Tahoma, Geneva, sans-serif;
+	position: absolute; left: 1em; top: 4em; z-index: 99;
+	margin-left: 0; width: 80px;
 }
 
 div.username {
