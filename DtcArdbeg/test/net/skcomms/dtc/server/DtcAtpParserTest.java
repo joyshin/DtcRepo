@@ -31,7 +31,7 @@ public class DtcAtpParserTest {
     os_socket.write(bs);
     os_socket.flush();
 
-    DtcAtp atp = DtcAtpParser.parse(soc.getInputStream(), "euc-kr");
+    DtcAtp atp = DtcAtpParser.parse(soc.getInputStream(), "utf-8");
 
     Assert.assertNotNull(atp);
     System.out.println(atp);
@@ -51,8 +51,9 @@ public class DtcAtpParserTest {
   public void testAtp() throws IOException {
 
     String[] messages = {
-        "ATP/1.2 KCBBSD 0" + DtcAtpParserTest.LT + DtcAtpParserTest.LT + DtcAtpParserTest.LT + "0"
-            + DtcAtpParserTest.LT,
+        // "ATP/1.2 KCBBSD 0" + DtcAtpParserTest.LT + DtcAtpParserTest.LT +
+        // DtcAtpParserTest.LT + "0"
+        // + DtcAtpParserTest.LT,
         "ATP/1.2 KCBBSD 100" + DtcAtpParserTest.LT + DtcAtpParserTest.LT +
             "" + DtcAtpParserTest.FT +
             "" + DtcAtpParserTest.FT +

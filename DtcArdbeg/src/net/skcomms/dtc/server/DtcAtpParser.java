@@ -92,7 +92,6 @@ public class DtcAtpParser {
   }
 
   private void octetStream() throws IOException {
-
     this.atp.setBinary(this.tokenizer.getBinaryData(this.binarySize));
   }
 

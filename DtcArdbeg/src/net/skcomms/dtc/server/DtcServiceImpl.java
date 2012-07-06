@@ -289,14 +289,10 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
 
   static byte[] readAllBytes(InputStream is) throws IOException {
     ByteArrayOutputStream bos = new ByteArrayOutputStream(40960);
-    int bufferSize = 4096;
-    byte[] buffer = new byte[bufferSize];
+    byte[] buffer = new byte[4096];
     int len;
     while ((len = is.read(buffer)) != -1) {
       bos.write(buffer, 0, len);
-      if (len < bufferSize) {
-        break;
-      }
     }
     return bos.toByteArray();
   }
@@ -337,7 +333,6 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
       OutputStream postStream = httpCon.getOutputStream();
       postStream.write(dtcRequest.getRequestData().getBytes());
       postStream.flush();
-      postStream.close();
     }
     return httpCon.getInputStream();
   }
@@ -348,16 +343,21 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
 
   private String createAtpResponse(DtcRequest request, DtcIni ini) throws IOException {
     Socket socket = this.openSocket(request);
-    DtcAtp atpRequest = DtcAtpFactory.createFrom(request, ini);
-    System.out.println("ATP REQUEST:" + atpRequest);
-    socket.getOutputStream().write(atpRequest.getBytes(request.getCharset()));
-    socket.getOutputStream().flush();
-    byte[] buffer = DtcServiceImpl.readAllBytes(socket.getInputStream());
-    socket.close();
-    System.out.println(new String(buffer));
-    DtcAtp atpResponse = DtcAtpFactory.createFrom(new ByteArrayInputStream(buffer),
-        request.getCharset());
-    return atpResponse.toHtmlString(ini);
+    try {
+      DtcAtp atpRequest = DtcAtpFactory.createFrom(request, ini);
+      System.out.println("ATP REQUEST:" + atpRequest);
+      socket.getOutputStream().write(atpRequest.getBytes(request.getCharset()));
+      socket.getOutputStream().flush();
+      // byte[] buffer = DtcServiceImpl.readAllBytes(socket.getInputStream());
+      // System.out.println(new String(buffer));
+      // DtcAtp atpResponse = DtcAtpFactory.createFrom(new
+      // ByteArrayInputStream(buffer),
+      // request.getCharset());
+      DtcAtp atpResponse = DtcAtpFactory.createFrom(socket.getInputStream(), request.getCharset());
+      return atpResponse.toHtmlString(ini);
+    } finally {
+      socket.close();
+    }
   }
 
   private File[] getChildNodes(File file) {

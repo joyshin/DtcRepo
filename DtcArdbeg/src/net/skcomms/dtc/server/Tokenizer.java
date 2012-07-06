@@ -20,12 +20,12 @@ public class Tokenizer {
   }
 
   public byte[] getBinaryData(int binarySize) {
-    // FIXME 바이너리 데이터를 처리하려면 Scanner를 걷어내고 직접 토큰을 생성한다.
-    if (!this.scanner.hasNext(".*")) {
+    // FIXME 바이너리 데이터를 제대로 처리하려면 Scanner를 걷어내고 직접 토큰을 생성한다.
+    if (binarySize == 0) {
       return new byte[0];
     }
 
-    byte[] bytes = this.scanner.next(".*").getBytes();
+    byte[] bytes = this.scanner.next(".{" + binarySize + "}").getBytes();
     if (binarySize != bytes.length) {
       throw new IllegalArgumentException("ERROR: expectedSize:" + binarySize + ", actual:"
           + bytes.length);
