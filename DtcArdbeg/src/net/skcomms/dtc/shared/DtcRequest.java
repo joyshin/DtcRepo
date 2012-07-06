@@ -27,7 +27,7 @@ public class DtcRequest implements Serializable {
     this.encoding = encoding;
   }
 
-  public String getEncoding() {
+  public String getCharset() {
     return this.encoding;
   }
 

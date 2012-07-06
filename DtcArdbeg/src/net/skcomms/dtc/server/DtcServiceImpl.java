@@ -17,10 +17,8 @@ package net.skcomms.dtc.server;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -114,6 +112,30 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     return (sb.length() == 0) ? "" : sb.toString().substring(1);
   }
 
+  /**
+   * @param dirPath
+   *          파일이 존재하는 디렉토리 경로.
+   * @param node
+   * @return
+   * @throws IOException
+   */
+  public static DtcNodeMeta createDtcNodeMeta(String dirPath, File node) throws IOException {
+    DtcNodeMeta nodeMeta = new DtcNodeMeta();
+    nodeMeta.setName(node.getName());
+    if (node.isDirectory()) {
+      nodeMeta.setDescription("디렉토리");
+      nodeMeta.setPath(dirPath + node.getName() + "/");
+    } else {
+      DtcIni ini = new DtcIniFactory().createFrom(node.getPath());
+      nodeMeta.setDescription(ini.getBaseProp("DESCRIPTION").getValue());
+      nodeMeta.setPath(dirPath + node.getName());
+    }
+    String updateTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new Date(node
+        .lastModified()));
+    nodeMeta.setUpdateTime(updateTime);
+    return nodeMeta;
+  }
+
   static String createDtcResponse(DtcRequest dtcRequest) throws IOException {
 
     String response = null;
@@ -129,9 +151,9 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     httpCon.setReadTimeout(TIMEOUT);
     httpCon.setDoInput(true);
     httpCon.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-    if (dtcRequest.getEncoding() != "") {
+    if (dtcRequest.getCharset() != "") {
       httpCon.setRequestProperty("Content-Type", "text/html; charset="
-          + dtcRequest.getEncoding());
+          + dtcRequest.getCharset());
     }
 
     httpCon.setRequestMethod(dtcRequest.getHttpMethod().toUpperCase());
@@ -145,7 +167,7 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     }
 
     byte[] content = DtcServiceImpl.readAllBytes(httpCon.getInputStream());
-    encoding = DtcServiceImpl.guessCharacterEncoding(content);
+    encoding = DtcServiceImpl.detectCharacterSet(content);
 
     BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
         content), encoding));
@@ -229,6 +251,20 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
 
   }
 
+  static String detectCharacterSet(byte[] bytes) throws IOException {
+    String string;
+    if (bytes.length > 1024) {
+      string = new String(bytes, 0, 1024);
+    }
+    else {
+      string = new String(bytes);
+    }
+    if (string.contains("charset=utf-8") || string.contains("encoding=\"utf-8\"")) {
+      return "utf-8";
+    }
+    return "windows-949";
+  }
+
   public static String escapeForXml(String src) {
     return src.replaceAll("\\\\u000B", "&#11;").replaceAll("\\\\f", "&#12;");
   }
@@ -290,6 +326,10 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     return dp.getHtml().toString();
   }
 
+  public static String getRelativePath(String path) throws IOException {
+    return path.substring(DtcServiceImpl.getRootPath().length() - 1);
+  }
+
   public static String getRootPath() throws IOException {
     if (new File("/home/search/dtc").isDirectory()) {
       return "/home/search/dtc/";
@@ -301,27 +341,16 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
 
   }
 
-  static String guessCharacterEncoding(byte[] bytes) throws IOException {
-    String string;
-    if (bytes.length > 1024) {
-      string = new String(bytes, 0, 1024);
-    }
-    else {
-      string = new String(bytes);
-    }
-    if (string.contains("charset=utf-8") || string.contains("encoding=\"utf-8\"")) {
-      return "utf-8";
-    }
-    return "windows-949";
-  }
-
   static byte[] readAllBytes(InputStream is) throws IOException {
-    DataInputStream dis = new DataInputStream(is);
     ByteArrayOutputStream bos = new ByteArrayOutputStream(40960);
-    byte[] buffer = new byte[4096];
+    int bufferSize = 4096;
+    byte[] buffer = new byte[bufferSize];
     int len;
-    while ((len = dis.read(buffer)) != -1) {
+    while ((len = is.read(buffer)) != -1) {
       bos.write(buffer, 0, len);
+      if (len < bufferSize) {
+        break;
+      }
     }
     return bos.toByteArray();
   }
@@ -331,34 +360,18 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
   private String createAtpResponse(DtcRequest request, DtcIni ini) throws IOException {
     Socket socket = this.openSocket(request);
     DtcAtp atpRequest = DtcAtpFactory.createFrom(request, ini);
-    socket.getOutputStream().write(atpRequest.getBytes(request.getEncoding()));
+    System.out.println("ATP REQUEST:" + atpRequest);
+    socket.getOutputStream().write(atpRequest.getBytes(request.getCharset()));
     socket.getOutputStream().flush();
     byte[] buffer = DtcServiceImpl.readAllBytes(socket.getInputStream());
     socket.close();
+    System.out.println(new String(buffer));
     DtcAtp atpResponse = DtcAtpFactory.createFrom(new ByteArrayInputStream(buffer),
-        request.getEncoding());
+        request.getCharset());
 
     // atp -> html
 
-    return atpResponse.toString();
-  }
-
-  private DtcNodeMeta createDtcNodeMeta(String path, File file) throws IOException,
-      FileNotFoundException {
-    DtcNodeMeta node = new DtcNodeMeta();
-    node.setName(file.getName());
-    if (file.isDirectory()) {
-      node.setDescription("디렉토리");
-      node.setPath(this.getRelativePath(path) + file.getName() + "/");
-    } else {
-      DtcIni ini = new DtcIniFactory().createFrom(file.getPath());
-      node.setDescription(ini.getBaseProp("DESCRIPTION").getValue());
-      node.setPath(this.getRelativePath(path) + file.getName());
-    }
-    String updateTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new Date(file
-        .lastModified()));
-    node.setUpdateTime(updateTime);
-    return node;
+    return atpResponse.toHtmlString(ini);
   }
 
   private File[] getChildNodes(File file) {
@@ -383,11 +396,13 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
 
   List<DtcNodeMeta> getDirImpl(String path) throws IOException {
     String parentPath = DtcServiceImpl.getRootPath() + path.substring(1);
+    String relativePath = DtcServiceImpl.getRelativePath(parentPath);
     File file = new File(parentPath);
     List<DtcNodeMeta> nodes = new ArrayList<DtcNodeMeta>();
+
     File[] files = this.getChildNodes(file);
     for (File child : files) {
-      DtcNodeMeta node = this.createDtcNodeMeta(parentPath, child);
+      DtcNodeMeta node = DtcServiceImpl.createDtcNodeMeta(relativePath, child);
       nodes.add(node);
     }
     return nodes;
@@ -426,12 +441,11 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
 
     // change encoding
     try {
-
       String filePath = DtcServiceImpl.getRootPath() + request.getPath().substring(1);
       DtcIni ini = new DtcIniFactory().createFrom(filePath);
 
       String encodedData = DtcServiceImpl.getEncodedQuery(request.getRequestData(),
-          request.getEncoding());
+          request.getCharset());
       request.setRequestData(encodedData);
 
       // replace URL
@@ -441,6 +455,7 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
       System.out.println("INI Protocol:" + ini.getProtocol());
       if (ini.getProtocol().equals("ATP")) {
         rawHtml = this.createAtpResponse(request, ini);
+        System.out.println("ATP HTML:" + rawHtml);
       } else {
         rawHtml = DtcServiceImpl.createDtcResponse(request);
       }
@@ -457,10 +472,6 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
       e.printStackTrace();
       throw new IllegalArgumentException(e);
     }
-  }
-
-  private String getRelativePath(String path) throws IOException {
-    return path.substring(DtcServiceImpl.getRootPath().length() - 1);
   }
 
   @Override

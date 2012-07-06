@@ -129,6 +129,30 @@ public class DtcIni {
     return null;
   }
 
+  public List<DtcResponseProperty> getResponseProps() {
+    return this.responseProps;
+  }
+
+  public List<DtcResponseProperty> getResultHeaderProps() {
+    List<DtcResponseProperty> headerProps = new ArrayList<DtcResponseProperty>();
+    for (DtcResponseProperty prop : this.responseProps) {
+      if (!prop.getAttrs().contains("LIST_FIELD")) {
+        headerProps.add(prop);
+      }
+    }
+    return headerProps;
+  }
+
+  public List<DtcResponseProperty> getResultListProps() {
+    List<DtcResponseProperty> headerProps = new ArrayList<DtcResponseProperty>();
+    for (DtcResponseProperty prop : this.responseProps) {
+      if (prop.getAttrs().contains("LIST_FIELD")) {
+        headerProps.add(prop);
+      }
+    }
+    return headerProps;
+  }
+
   /**
    * @param dtcProperty
    */

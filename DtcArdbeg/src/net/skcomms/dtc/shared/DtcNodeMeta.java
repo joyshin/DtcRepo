@@ -5,6 +5,7 @@ package net.skcomms.dtc.shared;
 
 import java.io.Serializable;
 
+
 /**
  * @author jujang@sk.com
  */
