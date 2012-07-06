@@ -8,8 +8,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import net.skcomms.dtc.shared.DtcRequestMeta;
+import net.skcomms.dtc.shared.DtcRequestParameterModel;
+import net.skcomms.dtc.shared.IpInfoModel;
 
 /**
  * @author jujang@sk.com
@@ -35,6 +40,33 @@ public class DtcIni {
 
   public void addErrorMessage(String message) {
     this.errors.add(message);
+  }
+
+  public DtcRequestMeta createRequestInfo() {
+    DtcRequestMeta requestInfo = new DtcRequestMeta();
+
+    this.setupParams(requestInfo);
+    requestInfo.setEncoding(this.getCharacterSet());
+    this.setupIpInfo(requestInfo);
+
+    return requestInfo;
+  }
+
+  private void detectIps(DtcBaseProperty prop) {
+    Matcher matcher = DtcIni.IP_PATTERN.matcher(prop.getValue());
+    if (!matcher.find()) {
+      this.addErrorMessage("Error: invalid IP pattern:\"" + prop.getValue() + "\"");
+      return;
+    }
+
+    do {
+      if (matcher.group(1) != null) {
+        this.ips.put(matcher.group(1), "");
+      }
+      if (matcher.group(4) != null) {
+        this.ips.put(matcher.group(4), (matcher.group(8) == null ? "" : matcher.group(8)));
+      }
+    } while (matcher.find());
   }
 
   /**
@@ -103,19 +135,7 @@ public class DtcIni {
   public void setBaseProp(DtcBaseProperty prop) {
     this.baseProps.add(prop);
     if (prop.getKey().equals("IP")) {
-      Matcher matcher = DtcIni.IP_PATTERN.matcher(prop.getValue());
-      while (matcher.find()) {
-        if (matcher.group(1) != null) {
-          this.ips.put(matcher.group(1), "");
-        }
-        if (matcher.group(4) != null) {
-          this.ips.put(matcher.group(4), (matcher.group(8) == null ? "" : matcher.group(8)));
-        }
-      }
-      matcher.reset();
-      if (!matcher.find()) {
-        this.addErrorMessage("Error: invalid IP pattern:\"" + prop.getValue() + "\"");
-      }
+      this.detectIps(prop);
     }
   }
 
@@ -133,6 +153,25 @@ public class DtcIni {
 
   public void setResponseProp(DtcResponseProperty prop) {
     this.responseProps.add(prop);
+  }
+
+  private void setupIpInfo(DtcRequestMeta requestInfo) {
+    IpInfoModel ipInfo = new IpInfoModel();
+    for (Entry<String, String> entry : this.getIps().entrySet()) {
+      ipInfo.addOption(entry.getKey(), entry.getKey() + " - " + entry.getValue());
+    }
+    requestInfo.setIpInfo(ipInfo);
+  }
+
+  private void setupParams(DtcRequestMeta requestInfo) {
+    ArrayList<DtcRequestParameterModel> params = new ArrayList<DtcRequestParameterModel>();
+    int index = 0;
+    for (DtcRequestProperty prop : this.getRequestProps()) {
+      index++;
+      params.add(new DtcRequestParameterModel(prop.getKey(), "REQUEST" + index, prop.getValue()));
+    }
+    params.add(new DtcRequestParameterModel("Port", "port", this.getBaseProp("PORT").getValue()));
+    requestInfo.setParams(params);
   }
 
 }

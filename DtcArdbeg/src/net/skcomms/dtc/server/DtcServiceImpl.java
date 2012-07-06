@@ -20,6 +20,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -39,7 +40,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -55,13 +55,10 @@ import net.skcomms.dtc.client.service.DtcService;
 import net.skcomms.dtc.server.model.DtcAtp;
 import net.skcomms.dtc.server.model.DtcIni;
 import net.skcomms.dtc.server.model.DtcLog;
-import net.skcomms.dtc.server.model.DtcRequestProperty;
 import net.skcomms.dtc.shared.DtcNodeMeta;
 import net.skcomms.dtc.shared.DtcRequest;
 import net.skcomms.dtc.shared.DtcRequestMeta;
-import net.skcomms.dtc.shared.DtcRequestParameterModel;
 import net.skcomms.dtc.shared.DtcServiceVerifier;
-import net.skcomms.dtc.shared.IpInfoModel;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -100,26 +97,21 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
 
   };
 
-  public static String combineQueryString(Map<String, String> params, String encoding) {
-    System.out.println("charset:" + encoding);
+  public static String combineQueryString(Map<String, String> params, String encoding)
+      throws UnsupportedEncodingException {
     StringBuilder sb = new StringBuilder();
     for (Map.Entry<String, String> entry : params.entrySet()) {
+      sb.append("&");
       sb.append(entry.getKey());
       sb.append("=");
-
       if (entry.getValue() != null) {
-        try {
-          sb.append(URLEncoder.encode(entry.getValue(), encoding));
-        } catch (UnsupportedEncodingException e) {
-          e.printStackTrace();
-        }
+        sb.append(URLEncoder.encode(entry.getValue(), encoding));
       }
       else {
         sb.append("");
       }
-      sb.append("&");
     }
-    return sb.toString().substring(0, sb.length() - 1);
+    return (sb.length() == 0) ? "" : sb.toString().substring(1);
   }
 
   static String createDtcResponse(DtcRequest dtcRequest) throws IOException {
@@ -173,7 +165,6 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
       return response;
     }
     else {
-
       String targetUrl = null;
       String responseUrl = null;
       String htmlData = null;
@@ -259,8 +250,6 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
       if (pair.length == 2) {
         decodedQuery = URLDecoder.decode(pair[1], "utf-8");
         encodedQuery = URLEncoder.encode(decodedQuery, encoding);
-        // System.out.println("decodedQuery: " + decodedQuery);
-        // System.out.println("encodedQuery: " + encodedQuery);
         paramList.append(pair[0]);
         paramList.append("=");
         paramList.append(encodedQuery);
@@ -340,68 +329,51 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
   private EntityManagerFactory emf;
 
   private String createAtpResponse(DtcRequest request, DtcIni ini) throws IOException {
-    DtcAtp atpRequest = DtcAtpFactory.createFrom(request, ini);
     Socket socket = this.openSocket(request);
+    DtcAtp atpRequest = DtcAtpFactory.createFrom(request, ini);
     socket.getOutputStream().write(atpRequest.getBytes(request.getEncoding()));
     socket.getOutputStream().flush();
-    byte[] buffer = new byte[102400];
-    int nRead = socket.getInputStream().read(buffer);
-    byte[] copied = Arrays.copyOf(buffer, nRead);
-    DtcAtp atpResponse = DtcAtpFactory.createFrom(new ByteArrayInputStream(copied),
-        request.getEncoding());
+    byte[] buffer = DtcServiceImpl.readAllBytes(socket.getInputStream());
     socket.close();
+    DtcAtp atpResponse = DtcAtpFactory.createFrom(new ByteArrayInputStream(buffer),
+        request.getEncoding());
 
     // atp -> html
 
-    // return new String(atp.getBytes());
-
-    // try {
-    // return new String(atpResponse.getBytes(request.getEncoding()));
-    System.out.println(atpResponse.toString());
     return atpResponse.toString();
-    // } catch (UnsupportedEncodingException e) {
-    // throw new IllegalStateException("UnsupportedEncoding:" +
-    // ini.getCharacterSet());
-    // } catch (IOException e) {
-    // throw new IllegalStateException(e);
-    // }
   }
 
-  private DtcRequestMeta createRequestInfo(DtcIni ini) {
-    DtcRequestMeta requestInfo = new DtcRequestMeta();
-
-    ArrayList<DtcRequestParameterModel> params = new ArrayList<DtcRequestParameterModel>();
-    int index = 0;
-    for (DtcRequestProperty prop : ini.getRequestProps()) {
-      index++;
-      params.add(new DtcRequestParameterModel(prop.getKey(), "REQUEST" + index, prop.getValue()));
+  private DtcNodeMeta createDtcNodeMeta(String path, File file) throws IOException,
+      FileNotFoundException {
+    DtcNodeMeta node = new DtcNodeMeta();
+    node.setName(file.getName());
+    if (file.isDirectory()) {
+      node.setDescription("디렉토리");
+      node.setPath(this.getRelativePath(path) + file.getName() + "/");
+    } else {
+      DtcIni ini = new DtcIniFactory().createFrom(file.getPath());
+      node.setDescription(ini.getBaseProp("DESCRIPTION").getValue());
+      node.setPath(this.getRelativePath(path) + file.getName());
     }
-    params.add(new DtcRequestParameterModel("Port", "port", ini.getBaseProp("PORT").getValue()));
-    requestInfo.setParams(params);
+    String updateTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new Date(file
+        .lastModified()));
+    node.setUpdateTime(updateTime);
+    return node;
+  }
 
-    requestInfo.setEncoding(ini.getCharacterSet());
-
-    IpInfoModel ipInfo = new IpInfoModel();
-    for (Entry<String, String> entry : ini.getIps().entrySet()) {
-      ipInfo.addOption(entry.getKey(), entry.getKey() + " - " + entry.getValue());
-    }
-    requestInfo.setIpInfo(ipInfo);
-
-    return requestInfo;
+  private File[] getChildNodes(File file) {
+    File[] files = file.listFiles(new DtcNodeFilter());
+    Arrays.sort(files, DtcServiceImpl.NODE_COMPARATOR);
+    return files;
   }
 
   @Override
   public List<DtcNodeMeta> getDir(String path) {
     if (!DtcServiceVerifier.isValidDirectoryPath(path)) {
-      throw new IllegalArgumentException("Invalid directory:" + path);
+      throw new IllegalArgumentException("Invalid directory format:" + path);
     }
 
-    EntityManager manager = this.emf.createEntityManager();
-    manager.getTransaction().begin();
-    manager.persist(new DtcLog("\"" + path + "\" requested."));
-    manager.getTransaction().commit();
-    manager.close();
-
+    this.logPath(path);
     try {
       return this.getDirImpl(path);
     } catch (IOException e) {
@@ -410,27 +382,12 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
   }
 
   List<DtcNodeMeta> getDirImpl(String path) throws IOException {
-    String root = DtcServiceImpl.getRootPath();
-    String parentPath = root + path.substring(1);
-    System.out.println("Absolute path:" + parentPath);
+    String parentPath = DtcServiceImpl.getRootPath() + path.substring(1);
     File file = new File(parentPath);
     List<DtcNodeMeta> nodes = new ArrayList<DtcNodeMeta>();
-    File[] files = file.listFiles(new DtcNodeFilter());
-    Arrays.sort(files, DtcServiceImpl.NODE_COMPARATOR);
+    File[] files = this.getChildNodes(file);
     for (File child : files) {
-      DtcNodeMeta node = new DtcNodeMeta();
-      node.setName(child.getName());
-      if (child.isDirectory()) {
-        node.setDescription("디렉토리");
-        node.setPath(parentPath.substring(root.length() - 1) + child.getName() + "/");
-      } else {
-        DtcIni ini = new DtcIniFactory().createFrom(child.getPath());
-        node.setDescription(ini.getBaseProp("DESCRIPTION").getValue());
-        node.setPath(parentPath.substring(root.length() - 1) + child.getName());
-      }
-      String updateTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new Date(child
-          .lastModified()));
-      node.setUpdateTime(updateTime);
+      DtcNodeMeta node = this.createDtcNodeMeta(parentPath, child);
       nodes.add(node);
     }
     return nodes;
@@ -440,7 +397,7 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     String filePath = DtcServiceImpl.getRootPath() + path.substring(1);
     DtcIni ini = new DtcIniFactory().createFrom(filePath);
     // FIXME DtcRequestInfoModel을 DtcIni로 대체하는 것을 검토하자.
-    DtcRequestMeta requestInfo = this.createRequestInfo(ini);
+    DtcRequestMeta requestInfo = ini.createRequestInfo();
     requestInfo.setPath(path);
     return requestInfo;
   }
@@ -502,12 +459,24 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     }
   }
 
+  private String getRelativePath(String path) throws IOException {
+    return path.substring(DtcServiceImpl.getRootPath().length() - 1);
+  }
+
   @Override
   public void init(ServletConfig config) throws ServletException {
     System.out.println("init() called.");
     super.init(config);
     WebApplicationContextUtils.getRequiredWebApplicationContext(this.getServletContext())
         .getAutowireCapableBeanFactory().autowireBean(this);
+  }
+
+  private void logPath(String path) {
+    EntityManager manager = this.emf.createEntityManager();
+    manager.getTransaction().begin();
+    manager.persist(new DtcLog("\"" + path + "\" requested."));
+    manager.getTransaction().commit();
+    manager.close();
   }
 
   private Socket openSocket(DtcRequest request) throws UnknownHostException, IOException {
