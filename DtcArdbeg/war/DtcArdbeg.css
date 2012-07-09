@@ -142,45 +142,51 @@ div[class^='value']{display:table-cell;
 					background-color:#1C1C1C; 
 					color:white; 
 					width:100%;}
-
+					
 button.copyButton {
 	background:url('Copy-icon.png');
-	background-size:30px 30px;
+	background-size:20px 20px;
+	background-repeat:no-repeat;
 	padding:0px;
 	border:0px;
-	width:30px;
-	height:30px;
+	width:20px;
+	height:20px;
 }
 
 button.copyButton span {
 	display:none;
+	position:relative;
 }
 
 button.copyButton:hover span {
-    display:inline; border:1px solid #cccccc;
+    display:block; border:1px solid #cccccc;
+    background-color:rgba(225, 225, 0, 1);
     border-radius: 5px 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; 
 	box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.1); -webkit-box-shadow: 5px 5px rgba(0, 0, 0, 0.1); -moz-box-shadow: 5px 5px rgba(0, 0, 0, 0.1);
 	font-family: Calibri, Tahoma, Geneva, sans-serif;
-	position: absolute; left: 3em; top: 4em; z-index: 99;
-	margin-left: 0; width: 150px;
+	position:absolute; left:3em; top:4em; z-index:200054;
+	margin-left:0; width:150px;
+	cursor:pointer;
 }
 
 button.loginButton {
 	background:url('Login-icon.png');
-	background-size:30px 30px;
+	background-size:20px 20px;
+	background-repeat:no-repeat;
 	padding:0px;
 	border:0px;
-	width:30px;
-	height:30px;
+	width:20px;
+	height:20px;
 }
 
 button.logoutButton {
 	background:url('Logout-icon.png');
-	background-size:30px 30px;
+	background-size:20px 20px;
+	background-repeat:no-repeat;
 	padding:0px;
 	border:0px;
-	width:30px;
-	height:30px;
+	width:20px;
+	height:20px;
 }
 
 button[class^='gwt-Button log'] span {
@@ -189,20 +195,23 @@ button[class^='gwt-Button log'] span {
 
 button[class^='gwt-Button log']:hover span {
 	display:inline; border:1px solid #cccccc;
+    background-color:rgba(225, 225, 0, 1);
     border-radius: 5px 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; 
 	box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.1); -webkit-box-shadow: 5px 5px rgba(0, 0, 0, 0.1); -moz-box-shadow: 5px 5px rgba(0, 0, 0, 0.1);
 	font-family: Calibri, Tahoma, Geneva, sans-serif;
-	position: absolute; right: 3em; top: 4em; z-index: 99;
+	position: absolute; right: 3em; top: 4em; z-index: 1000000;
 	margin-left: 0; width: 50px;
 }
 
 button.homeButton {
 	background:url('Home-icon.png');
-	background-size:30px 30px;
+	background-size:20px 20px;
+	background-repeat:no-repeat;
+	float:left;
 	padding:0px;
 	border:0px;
-	width:30px;
-	height:30px;
+	width:20px;
+	height:20px;
 }
 
 button.homeButton span {
@@ -211,11 +220,16 @@ button.homeButton span {
 
 button.homeButton:hover span {
 	display:inline; border:1px solid #cccccc;
+    background-color:rgba(225, 225, 0, 1);
     border-radius: 5px 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; 
 	box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.1); -webkit-box-shadow: 5px 5px rgba(0, 0, 0, 0.1); -moz-box-shadow: 5px 5px rgba(0, 0, 0, 0.1);
 	font-family: Calibri, Tahoma, Geneva, sans-serif;
-	position: absolute; left: 1em; top: 4em; z-index: 99;
+	position: absolute; left: 1em; top: 4em; z-index: 1000000;
 	margin-left: 0; width: 80px;
+}
+
+table.naviPanel {
+	float:left;
 }
 
 div.username {

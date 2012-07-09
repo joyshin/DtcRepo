@@ -9,9 +9,9 @@ import net.skcomms.dtc.client.DtcNodeObserver;
 import net.skcomms.dtc.client.model.DtcNodeModel;
 import net.skcomms.dtc.shared.DtcRequestMeta;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -46,7 +46,7 @@ public class DtcNavigationBarView extends DefaultDtcArdbegObserver implements Dt
       @Override
       public void onClick(ClickEvent event) {
         // FIXME: selectionPage 호출 코드로 변경해야할 부분
-        Window.alert("Path=" + path);
+        GWT.log("Path=" + path);
         event.stopPropagation();
         DtcNavigationBarView.this.owner.setPath(path);
       }
@@ -65,13 +65,12 @@ public class DtcNavigationBarView extends DefaultDtcArdbegObserver implements Dt
 
     homeButton.addStyleName("homeButton");
     homeButton.setHTML("<span>go to Home</span>");
-
     homeButton.addClickHandler(new ClickHandler() {
 
       @Override
       public void onClick(ClickEvent event) {
         // FIXME: selectionPage 호출 코드로 변경해야할 부분
-        Window.alert("Path=" + DtcNavigationBarView.this.rootPath);
+        GWT.log("Path=" + DtcNavigationBarView.this.rootPath);
         event.stopPropagation();
         DtcNavigationBarView.this.owner.setPath(DtcNavigationBarView.this.rootPath);
       }
@@ -90,7 +89,6 @@ public class DtcNavigationBarView extends DefaultDtcArdbegObserver implements Dt
 
     this.createHomeButton();
     RootPanel.get("naviBarContainer").add(this.naviPanel);
-    RootPanel.get("naviBarContainer").setWidth("100px");
   }
 
   @Override
@@ -122,13 +120,13 @@ public class DtcNavigationBarView extends DefaultDtcArdbegObserver implements Dt
     String[] nodes = DtcNavigationBarView.getNavigationNodes(path);
     String nodeHistory = this.rootPath;
     for (int i = 1; i < nodes.length; i++) {
+      this.addLabel(DtcNavigationBarView.NAVIGATION_DELIMITER);
       if (i == nodes.length - 1) {
         this.addLabel(nodes[i]);
         continue;
       }
       nodeHistory = nodeHistory + nodes[i] + "/";
       this.addAnchor(nodes[i], nodeHistory);
-      this.addLabel(DtcNavigationBarView.NAVIGATION_DELIMITER);
     }
   }
 }
