@@ -268,6 +268,7 @@ public class DtcArdbeg implements EntryPoint, DtcNodeObserver {
   @Override
   public void onModuleLoad() {
     this.initializeComponents();
+    this.setUpCloseHandler();
   }
 
   @Override
@@ -282,8 +283,6 @@ public class DtcArdbeg implements EntryPoint, DtcNodeObserver {
    * @param path
    */
   public void setPath(String path) {
-    // this.showSplash();
-
     DtcPageType type = DtcArdbeg.getTypeOfSelected(path, !path.endsWith("/"));
 
     if (type == DtcPageType.HOME) {
@@ -294,13 +293,14 @@ public class DtcArdbeg implements EntryPoint, DtcNodeObserver {
       this.dtcArdbegNodeModel.refreshDtcTestPage(path);
     }
   }
-  //
-  // public void showSplash() {
-  // for (DtcArdbegObserver observer : this.dtcArdbegObservers) {
-  // observer.onShow();
-  // }
-  // }
-  // public void showSplash() {
-  // RootPanel.get("loading").setVisible(true);
-  // }
+
+  private void setUpCloseHandler() {
+    Window.addWindowClosingHandler(new Window.ClosingHandler() {
+
+      @Override
+      public void onWindowClosing(Window.ClosingEvent closingEvent) {
+        closingEvent.setMessage("겨우 요거 테스트하고.. 뭐, 알겠습니다.");
+      }
+    });
+  }
 }
