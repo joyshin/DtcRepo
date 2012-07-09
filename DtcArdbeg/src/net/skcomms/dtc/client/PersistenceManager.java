@@ -10,10 +10,10 @@ import net.skcomms.dtc.client.model.CookieStorageModel;
 import net.skcomms.dtc.client.model.LocalStorageModel;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.http.client.URL;
 
 /**
  * @author jujang@sk.com
- * 
  */
 public class PersistenceManager {
 
@@ -43,7 +43,7 @@ public class PersistenceManager {
   public String getItem(String key) {
     GWT.log("getItem Key: " + key);
     GWT.log("getItem Data :" + this.clientStorage.getItem(key));
-    return this.clientStorage.getItem(key);
+    return URL.decode(this.clientStorage.getItem(key));
   }
 
   public List<String> getItemKeys() {
@@ -68,7 +68,7 @@ public class PersistenceManager {
   public void setItem(String key, String data) {
     GWT.log("setItem Key: " + key);
     GWT.log("setItem Data :" + data);
-    this.clientStorage.setItem(key, data);
+    this.clientStorage.setItem(key, URL.encode(data));
   }
 
   public void setVisitCount(String serviceName, int visitCount) {

@@ -8,6 +8,7 @@ import net.skcomms.dtc.client.service.DtcService;
 import net.skcomms.dtc.shared.DtcRequest;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class DtcTestPageModel {
@@ -26,7 +27,11 @@ public class DtcTestPageModel {
 
   private void fireResponseReceived(DtcResponse response) {
     for (DtcTestPageModelObserver observer : DtcTestPageModel.this.observers) {
-      observer.onTestPageResponseReceived(response);
+      try {
+        observer.onTestPageResponseReceived(response);
+      } catch (Exception e) {
+        Window.alert(e.getMessage());
+      }
     }
   }
 
