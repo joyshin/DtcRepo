@@ -299,7 +299,7 @@ public class DtcArdbeg implements EntryPoint, DtcNodeObserver {
 
       @Override
       public void onWindowClosing(Window.ClosingEvent closingEvent) {
-        closingEvent.setMessage("겨우 요거 테스트하고.. 뭐, 알겠습니다.");
+        closingEvent.setMessage("겨우 요거 테스트하고..-.-;; 뭐, 알겠습니다.");
       }
     });
   }
