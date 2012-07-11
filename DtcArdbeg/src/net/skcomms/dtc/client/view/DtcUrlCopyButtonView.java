@@ -28,7 +28,8 @@ public class DtcUrlCopyButtonView {
 
   protected void initializeLinkCopyButton() {
     RootPanel.get("linkCopyContainer").add(this.linkCopyButton);
-    this.linkCopyButton.setText("Copy link");
+    this.linkCopyButton.setSize("30px", "30px");
+    this.linkCopyButton.addStyleName("copyButton");
+    this.linkCopyButton.setHTML("<span>Copy Link to Clip Board</span>");
   }
-
 }

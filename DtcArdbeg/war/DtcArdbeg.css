@@ -143,14 +143,7 @@ div[class~='depth_5'],div[class~=Document] {
 	width: 100%;
 }
 
-.table_row {
-	display: table-row;
-	text-align: left;
-	padding-left: 5px;
-	width: 100%
-}
-
-div[class ^='key'] {
+div[class^='key'] {
 	display: table-cell;
 	font-size: 12px;
 	text-align: left;
@@ -159,7 +152,7 @@ div[class ^='key'] {
 	color: #53FF14;
 }
 
-div[class ^='value'] {
+div[class^='value'] {
 	display: table-cell;
 	font-size: 12px;
 	text-align: left;
@@ -168,3 +161,110 @@ div[class ^='value'] {
 	color: white;
 	width: 100%;
 }
+					
+.table_row {
+	display: table-row;
+	text-align: left;
+	padding-left: 5px;
+	width: 100%
+}
+
+button[class^='gwt-Button log'] span {
+	display:none;
+}
+
+button[class^='gwt-Button log']:hover span {
+	display:inline; border:1px solid #cccccc;
+    background-color:rgba(225, 225, 0, 1);
+    border-radius: 5px 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; 
+	box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.1); -webkit-box-shadow: 5px 5px rgba(0, 0, 0, 0.1); -moz-box-shadow: 5px 5px rgba(0, 0, 0, 0.1);
+	font-family: Calibri, Tahoma, Geneva, sans-serif;
+	position: absolute; right: 3em; top: 4em; z-index: 1000000;
+	margin-left: 0; width: 50px;
+}
+
+button.copyButton {
+	background:url('Copy-icon.png');
+	background-size:20px 20px;
+	background-repeat:no-repeat;
+	padding:0px;
+	border:0px;
+	width:20px;
+	height:20px;
+}
+
+button.copyButton span {
+    display:none;
+    position:relative;
+}
+
+button.copyButton:hover span {
+    display:block; border:1px solid #cccccc;
+    background-color:rgba(225, 225, 0, 1);
+    border-radius: 5px 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; 
+	box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.1); -webkit-box-shadow: 5px 5px rgba(0, 0, 0, 0.1); -moz-box-shadow: 5px 5px rgba(0, 0, 0, 0.1);
+	font-family: Calibri, Tahoma, Geneva, sans-serif;
+	position:absolute; left:3em; top:4em; z-index:1000000;
+	margin-left:0; width:150px;
+	cursor:pointer;
+}
+
+button.loginButton {
+	background:url('Login-icon.png');
+	background-size:20px 20px;
+	background-repeat:no-repeat;
+	padding:0px;
+	border:0px;
+	width:20px;
+	height:20px;
+}
+
+button.logoutButton {
+	background:url('Logout-icon.png');
+	background-size:20px 20px;
+	background-repeat:no-repeat;
+	padding:0px;
+	border:0px;
+	width:20px;
+	height:20px;
+}
+
+button.homeButton {
+	background:url('Home-icon.png');
+	background-size:20px 20px;
+	background-repeat:no-repeat;
+	float:left;
+	padding:0px;
+	border:0px;
+	width:20px;
+	height:20px;
+}
+
+button.homeButton span {
+	display:none;
+}
+
+button.homeButton:hover span {
+	display:inline; border:1px solid #cccccc;
+    background-color:rgba(225, 225, 0, 1);
+    border-radius: 5px 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; 
+	box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.1); -webkit-box-shadow: 5px 5px rgba(0, 0, 0, 0.1); -moz-box-shadow: 5px 5px rgba(0, 0, 0, 0.1);
+	font-family: Calibri, Tahoma, Geneva, sans-serif;
+	position: absolute; left: 1em; top: 4em; z-index: 1000000;
+	margin-left: 0; width: 80px;
+}
+
+table.naviPanel {
+	float:left;
+}
+
+div.username {
+	font-family:"New Gulim";
+	font-weight:bold;
+	text-align:left;
+	
+}
+
+.gwt-Anchor {
+}
+

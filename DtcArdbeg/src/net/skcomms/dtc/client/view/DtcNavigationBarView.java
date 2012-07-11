@@ -20,7 +20,6 @@ import com.google.gwt.user.client.ui.RootPanel;
 
 /**
  * @author jujang@sk.com
- * 
  */
 public class DtcNavigationBarView extends DefaultDtcArdbegObserver implements DtcNodeObserver {
 
@@ -43,6 +42,7 @@ public class DtcNavigationBarView extends DefaultDtcArdbegObserver implements Dt
     Anchor anchor = new Anchor(text);
 
     anchor.addClickHandler(new ClickHandler() {
+
       @Override
       public void onClick(ClickEvent event) {
         // FIXME: selectionPage 호출 코드로 변경해야할 부분
