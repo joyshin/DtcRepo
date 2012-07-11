@@ -6,6 +6,8 @@ package net.skcomms.dtc.server;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -15,6 +17,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import net.skcomms.dtc.server.util.DtcHelper;
 import net.skcomms.dtc.shared.DtcNodeMeta;
 import net.skcomms.dtc.shared.DtcRequestMeta;
 import net.skcomms.dtc.shared.DtcServiceVerifier;
@@ -93,8 +96,8 @@ public class DtcServiceImplTest {
 
   @Test
   public void testGetRootPath() throws IOException {
-    Assert.assertEquals("sample/dtc/", DtcServiceImpl.getRootPath());
-    String absolutePath = DtcServiceImpl.getRootPath() + "/";
+    Assert.assertEquals("sample/dtc/", DtcHelper.getRootPath());
+    String absolutePath = DtcHelper.getRootPath() + "/";
     File file = new File(absolutePath);
 
     for (File item : file.listFiles(new DtcServiceImpl.DtcNodeFilter())) {
@@ -117,18 +120,18 @@ public class DtcServiceImplTest {
   @Test
   public void testParseTestPage() throws IOException {
     DtcRequestMeta requestInfo = new DtcServiceImpl()
-        .getDtcRequestPageInfo("/kadcpts/100.ini");
+        .getDtcRequestMeta("/kadcpts/100.ini");
     System.out.println(requestInfo.getParams().toString());
     System.out.println(requestInfo.getIpInfo());
 
-    requestInfo = new DtcServiceImpl().getDtcRequestPageInfo("/kegloos_new/100.ini");
+    requestInfo = new DtcServiceImpl().getDtcRequestMeta("/kegloos_new/100.ini");
     System.out.println(requestInfo.getParams().toString());
     System.out.println(requestInfo.getIpInfo());
   }
 
   @Test
   public void testSaxParser() throws IOException, ParserConfigurationException, SAXException {
-    byte[] htmlContents = DtcServiceImpl
+    byte[] htmlContents = DtcServiceImplTest
         // .getHtmlContents("http://10.173.2.120:9001/KSHOP2SD/100?Dummy1=1&Dummy2=1&Dummy3=1&Dummy4=1&Version=100&Query=%B3%AA%C0%CC%C5%B0&ResultStartPos=1&ResultCount=2&Sort=PD&Property=&Adult=1&ClientCode=TAA&ClientURI=DTC");
         .getHtmlContents("http://10.141.242.31:21002/KEGLOOSD/100?Dummy1=1&Dummy2=1&Dummy3=1&Dummy4=1&Version=100&ClientCode=NSB&ClientURL=&Query=%EB%A7%8C%ED%99%94&ResultStartPos=1&ResultCount=10&OrderBy=PD&SearchField=AL&ResultDocLength=256");
     SAXParserFactory sax = SAXParserFactory.newInstance();
@@ -150,6 +153,19 @@ public class DtcServiceImplTest {
         }
       }
     });
+  }
+
+  /**
+   * @param url
+   * @return
+   * @throws IOException
+   */
+  public static byte[] getHtmlContents(String href) throws IOException {
+    URL url = new URL(href);
+    URLConnection conn = url.openConnection();
+    byte[] contents = DtcHelper.readAllBytes(conn.getInputStream());
+  
+    return contents;
   }
 
 }

@@ -1,7 +1,9 @@
 package net.skcomms.dtc.client.model;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
+
+import net.skcomms.dtc.shared.DtcRequestParameter;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -11,9 +13,9 @@ public class DtcSearchHistoryTest {
   @Test
   public void test() {
     String path = "path";
-    Map<String, String> params = new HashMap<String, String>();
-    params.put("key1", "value1");
-    params.put("key2", "value2");
+    List<DtcRequestParameter> params = new ArrayList<DtcRequestParameter>();
+    params.add(new DtcRequestParameter("key1", null, "value1"));
+    params.add(new DtcRequestParameter("key2", null, "value2"));
     DtcSearchHistory dtcSearchHistory = DtcSearchHistory.create(path, params, 5);
 
     String result = dtcSearchHistory.serialize();

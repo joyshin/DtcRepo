@@ -19,6 +19,7 @@ import net.skcomms.dtc.server.model.DtcBaseProperty;
 import net.skcomms.dtc.server.model.DtcIni;
 import net.skcomms.dtc.server.model.DtcRequestProperty;
 import net.skcomms.dtc.server.model.DtcResponseProperty;
+import net.skcomms.dtc.server.util.DtcHelper;
 
 /**
  * @author jujang@sk.com
@@ -118,7 +119,7 @@ public class DtcIniFactory {
   }
 
   public DtcIni createFrom(InputStream is) throws IOException {
-    byte[] bytes = DtcServiceImpl.readAllBytes(is);
+    byte[] bytes = DtcHelper.readAllBytes(is);
     String encoding = DtcIniFactory.examineCharset(bytes);
     return this.parse(bytes, encoding);
   }

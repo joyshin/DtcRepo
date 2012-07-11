@@ -24,10 +24,6 @@ public class DtcServiceVerifier {
     return path.matches(regex);
   }
 
-  public static boolean isValidMethod(String httpMethod) {
-    return (httpMethod.toLowerCase().equals("get") || httpMethod.toLowerCase().equals("post"));
-  }
-
   /**
    * 지정된 테스트 페이지의 유효성을 검사한다. 정규식 "/([a-zA-Z0-9_.-]+/)*[a-zA-Z0-9_.-]+\\.ini"에
    * 일치하면 유효한 것으로 판단한다.

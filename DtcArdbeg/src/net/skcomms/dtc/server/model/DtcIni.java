@@ -13,7 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.skcomms.dtc.shared.DtcRequestMeta;
-import net.skcomms.dtc.shared.DtcRequestParameterModel;
+import net.skcomms.dtc.shared.DtcRequestParameter;
 import net.skcomms.dtc.shared.IpInfoModel;
 
 /**
@@ -43,13 +43,15 @@ public class DtcIni {
   }
 
   public DtcRequestMeta createRequestInfo() {
-    DtcRequestMeta requestInfo = new DtcRequestMeta();
+    DtcRequestMeta requestMeta = new DtcRequestMeta();
 
-    this.setupParams(requestInfo);
-    requestInfo.setEncoding(this.getCharacterSet());
-    this.setupIpInfo(requestInfo);
+    this.setupParams(requestMeta);
+    requestMeta.setEncoding(this.getCharacterSet());
+    requestMeta.setAppName(this.getBaseProp("APP_NAME").getValue());
+    requestMeta.setApiNumber(this.getBaseProp("API_NUM").getValue());
+    this.setupIpInfo(requestMeta);
 
-    return requestInfo;
+    return requestMeta;
   }
 
   private void detectIps(DtcBaseProperty prop) {
@@ -188,13 +190,13 @@ public class DtcIni {
   }
 
   private void setupParams(DtcRequestMeta requestInfo) {
-    ArrayList<DtcRequestParameterModel> params = new ArrayList<DtcRequestParameterModel>();
+    ArrayList<DtcRequestParameter> params = new ArrayList<DtcRequestParameter>();
     int index = 0;
     for (DtcRequestProperty prop : this.getRequestProps()) {
       index++;
-      params.add(new DtcRequestParameterModel(prop.getKey(), "REQUEST" + index, prop.getValue()));
+      params.add(new DtcRequestParameter(prop.getKey(), "REQUEST" + index, prop.getValue()));
     }
-    params.add(new DtcRequestParameterModel("Port", "port", this.getBaseProp("PORT").getValue()));
+    params.add(new DtcRequestParameter("Port", "port", this.getBaseProp("PORT").getValue()));
     requestInfo.setParams(params);
   }
 

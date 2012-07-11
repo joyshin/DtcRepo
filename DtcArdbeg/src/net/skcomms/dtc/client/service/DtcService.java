@@ -56,7 +56,7 @@ public interface DtcService extends RemoteService {
    */
   List<DtcNodeMeta> getDir(String path) throws IllegalArgumentException;
 
-  DtcRequestMeta getDtcRequestPageInfo(String path);
+  DtcRequestMeta getDtcRequestMeta(String path);
 
   DtcResponse getDtcResponse(DtcRequest httpRequestInfo);
 }

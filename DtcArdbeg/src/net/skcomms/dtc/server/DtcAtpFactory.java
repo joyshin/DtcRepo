@@ -2,21 +2,25 @@ package net.skcomms.dtc.server;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
+import java.util.List;
 
 import net.skcomms.dtc.server.model.DtcAtp;
 import net.skcomms.dtc.server.model.DtcAtpRecord;
 import net.skcomms.dtc.server.model.DtcIni;
-import net.skcomms.dtc.server.model.DtcRequestProperty;
 import net.skcomms.dtc.shared.DtcRequest;
+import net.skcomms.dtc.shared.DtcRequestParameter;
 
 public class DtcAtpFactory {
 
-  private static void addArguments(DtcRequest request, DtcIni ini, DtcAtp atp) {
-    Map<String, String> actuals = request.getRequestParameters();
-    for (DtcRequestProperty prop : ini.getRequestProps()) {
+  private static void addArguments(DtcRequest request, DtcAtp atp) {
+    List<DtcRequestParameter> params = request.getRequestParameters();
+    for (DtcRequestParameter param : params) {
+      if (param.getKey().equals("IP") || param.getKey().equals("Port")) {
+        continue;
+      }
+
       DtcAtpRecord record = new DtcAtpRecord();
-      record.addField(actuals.get(prop.getKey()));
+      record.addField(param.getValue() == null ? "" : param.getValue());
       atp.addRecord(record);
     }
   }
@@ -33,7 +37,7 @@ public class DtcAtpFactory {
     DtcAtp atp = new DtcAtp();
     DtcAtpFactory.setSignature(ini, atp);
     DtcAtpFactory.addDummyRecords(atp);
-    DtcAtpFactory.addArguments(request, ini, atp);
+    DtcAtpFactory.addArguments(request, atp);
     atp.setBinary(new byte[0]);
     return atp;
   }

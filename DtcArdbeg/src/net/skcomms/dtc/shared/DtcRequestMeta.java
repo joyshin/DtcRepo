@@ -12,13 +12,17 @@ import java.util.List;
 @SuppressWarnings("serial")
 public class DtcRequestMeta implements Serializable {
 
-  private List<DtcRequestParameterModel> params;
+  private List<DtcRequestParameter> params;
 
   private IpInfoModel ipInfo;
 
   private String encoding;
 
   private String path;
+
+  private String appName;
+
+  private String apiNumber;
 
   /**
    * @return
@@ -34,7 +38,7 @@ public class DtcRequestMeta implements Serializable {
     return this.ipInfo;
   }
 
-  public List<DtcRequestParameterModel> getParams() {
+  public List<DtcRequestParameter> getParams() {
     return this.params;
   }
 
@@ -53,7 +57,7 @@ public class DtcRequestMeta implements Serializable {
     this.ipInfo = ipInfo;
   }
 
-  public void setParams(List<DtcRequestParameterModel> params) {
+  public void setParams(List<DtcRequestParameter> params) {
     this.params = params;
   }
 
@@ -67,6 +71,22 @@ public class DtcRequestMeta implements Serializable {
   @Override
   public String toString() {
     return this.encoding + ", " + this.ipInfo.toString() + ", " + this.params.toString();
+  }
+
+  public String getAppName() {
+    return appName;
+  }
+
+  public void setAppName(String appName) {
+    this.appName = appName;
+  }
+
+  public String getApiNumber() {
+    return apiNumber;
+  }
+
+  public void setApiNumber(String apiNumber) {
+    this.apiNumber = apiNumber;
   }
 
 }
