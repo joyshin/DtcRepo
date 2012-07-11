@@ -7,13 +7,16 @@ import java.util.Map;
 import net.skcomms.dtc.client.controller.DtcActivityIndicatorController;
 import net.skcomms.dtc.client.controller.DtcNodeController;
 import net.skcomms.dtc.client.controller.DtcSearchHistoryController;
+import net.skcomms.dtc.client.controller.DtcSelectTestPageController;
 import net.skcomms.dtc.client.controller.DtcTestPageController;
 import net.skcomms.dtc.client.controller.DtcUrlCopyController;
 import net.skcomms.dtc.client.model.DtcNodeModel;
 import net.skcomms.dtc.client.model.DtcSearchHistoryDao;
+import net.skcomms.dtc.client.model.DtcServiceListDao;
 import net.skcomms.dtc.client.model.DtcTestPageModel;
 import net.skcomms.dtc.client.view.DtcNavigationBarView;
 import net.skcomms.dtc.client.view.DtcNodeView;
+import net.skcomms.dtc.client.view.DtcSelectTestPageView;
 import net.skcomms.dtc.client.view.DtcTestPageView;
 import net.skcomms.dtc.client.view.DtcUrlCopyButtonView;
 import net.skcomms.dtc.client.view.DtcUrlCopyDialogBoxView;
@@ -97,6 +100,10 @@ public class DtcArdbeg implements EntryPoint, DtcNodeObserver {
   private DtcNodeView dtcFavoriteNodeView;
 
   private final DtcActivityIndicatorController dtcActivityIndicatorController = new DtcActivityIndicatorController();
+
+  private DtcSelectTestPageView dtcSelectTestPageView;
+
+  private DtcServiceListDao dtcServiceListDao;
 
   public void addDtcArdbegObserver(DtcArdbegObserver observer) {
     this.dtcArdbegObservers.add(observer);
@@ -199,6 +206,8 @@ public class DtcArdbeg implements EntryPoint, DtcNodeObserver {
     this.initializeNavigationBar();
     this.initializeTestPage();
 
+    this.initializeServiceSelectPage();
+
     this.initializeUrlCopy();
     this.usernameSubmissionManager.initialize();
 
@@ -230,6 +239,17 @@ public class DtcArdbeg implements EntryPoint, DtcNodeObserver {
     this.setPath(path);
   }
 
+  private void initializeServiceSelectPage() {
+
+    DtcSelectTestPageController selectTestPageController = new DtcSelectTestPageController();
+
+    this.dtcServiceListDao = new DtcServiceListDao();
+    selectTestPageController
+        .initialize(this.dtcSelectTestPageView, this.dtcServiceListDao);
+    this.dtcTestPageView.addObserver(selectTestPageController);
+    this.dtcServiceListDao.addObserver(selectTestPageController);
+  }
+
   private void initializeTestPage() {
     DtcSearchHistoryDao searchHistoryDao = new DtcSearchHistoryDao();
     DtcSearchHistoryController searchHistoryController = new DtcSearchHistoryController();
@@ -240,6 +260,7 @@ public class DtcArdbeg implements EntryPoint, DtcNodeObserver {
     dtcTestPageController.initialize(this, this.dtcTestPageView,
         DtcNodeModel.getInstance(), testPageModel);
     dtcTestPageController.addObserver(this.dtcActivityIndicatorController);
+
   }
 
   private void initializeUrlCopy() {

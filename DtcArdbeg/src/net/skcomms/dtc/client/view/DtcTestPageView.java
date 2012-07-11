@@ -309,6 +309,9 @@ public class DtcTestPageView {
         DtcTestPageView.this.dtcSelectTestPageView.setShowModalMask(true);
         DtcTestPageView.this.dtcSelectTestPageView.centerInPage();
         DtcTestPageView.this.dtcSelectTestPageView.setDismissOnOutsideClick(true);
+        for (DtcTestPageViewObserver observer : DtcTestPageView.this.dtcTestPageViewObservers) {
+          observer.onClickSelectTestPageButton();
+        }
         DtcTestPageView.this.dtcSelectTestPageView.addCloseClickHandler(new CloseClickHandler() {
           @Override
           public void onCloseClick(CloseClickEvent event) {

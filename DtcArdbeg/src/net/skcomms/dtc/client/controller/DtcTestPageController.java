@@ -107,6 +107,11 @@ public class DtcTestPageController implements DtcNodeObserver, DtcTestPageModelO
   }
 
   @Override
+  public void onClickSelectTestPageButton() {
+
+  }
+
+  @Override
   public void onDtcTestPageLoaded(DtcRequestMeta requestMeta) {
     this.loadDtcTestPageView(requestMeta);
   }
