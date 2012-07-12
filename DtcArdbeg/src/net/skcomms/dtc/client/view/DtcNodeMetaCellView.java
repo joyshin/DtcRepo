@@ -16,7 +16,7 @@ public final class DtcNodeMetaCellView extends AbstractCell<DtcNodeMeta> {
 
   private static final DtcNodeMetaCellView instance = new DtcNodeMetaCellView();
 
-  private static final String CELL_STYLE_OPENER = "<div style=\"position: relative; width:280px; height:74px; border: 1px solid; border-radius: 15px; float: left; \">";
+  private static final String CELL_STYLE_OPENER = "<div class=\"cellNode\">";
 
   private static final String CELL_STYLE_CLOSER = "</div>";
 

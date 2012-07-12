@@ -229,16 +229,6 @@ public class DtcTestPageView {
     }
   }
 
-  public Map<String, String> getRequestParameters() {
-    Map<String, String> params = new HashMap<String, String>();
-    for (ListGridRecord record : this.requestFormGrid.getRecords()) {
-      String value = this.getSafeRecordValue(record);
-      params.put(record.getAttribute("key"), value);
-    }
-
-    return params;
-  }
-
   private String getSafeRecordValue(ListGridRecord record) {
     String value = null;
     if (record.getAttribute("name").toLowerCase().equals("ip_select")) {
@@ -250,6 +240,16 @@ public class DtcTestPageView {
       value = record.getAttribute("value");
     }
     return value == null ? "" : value;
+  }
+
+  public Map<String, String> getRequestParameters() {
+    Map<String, String> params = new HashMap<String, String>();
+    for (ListGridRecord record : this.requestFormGrid.getRecords()) {
+      String value = this.getSafeRecordValue(record);
+      params.put(record.getAttribute("key"), value);
+    }
+
+    return params;
   }
 
   public void setHTMLData(String convertedHTML) {

@@ -12,7 +12,6 @@
 <!--                                                               -->
 <!-- Consider inlining CSS to reduce the number of requested files -->
 <!--                                                               -->
-<link type="text/css" rel="stylesheet" href="DtcArdbeg.css">
 
 <!--                                           -->
 <!-- Any title is fine                         -->
@@ -34,36 +33,32 @@
 <!--                                           -->
 <body>
 
-	<!-- OPTIONAL: include this if you want history support -->
-	<iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1'
-		style="position: absolute; width: 0; height: 0; border: 0"></iframe>
+  <!-- OPTIONAL: include this if you want history support -->
+  <iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1'
+    style="position: absolute; width: 0; height: 0; border: 0"></iframe>
 
-	<!-- RECOMMENDED if your web app will not function without JavaScript enabled -->
-	<noscript>
-		<div
-			style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
-			Your web browser must have JavaScript enabled in order for this
-			application to display correctly.</div>
-	</noscript>
+  <!-- RECOMMENDED if your web app will not function without JavaScript enabled -->
+  <noscript>
+    <div
+      style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
+      Your web browser must have JavaScript enabled in order for this application to display
+      correctly.</div>
+  </noscript>
 
-	<div id="loading" style="display:none;"></div>
-	<div>
-		<div>
-			<div id="naviBarContainer" style="float:left;"></div>
-			<div id="linkCopyContainer" style="float:left; padding-left:15px;"></div>
-            <div id="loginContainer" style="float:right;"></div>
-            <div id="usernameContainer" style="float:right;"></div>		
-		</div>
-		<div style="clear:both;">
-			<div id="dtcContainer"></div>				
-      
-			<div style="clear:both; height:30px;"></div>
-			<div id="favoriteNodeContainer"></div>
-      
-			<div style="clear:both; height:30px;"></div>
-			<div id="nodeContainer" style="clear:both;"></div>			
-		</div>	
-	</div>
-    <div id="chronoContainer"></div>
+  <div id="loading" style="display: none;"></div>
+  <div>
+    <div class="navigation-area">
+      <div id="linkCopyContainer" style="float: left;"></div>
+      <div id="naviBarContainer" style="float: left;"></div>
+      <div id="loginContainer" style="float: right;"></div>
+      <div id="usernameContainer" style="float: right;"></div>
+    </div>
+    <div style="clear: both;"></div>
+    <div id="favoriteNodeContainer" style="clear: both;"></div>
+    <div style="clear: both;"></div>
+    <div id="nodeContainer" style="clear: both;"></div>
+    <div id="dtcContainer"></div>
+  </div>
+  <div id="chronoContainer"></div>
 </body>
 </html>

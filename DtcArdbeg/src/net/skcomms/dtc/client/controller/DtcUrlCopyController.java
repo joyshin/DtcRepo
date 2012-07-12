@@ -22,6 +22,30 @@ public class DtcUrlCopyController {
 
   private DtcTestPageView dtcTestPageView;
 
+  private void appendQueryString(StringBuilder sb) {
+    String path = this.module.getCurrentPath();
+    if (path.equals("/")) {
+      return;
+    }
+
+    sb.append("?path=");
+    sb.append(URL.encode(path));
+
+    if (!path.endsWith("/")) {
+      this.appendRequestParameters(sb);
+    }
+  }
+
+  private void appendRequestParameters(StringBuilder sb) {
+    Map<String, String> params = this.dtcTestPageView.getRequestParameters();
+    for (Entry<String, String> entry : params.entrySet()) {
+      sb.append('&');
+      sb.append(entry.getKey());
+      sb.append('=');
+      sb.append(entry.getValue() == null ? "" : URL.encode(entry.getValue()));
+    }
+  }
+
   private String combineUrl() {
     StringBuilder sb = new StringBuilder();
 
@@ -31,25 +55,7 @@ public class DtcUrlCopyController {
     } else {
       sb.append(href.substring(0, href.indexOf('?')));
     }
-
-    if (this.module.getCurrentPath().equals("/")) {
-    }
-    else if (this.module.getCurrentPath().endsWith("/")) {
-      sb.append("?path=");
-      sb.append(URL.encode(this.module.getCurrentPath()));
-    } else {
-      sb.append("?path=");
-      sb.append(URL.encode(this.module.getCurrentPath()));
-      Map<String, String> params = this.dtcTestPageView.getRequestParameters();
-      for (Entry<String, String> entry : params.entrySet()) {
-        sb.append('&');
-        sb.append(entry.getKey());
-        sb.append('=');
-        sb.append(URL.encode(entry.getValue()));
-      }
-    }
-
-    System.out.println(sb.toString());
+    this.appendQueryString(sb);
     return sb.toString();
   }
 

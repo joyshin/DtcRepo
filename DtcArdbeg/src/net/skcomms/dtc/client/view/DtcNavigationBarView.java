@@ -40,6 +40,8 @@ public class DtcNavigationBarView extends DefaultDtcArdbegObserver implements Dt
 
   private void addAnchor(String text, final String path) {
     Anchor anchor = new Anchor(text);
+    anchor.setHref("?path=" + path);
+    anchor.addStyleName("navigation-anchor");
 
     anchor.addClickHandler(new ClickHandler() {
 
@@ -58,6 +60,7 @@ public class DtcNavigationBarView extends DefaultDtcArdbegObserver implements Dt
 
   private void addLabel(String Text) {
     Label label = new Label(Text);
+    label.addStyleName("navigation-label");
     this.naviPanel.add(label);
   }
 
@@ -124,10 +127,10 @@ public class DtcNavigationBarView extends DefaultDtcArdbegObserver implements Dt
       this.addLabel(DtcNavigationBarView.NAVIGATION_DELIMITER);
       if (i == nodes.length - 1) {
         this.addLabel(nodes[i]);
-        continue;
+      } else {
+        nodeHistory = nodeHistory + nodes[i] + "/";
+        this.addAnchor(nodes[i], nodeHistory);
       }
-      nodeHistory = nodeHistory + nodes[i] + "/";
-      this.addAnchor(nodes[i], nodeHistory);
     }
   }
 }
