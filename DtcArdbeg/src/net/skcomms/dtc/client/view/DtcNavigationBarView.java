@@ -89,6 +89,7 @@ public class DtcNavigationBarView extends DefaultDtcArdbegObserver implements Dt
 
     this.naviPanel.clear();
     this.naviPanel.setSpacing(3);
+    this.naviPanel.addStyleName("naviPanel");
     this.owner = dtcArdbeg;
 
     this.createHomeButton();
