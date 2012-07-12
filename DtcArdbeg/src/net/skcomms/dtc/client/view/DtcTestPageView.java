@@ -232,17 +232,24 @@ public class DtcTestPageView {
   public Map<String, String> getRequestParameters() {
     Map<String, String> params = new HashMap<String, String>();
     for (ListGridRecord record : this.requestFormGrid.getRecords()) {
-      String value;
-      if (record.getAttribute("name").toLowerCase().equals("ip_select")) {
-        MatchResult match = DtcTestPageView.IP_PATTERN.exec(record.getAttribute("value"));
-        value = match.getGroup(0);
-      } else {
-        value = record.getAttribute("value");
-      }
-      params.put(record.getAttribute("key"), (value == null ? "" : value));
+      String value = this.getSafeRecordValue(record);
+      params.put(record.getAttribute("key"), value);
     }
 
     return params;
+  }
+
+  private String getSafeRecordValue(ListGridRecord record) {
+    String value = null;
+    if (record.getAttribute("name").toLowerCase().equals("ip_select")) {
+      MatchResult match = DtcTestPageView.IP_PATTERN.exec(record.getAttribute("value"));
+      if (match != null) {
+        value = match.getGroup(0);
+      }
+    } else {
+      value = record.getAttribute("value");
+    }
+    return value == null ? "" : value;
   }
 
   public void setHTMLData(String convertedHTML) {
@@ -310,6 +317,7 @@ public class DtcTestPageView {
         DtcTestPageView.this.dtcSelectTestPageView.centerInPage();
         DtcTestPageView.this.dtcSelectTestPageView.setDismissOnOutsideClick(true);
         DtcTestPageView.this.dtcSelectTestPageView.addCloseClickHandler(new CloseClickHandler() {
+
           @Override
           public void onCloseClick(CloseClickEvent event) {
 
