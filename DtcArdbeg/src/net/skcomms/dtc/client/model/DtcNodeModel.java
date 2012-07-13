@@ -179,7 +179,7 @@ public class DtcNodeModel {
   }
 
   public void refreshDtcTestPage(final String path) {
-    DtcService.Util.getInstance().getDtcRequestPageInfo(path,
+    DtcService.Util.getInstance().getDtcRequestMeta(path,
         new AsyncCallback<DtcRequestMeta>() {
 
           @Override

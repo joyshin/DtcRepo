@@ -6,7 +6,7 @@ package net.skcomms.dtc.shared;
 import java.io.Serializable;
 
 @SuppressWarnings("serial")
-public class DtcRequestParameterModel implements Serializable {
+public class DtcRequestParameter implements Serializable {
 
   private String key;
 
@@ -14,10 +14,10 @@ public class DtcRequestParameterModel implements Serializable {
 
   private String value;
 
-  public DtcRequestParameterModel() {
+  public DtcRequestParameter() {
   }
 
-  public DtcRequestParameterModel(String aKey, String aName, String aValue) {
+  public DtcRequestParameter(String aKey, String aName, String aValue) {
     this.key = aKey;
     this.name = aName;
     this.value = aValue;
@@ -25,13 +25,13 @@ public class DtcRequestParameterModel implements Serializable {
 
   @Override
   public boolean equals(Object other) {
-    if (!(other instanceof DtcRequestParameterModel)) {
+    if (!(other instanceof DtcRequestParameter)) {
       return false;
     }
 
-    DtcRequestParameterModel o = (DtcRequestParameterModel) other;
+    DtcRequestParameter o = (DtcRequestParameter) other;
 
-    return this.key.equals(o.key) && this.name.equals(o.name) && this.value.equals(o.value);
+    return this.key.equals(o.key);
   }
 
   public String getKey() {

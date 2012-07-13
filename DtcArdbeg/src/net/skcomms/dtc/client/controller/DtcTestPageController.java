@@ -15,10 +15,9 @@ import net.skcomms.dtc.client.model.DtcTestPageModel;
 import net.skcomms.dtc.client.view.DtcTestPageView;
 import net.skcomms.dtc.shared.DtcRequest;
 import net.skcomms.dtc.shared.DtcRequestMeta;
-import net.skcomms.dtc.shared.DtcRequestParameterModel;
+import net.skcomms.dtc.shared.DtcRequestParameter;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.http.client.URL;
 
 public class DtcTestPageController implements DtcNodeObserver, DtcTestPageModelObserver,
     DtcTestPageViewObserver {
@@ -27,15 +26,11 @@ public class DtcTestPageController implements DtcNodeObserver, DtcTestPageModelO
 
   private DtcTestPageModel testPageModel;
 
-  private String currentPath;
-
-  private String dtcProxyUrl;
-
-  private String encoding;
-
   private Map<String, List<String>> initialRequestParameters = null;
 
   private final List<DtcTestPageControllerObserver> dtcTestPageControllerObservers = new ArrayList<DtcTestPageControllerObserver>();
+
+  private DtcRequestMeta requestMeta;
 
   public void addObserver(DtcTestPageControllerObserver observer) {
     this.dtcTestPageControllerObservers.add(observer);
@@ -55,7 +50,7 @@ public class DtcTestPageController implements DtcNodeObserver, DtcTestPageModelO
     }
 
     // other
-    for (DtcRequestParameterModel param : requestInfo.getParams()) {
+    for (DtcRequestParameter param : requestInfo.getParams()) {
       if (this.initialRequestParameters.containsKey(param.getKey())) {
         param.setValue(this.initialRequestParameters.get(param.getKey()).get(0));
       }
@@ -63,31 +58,19 @@ public class DtcTestPageController implements DtcNodeObserver, DtcTestPageModelO
   }
 
   private DtcRequest createDtcRequest() {
-    StringBuilder requestData = new StringBuilder();
-    final String testURL = "c" + "=" + URL.encode(this.currentPath);
-    String process = "process=1";
-    String targetUrl = URL.encode(this.dtcProxyUrl + "response.html");
-
-    requestData.append(testURL);
-    requestData.append("&");
-    requestData.append(process);
-
-    requestData.append(this.testPageView.createRequestData());
-    GWT.log("ProxyURL: " + this.dtcProxyUrl);
-
     DtcRequest request = new DtcRequest();
+    request.setPath(this.requestMeta.getPath());
+    request.setEncoding(this.requestMeta.getEncoding());
+
+    request.setAppName(this.requestMeta.getAppName());
+    request.setApiNumber(this.requestMeta.getApiNumber());
     request.setRequestParameters(this.testPageView.getRequestParameters());
-    request.setPath(this.currentPath);
-    request.setHttpMethod("POST");
-    request.setUrl(targetUrl);
-    request.setRequestData(requestData.toString());
-    request.setEncoding(this.encoding);
+
     return request;
   }
 
   public void initialize(final DtcArdbeg dtcArdbeg, DtcTestPageView dtcTestPageView,
       DtcNodeModel nodeModel, DtcTestPageModel testPageModel) {
-    this.dtcProxyUrl = dtcArdbeg.getDtcProxyUrl();
     this.testPageView = dtcTestPageView;
     this.initialRequestParameters = dtcArdbeg.getRequestParameters();
     this.testPageModel = testPageModel;
@@ -99,11 +82,10 @@ public class DtcTestPageController implements DtcNodeObserver, DtcTestPageModelO
 
   public void loadDtcTestPageView(DtcRequestMeta requestMeta) {
     this.adjustRequestInfo(requestMeta);
-    this.currentPath = requestMeta.getPath();
+    this.requestMeta = requestMeta;
 
-    this.testPageView.setRequestInfo(requestMeta);
+    this.testPageView.setRequestMeta(requestMeta);
     this.testPageView.draw();
-    this.encoding = requestMeta.getEncoding();
   }
 
   @Override

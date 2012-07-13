@@ -129,6 +129,7 @@ div[class^='key'] {
 	padding: 3px;
 	background-color: #1C1C1C;
 	color: #53FF14;
+	width:10px;
 }
 
 div[class^='value'] {

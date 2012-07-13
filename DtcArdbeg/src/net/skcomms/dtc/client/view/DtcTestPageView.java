@@ -1,13 +1,11 @@
 package net.skcomms.dtc.client.view;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import net.skcomms.dtc.client.DtcTestPageViewObserver;
 import net.skcomms.dtc.shared.DtcRequestMeta;
-import net.skcomms.dtc.shared.DtcRequestParameterModel;
+import net.skcomms.dtc.shared.DtcRequestParameter;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.URL;
@@ -154,11 +152,11 @@ public class DtcTestPageView {
   }
 
   private void createGridRecord() {
-    List<DtcRequestParameterModel> params = this.requestInfo.getParams();
+    List<DtcRequestParameter> params = this.requestInfo.getParams();
     List<RequestGridRecord> records = new ArrayList<RequestGridRecord>();
 
     int index = 0;
-    for (DtcRequestParameterModel param : params) {
+    for (DtcRequestParameter param : params) {
       records
           .add(new RequestGridRecord(index++, param.getKey(), param.getName(), param.getValue()));
     }
@@ -229,13 +227,14 @@ public class DtcTestPageView {
     }
   }
 
-  public Map<String, String> getRequestParameters() {
-    Map<String, String> params = new HashMap<String, String>();
+  public List<DtcRequestParameter> getRequestParameters() {
+    List<DtcRequestParameter> params = new ArrayList<DtcRequestParameter>();
     for (ListGridRecord record : this.requestFormGrid.getRecords()) {
-      String value = this.getSafeRecordValue(record);
-      params.put(record.getAttribute("key"), value);
+      DtcRequestParameter param = new DtcRequestParameter();
+      param.setKey(record.getAttribute("key"));
+      param.setValue(this.getSafeRecordValue(record));
+      params.add(param);
     }
-
     return params;
   }
 
@@ -256,7 +255,7 @@ public class DtcTestPageView {
     this.htmlPane.setContents(convertedHTML);
   }
 
-  public void setRequestInfo(DtcRequestMeta requestInfo) {
+  public void setRequestMeta(DtcRequestMeta requestInfo) {
     this.requestInfo = requestInfo;
   }
 

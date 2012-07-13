@@ -1,13 +1,13 @@
 package net.skcomms.dtc.client.controller;
 
 import java.util.List;
-import java.util.Map;
 
 import net.skcomms.dtc.client.DtcTestPageModelObserver;
 import net.skcomms.dtc.client.model.DtcResponse;
 import net.skcomms.dtc.client.model.DtcSearchHistory;
 import net.skcomms.dtc.client.model.DtcSearchHistoryDao;
 import net.skcomms.dtc.client.model.DtcTestPageModel;
+import net.skcomms.dtc.shared.DtcRequestParameter;
 
 import com.google.gwt.core.client.GWT;
 
@@ -33,7 +33,7 @@ public class DtcSearchHistoryController implements DtcTestPageModelObserver {
   private void persist(DtcResponse response) {
     GWT.log("DtcSearchHistoryController.persist() called");
     String path = response.getRequest().getPath();
-    Map<String, String> params = response.getRequest().getRequestParameters();
+    List<DtcRequestParameter> params = response.getRequest().getRequestParameters();
     DtcSearchHistory searchHistory = DtcSearchHistory.create(path, params,
         response.getResponseTime());
     this.searchHistoryDao.persist(searchHistory);

@@ -4,12 +4,14 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import net.skcomms.dtc.server.model.DtcAtp;
 import net.skcomms.dtc.server.model.DtcIni;
+import net.skcomms.dtc.server.util.DtcHelper;
 import net.skcomms.dtc.shared.DtcRequest;
+import net.skcomms.dtc.shared.DtcRequestParameter;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -78,22 +80,22 @@ public class DtcAtpParserTest {
   @Test
   public void testAtpRequest() throws IOException {
 
-    Map<String, String> requestParameter = new HashMap<String, String>();
-    requestParameter.put("Version", "100");
-    requestParameter.put("Query", "블로그");
-    requestParameter.put("ResultStartPos", "1");
-    requestParameter.put("ResultCount", "2");
-    requestParameter.put("ClientCode", "TS");
-    requestParameter.put("Sort", "PD");
-    requestParameter.put("SummaryLen", "128");
-    requestParameter.put("Referer", "TEST");
-    requestParameter.put("Port", "9200");
-    requestParameter.put("IP", "10.171.10.241");
+    List<DtcRequestParameter> requestParameter = new ArrayList<DtcRequestParameter>();
+    requestParameter.add(new DtcRequestParameter("Version", null, "100"));
+    requestParameter.add(new DtcRequestParameter("Query", null, "블로그"));
+    requestParameter.add(new DtcRequestParameter("ResultStartPos", null, "1"));
+    requestParameter.add(new DtcRequestParameter("ResultCount", null, "2"));
+    requestParameter.add(new DtcRequestParameter("ClientCode", null, "TS"));
+    requestParameter.add(new DtcRequestParameter("Sort", null, "PD"));
+    requestParameter.add(new DtcRequestParameter("SummaryLen", null, "128"));
+    requestParameter.add(new DtcRequestParameter("Referer", null, "TEST"));
+    requestParameter.add(new DtcRequestParameter("Port", null, "9200"));
+    requestParameter.add(new DtcRequestParameter("IP", null, "10.171.10.241"));
 
     DtcRequest request = new DtcRequest();
     request.setRequestParameters(requestParameter);
 
-    String filePath = DtcServiceImpl.getRootPath() + "kcbbs/blog.100.xml.ini";
+    String filePath = DtcHelper.getRootPath() + "kcbbs/blog.100.xml.ini";
     DtcIni ini = new DtcIniFactory().createFrom(filePath);
 
     DtcAtp dtcAtp = DtcAtpFactory.createFrom(request, ini);

@@ -19,7 +19,7 @@ public interface DtcServiceAsync {
 
   void getDir(String path, AsyncCallback<List<DtcNodeMeta>> callback);
 
-  void getDtcRequestPageInfo(String path, AsyncCallback<DtcRequestMeta> callback);
+  void getDtcRequestMeta(String path, AsyncCallback<DtcRequestMeta> callback);
 
   void getDtcResponse(DtcRequest httpRequestInfo, AsyncCallback<DtcResponse> callback);
 

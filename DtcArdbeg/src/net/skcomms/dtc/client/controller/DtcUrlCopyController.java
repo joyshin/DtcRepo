@@ -1,12 +1,12 @@
 package net.skcomms.dtc.client.controller;
 
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.List;
 
 import net.skcomms.dtc.client.DtcArdbeg;
 import net.skcomms.dtc.client.view.DtcTestPageView;
 import net.skcomms.dtc.client.view.DtcUrlCopyButtonView;
 import net.skcomms.dtc.client.view.DtcUrlCopyDialogBoxView;
+import net.skcomms.dtc.shared.DtcRequestParameter;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -37,12 +37,12 @@ public class DtcUrlCopyController {
   }
 
   private void appendRequestParameters(StringBuilder sb) {
-    Map<String, String> params = this.dtcTestPageView.getRequestParameters();
-    for (Entry<String, String> entry : params.entrySet()) {
+    List<DtcRequestParameter> params = this.dtcTestPageView.getRequestParameters();
+    for (DtcRequestParameter param : params) {
       sb.append('&');
-      sb.append(entry.getKey());
+      sb.append(param.getKey());
       sb.append('=');
-      sb.append(entry.getValue() == null ? "" : URL.encode(entry.getValue()));
+      sb.append(param.getValue() == null ? "" : URL.encode(param.getValue()));
     }
   }
 
