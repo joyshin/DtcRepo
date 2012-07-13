@@ -48,6 +48,7 @@ public class DtcTestPageModel {
 
           @Override
           public void onSuccess(DtcResponse response) {
+            GWT.log(response.getResult());
             response.setRequest(request);
             DtcTestPageModel.this.fireResponseReceived(response);
           }

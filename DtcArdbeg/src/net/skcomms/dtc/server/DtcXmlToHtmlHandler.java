@@ -99,8 +99,6 @@ public class DtcXmlToHtmlHandler extends DefaultHandler {
       this.parseBuffer.append("]]>");
       this.parseBuffer.append("\n");
     }
-
-    System.out.println("C:" + new String(ch, start, length));
   }
 
   @Override
@@ -111,7 +109,6 @@ public class DtcXmlToHtmlHandler extends DefaultHandler {
 
   @Override
   public void endElement(String uri, String name, String qName) throws SAXException {
-    System.out.println("E:" + qName);
     String elementName = qName;
     StringBuilder divForm = new StringBuilder();
     StringBuilder nodeItem = new StringBuilder();
@@ -129,17 +126,17 @@ public class DtcXmlToHtmlHandler extends DefaultHandler {
         nodeItem.append(node.getNodeName());
         nodeItem.append("\"");
         nodeItem.append(">");
-        nodeItem.append("<div class=key_");
+        nodeItem.append("<div class=\"key_");
         nodeItem.append(node.getNodeName());
-        nodeItem.append(" name=");
+        nodeItem.append("\" name=\"");
         nodeItem.append(node.getNodeName());
         nodeItem.append(node.getAttribute());
-        nodeItem.append(">\n");
+        nodeItem.append("\">\n");
         nodeItem.append(node.getNodeName());
         nodeItem.append("</div>\n");
-        nodeItem.append("<div class=value_");
+        nodeItem.append("<div class=\"value_");
         nodeItem.append(node.getNodeName());
-        nodeItem.append(">\n");
+        nodeItem.append("\">\n");
         nodeItem.append(this.parseBuffer);
         nodeItem.append("</div>\n");
         nodeItem.append("</div>\n");
@@ -165,10 +162,10 @@ public class DtcXmlToHtmlHandler extends DefaultHandler {
           }
           nodeItem.append(node.getNodeName());
           nodeItem.append("\"");
-          nodeItem.append(" name=");
+          nodeItem.append(" name=\"");
           nodeItem.append(node.getNodeName());
           nodeItem.append(node.getAttribute());
-          nodeItem.append(">");
+          nodeItem.append("\">");
           nodeItem.append(node.getNodeName());
           divForm.insert(0, nodeItem.toString());
           nodeItem.setLength(0);
@@ -191,8 +188,7 @@ public class DtcXmlToHtmlHandler extends DefaultHandler {
 
   @Override
   public void startDocument() throws SAXException {
-    String dtd = "<!DOCTYPE html>\n" + "<html>";
-    this.rawHtml.append(dtd);
+    this.rawHtml.append("<!DOCTYPE html>\n" + "<html>");
     this.rawHtml.append("<body>");
   }
 
@@ -200,8 +196,6 @@ public class DtcXmlToHtmlHandler extends DefaultHandler {
   @Override
   public void startElement(String uri, String name, String qName, Attributes atts)
       throws SAXException {
-    System.out.println("S:" + qName);
-
     String elementName = qName;
     StringBuilder attrBuffer = new StringBuilder();
     ResultNode node = new ResultNode();

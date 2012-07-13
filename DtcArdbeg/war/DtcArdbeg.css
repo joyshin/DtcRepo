@@ -76,65 +76,50 @@ to {
 	border-radius: 15px;
 }
 
-div#Results {
-	display: table;
-	font-size: 18px;
-	border: 0px;
+div[class^='depth_'], div#Results {
+	/*padding-left: 15px;*/
 	padding-left: 15px;
-	background-color: #DBDBDB;
+	display: table;
+	font-size: 16px;
+	border: 0px;
 	width: 100%;
+}
+
+div#Results {
+	font-size: 18px;
+	background-color: #DBDBDB;
 }
 
 div[class~='depth_0'] {
-	display: table;
-	font-size: 16px;
-	border: 0px;
-	padding-left: 15px;
 	background-color: #BFBFBF;
-	width: 100%;
 }
 
 div[class~='depth_1'] {
-	display: table;
-	font-size: 16px;
-	border: 0px;
-	padding-left: 15px;
 	background-color: #8A8A8A;
-	width: 100%;
 }
 
 div[class~='depth_2'] {
-	display: table;
-	font-size: 16px;
-	border: 0px;
-	padding-left: 15px;
 	background-color: #8A8A8A;
-	width: 100%;
 }
 
 div[class~='depth_3'] {
-	display: table;
-	border: 0px;
-	padding-left: 15px;
 	background-color: #5E5E5E;
-	width: 100%;
 }
 
 div[class~='depth_4'] {
-	display: table;
-	border: 0px;
-	padding-left: 15px;
 	background-color: #3B3B3B;
-	width: 100%;
 }
 
 div[class~='depth_5'],div[class~=Document] {
-	display: table;
-	border: 0px;
-	padding-left: 15px;
 	background-color: #2B2B2B;
 	color: #FFFB00;
-	width: 100%;
+}
+
+div.table_row {
+	display: table-row;
+	text-align: left;
+	padding-left: 5px;
+	width: 100%; 
 }
 
 div[class^='key'] {
@@ -154,15 +139,9 @@ div[class^='value'] {
 	background-color: #1C1C1C;
 	color: white;
 	width: 100%;
+	word-wrap: break-word;
 }
 					
-.table_row {
-	display: table-row;
-	text-align: left;
-	padding-left: 5px;
-	width: 100%
-}
-
 button[class^='gwt-Button log'] span {
 	display:none;
 }
@@ -279,7 +258,8 @@ div.navigation-area {
 	background-color:#EEEEEE;
     border-radius: 5px 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; 
 	border-style: solid;
-	border-width: 1px;
+	border-width: 0px;
+	border-bottom-width: 1px;
 	display: block;
     float: left;
 	height: 30px;
@@ -296,7 +276,7 @@ div#naviBarContainer {
 	z-index: 2147483645;
 }
 
-body {
+body.body-style {
 	margin: 0px;
 }
 
@@ -310,9 +290,14 @@ div.cellNode {
 	position: relative; 
 	width:280px; 
 	height:74px; 
-	border: 1px solid; 
-	border-radius: 10px; 
+	border-style: solid; 
+	border-width: 0px;
+	border-right-width: 2px;
+	border-bottom-width: 2px;
+	border-color: #CCCCCC;
 	float: left;
+	margin: 5px;
+	box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.1); -webkit-box-shadow: 5px 5px rgba(0, 0, 0, 0.1); -moz-box-shadow: 5px 5px rgba(0, 0, 0, 0.1);
 }
 
 .navigation-anchor {
@@ -331,15 +316,17 @@ div#naviBarContainer table {
 	display:table;
 	border-spacing: 0px;
 	vertical-align: middle;
+	margin-left: 3px;
 }
 
 div#naviBarContainer table td{
 	vertical-align: bottom;
-	padding-right:3px;
+	padding-right:5px;
 }
 
 div#naviBarContainer table td:hover a {
 	color: white;
 	background-color:rgb(52,118,183);
     border-radius: 5px 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; 
+    text-decoration: none;
 }

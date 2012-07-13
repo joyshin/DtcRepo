@@ -153,7 +153,6 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
       String targetUrl = DtcServiceImpl.getTargetUrl(responseUrl);
       DtcRequest request = DtcServiceImpl.createRequest(targetUrl, dtcRequest.getCharset());
       response = DtcServiceImpl.createDtcResponse(request);
-      System.out.println("Response: " + response);
 
       if (responseUrl.contains("response_json.html")) {
         return response;
@@ -274,7 +273,6 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
 
   private static String getTargetUrl(String responseUrl) throws UnsupportedEncodingException {
     String targetUrl;
-    System.out.println("Response URL: " + responseUrl);
 
     String url = responseUrl.split("\\?u=")[0];
     String requestUrl = responseUrl.split("\\?u=")[1].split("\\?")[0];
@@ -283,7 +281,6 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     query = requestUrl + "?" + query;
 
     targetUrl = DtcServiceImpl.DTC_URL + url + "?u=" + URLEncoder.encode(query, "utf-8");
-    System.out.println("Target URL: " + targetUrl);
     return targetUrl;
   }
 
@@ -438,10 +435,8 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
       String targetUrl = DtcServiceImpl.DTC_URL + "response.html";
       request.setUrl(targetUrl);
       Date startTime = new Date();
-      System.out.println("INI Protocol:" + ini.getProtocol());
       if (ini.getProtocol().equals("ATP")) {
         rawHtml = this.createAtpResponse(request, ini);
-        System.out.println("ATP HTML:" + rawHtml);
       } else {
         rawHtml = DtcServiceImpl.createDtcResponse(request);
       }

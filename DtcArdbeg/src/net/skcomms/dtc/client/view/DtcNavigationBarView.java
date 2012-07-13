@@ -29,7 +29,7 @@ public class DtcNavigationBarView extends DefaultDtcArdbegObserver implements Dt
 
   private final HorizontalPanel naviPanel = new HorizontalPanel();
 
-  private final static String NAVIGATION_DELIMITER = "/";
+  private final static String NAVIGATION_DELIMITER = ">";
 
   private final String rootPath = "/";
 
