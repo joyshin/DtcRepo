@@ -245,7 +245,7 @@ public class DtcArdbeg implements EntryPoint, DtcNodeObserver {
 
     this.dtcServiceListDao = new DtcServiceListDao();
     selectTestPageController
-        .initialize(this.dtcSelectTestPageView, this.dtcServiceListDao);
+        .initialize(this.dtcServiceListDao);
     this.dtcTestPageView.addObserver(selectTestPageController);
     this.dtcServiceListDao.addObserver(selectTestPageController);
   }

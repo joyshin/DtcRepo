@@ -8,17 +8,17 @@ import net.skcomms.dtc.client.DtcTestPageViewObserver;
 import net.skcomms.dtc.client.model.DtcServiceListDao;
 import net.skcomms.dtc.client.view.DtcSelectTestPageView;
 
+import com.smartgwt.client.widgets.events.CloseClickEvent;
+import com.smartgwt.client.widgets.events.CloseClickHandler;
 import com.smartgwt.client.widgets.tree.TreeNode;
 
 public class DtcSelectTestPageController implements DtcTestPageViewObserver,
     DtcServiceListDaoObserver {
-
-  private DtcSelectTestPageView dtcSelectTestPageView;
+  DtcSelectTestPageView dtcSelectTestPageView;
   private DtcServiceListDao dtcServiceListDao;
 
-  public void initialize(DtcSelectTestPageView dtcSelectTestPageView,
+  public void initialize(
       DtcServiceListDao dtcServiceListDao) {
-    this.dtcSelectTestPageView = dtcSelectTestPageView;
     this.dtcServiceListDao = dtcServiceListDao;
 
   }
@@ -31,11 +31,22 @@ public class DtcSelectTestPageController implements DtcTestPageViewObserver,
 
   @Override
   public void onGetServiceList() {
+    this.dtcSelectTestPageView = new DtcSelectTestPageView();
 
-    this.dtcServiceListDao.getServiceList();
+    this.dtcSelectTestPageView.show();
     List<TreeNode> list = new ArrayList<TreeNode>();
 
-    this.dtcSelectTestPageView.setTreeNodeData(list);
+    this.dtcSelectTestPageView.setTreeNodeData(this.dtcServiceListDao.getServiceList());
+
+    this.dtcSelectTestPageView.addCloseClickHandler(new CloseClickHandler() {
+      @Override
+      public void onCloseClick(CloseClickEvent event) {
+
+        DtcSelectTestPageController.this.dtcSelectTestPageView.destroy();
+      }
+    });
+
+    // this.dtcSelectTestPageView.draw();
 
   }
 

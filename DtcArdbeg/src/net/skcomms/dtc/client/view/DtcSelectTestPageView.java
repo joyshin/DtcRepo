@@ -2,8 +2,12 @@ package net.skcomms.dtc.client.view;
 
 import java.util.List;
 
+import net.skcomms.dtc.client.model.DtcServiceTreeNode;
+
 import com.smartgwt.client.types.TreeModelType;
 import com.smartgwt.client.widgets.Window;
+import com.smartgwt.client.widgets.events.ClickEvent;
+import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.events.DrawEvent;
 import com.smartgwt.client.widgets.events.DrawHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
@@ -24,6 +28,16 @@ public class DtcSelectTestPageView extends Window {
   private Tree tree = new Tree();
 
   public DtcSelectTestPageView() {
+
+    this.setWidth(800);
+    this.setHeight(600);
+    this.setTitle("Select Test Page Window");
+    this.setShowMinimizeButton(false);
+    this.setIsModal(true);
+    this.setShowModalMask(true);
+    this.centerInPage();
+    this.setDismissOnOutsideClick(true);
+
     this.backgroundLayout = new VLayout();
     this.backgroundLayout.setHeight100();
     this.backgroundLayout.setWidth100();
@@ -43,33 +57,30 @@ public class DtcSelectTestPageView extends Window {
     this.backgroundLayout.addMember(this.serviceLayout);
     this.addItem(this.backgroundLayout);
 
-    // DtcServiceTreeNode root = new DtcServiceTreeNode("4", "1",
-    // "Charles Madigen", "");
-    // DtcServiceTreeNode node2 = new DtcServiceTreeNode("188", "4",
-    // "Rogine Leger", "");
-    // DtcServiceTreeNode node3 = new DtcServiceTreeNode("189", "4",
-    // "Gene Porter", "");
-    // DtcServiceTreeNode node4 = new DtcServiceTreeNode("265", "189",
-    // "Olivier Doucet", "");
-    // DtcServiceTreeNode node5 = new DtcServiceTreeNode("264", "189",
-    // "Cheryl Pearson", "");
-    // this.tree.setData(new TreeNode[] { root, node2, node3, node4, node5 });
-
   }
 
   public void setTreeNodeData(List<TreeNode> nodes) {
-    System.out.println("aaaaaa");
 
-    // System.out.println(serviceList.length);
-
-    TreeNode[] serviceList = new TreeNode[nodes.size()];
+    DtcServiceTreeNode[] serviceList = new DtcServiceTreeNode[nodes.size()];
     nodes.toArray(serviceList);
 
     this.treeGrid = new TreeGrid();
     this.treeGrid.setWidth100();
     this.treeGrid.setHeight(400);
 
-    this.field = new TreeGridField();
+    // this.treeGrid.setFolderIcon(this.treeGrid.getNodeIcon());
+
+    // GWT.log(this.treeGrid.getNodeIcon());
+    this.treeGrid.addClickHandler(new ClickHandler() {
+
+      @Override
+      public void onClick(ClickEvent event) {
+
+      }
+
+    });
+
+    this.field = new TreeGridField("Name");
     this.field.setCanSort(false);
     this.treeGrid.setFields(this.field);
 
@@ -77,20 +88,28 @@ public class DtcSelectTestPageView extends Window {
     this.tree.setNameProperty("Name");
     this.tree.setIdField("ServiceId");
     this.tree.setParentIdField("ParentServiceId");
-    this.tree.setShowRoot(true);
+    this.tree.setShowRoot(false);
 
     this.tree.setData(serviceList);
+    this.treeGrid.setData(this.tree);
 
     this.treeGrid.addDrawHandler(new DrawHandler() {
       @Override
       public void onDraw(DrawEvent event) {
-        DtcSelectTestPageView.this.tree.openAll();
+        // DtcSelectTestPageView.this.tree.openAll();
+        DtcSelectTestPageView.this.tree.openFolder(DtcSelectTestPageView.this.tree
+            .find("Root/kadcpts"));
+        DtcSelectTestPageView.this.tree.getParents(DtcSelectTestPageView.this.tree
+            .find("Root/kadcpts"));
+
+        DtcSelectTestPageView.this.tree.openFolders(DtcSelectTestPageView.this.tree
+            .getParents(DtcSelectTestPageView.this.tree
+                .find("Root/kadcpts")));
+
       }
     });
 
-    this.treeGrid.setData(this.tree);
     this.serviceListLayout.addMember(this.treeGrid);
     this.treeGrid.draw();
   }
-
 }

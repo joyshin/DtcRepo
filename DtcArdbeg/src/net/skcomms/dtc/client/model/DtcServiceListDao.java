@@ -8,7 +8,6 @@ import net.skcomms.dtc.client.service.DtcService;
 import net.skcomms.dtc.shared.DtcNodeMeta;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.widgets.tree.TreeNode;
 
@@ -33,16 +32,17 @@ public class DtcServiceListDao {
     TreeNode[] serviceNodes = new TreeNode[this.nodes.size()];
     this.nodes.toArray(serviceNodes);
 
-    System.out.println(serviceNodes[0].getAttribute("Name"));
-    Window.alert(serviceNodes[0].getAttribute("Name"));
-    Window.alert(serviceNodes[1].getAttribute("Name"));
-
-    // return serviceNodes;
     return this.nodes;
   }
 
   public void getServiceTree() {
-    DtcService.Util.getInstance().getDir("/", new AsyncCallback<List<DtcNodeMeta>>() {
+    DtcServiceListDao.this.nodes.clear();
+
+    this.getTreeNode("/");
+  }
+
+  private void getTreeNode(String currentPath) {
+    DtcService.Util.getInstance().getDir(currentPath, new AsyncCallback<List<DtcNodeMeta>>() {
       @Override
       public void onFailure(Throwable caught) {
         GWT.log(caught.getMessage());
@@ -51,9 +51,10 @@ public class DtcServiceListDao {
       @Override
       public void onSuccess(List<DtcNodeMeta> nodeInfos) {
 
-        int serviceId = 1;
+        int serviceId = 2;
         int parentServiceId = 1;
-        DtcServiceTreeNode root = new DtcServiceTreeNode(1, 0, "Name", "", "", "");
+        DtcServiceTreeNode root = new DtcServiceTreeNode(1, 0, "Root", "path", "des", "updateTime");
+
         DtcServiceListDao.this.nodes.add(root);
 
         for (DtcNodeMeta nodeMeta : nodeInfos) {
@@ -62,9 +63,12 @@ public class DtcServiceListDao {
               .getName(),
               nodeMeta.getPath(), nodeMeta.getDescription(), nodeMeta.getUpdateTime());
 
-          DtcServiceListDao.this.nodes.add(node);
+          node.setIsFolder(true);
+          node.setChildren(null);
+          node.setShowDropIcon(true);
 
-          GWT.log(nodeMeta.getName());
+          DtcServiceListDao.this.nodes.add(node);
+          GWT.log(node.getAttribute("Path"));
         }
 
         for (DtcServiceListDaoObserver observer : DtcServiceListDao.this.dtcServiceListDaoObservers) {
@@ -74,5 +78,4 @@ public class DtcServiceListDao {
       }
     });
   }
-
 }

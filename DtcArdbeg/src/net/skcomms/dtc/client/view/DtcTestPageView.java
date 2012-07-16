@@ -24,8 +24,6 @@ import com.smartgwt.client.widgets.Button;
 import com.smartgwt.client.widgets.HTMLPane;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
-import com.smartgwt.client.widgets.events.CloseClickEvent;
-import com.smartgwt.client.widgets.events.CloseClickHandler;
 import com.smartgwt.client.widgets.form.fields.ComboBoxItem;
 import com.smartgwt.client.widgets.form.fields.FormItem;
 import com.smartgwt.client.widgets.form.fields.TextItem;
@@ -300,27 +298,10 @@ public class DtcTestPageView {
       @Override
       public void onClick(ClickEvent event) {
 
-        DtcTestPageView.this.dtcSelectTestPageView = new DtcSelectTestPageView();
-        DtcTestPageView.this.dtcSelectTestPageView.setWidth(800);
-        DtcTestPageView.this.dtcSelectTestPageView.setHeight(600);
-        DtcTestPageView.this.dtcSelectTestPageView.setTitle("Select Test Page Window");
-        DtcTestPageView.this.dtcSelectTestPageView.setShowMinimizeButton(false);
-        DtcTestPageView.this.dtcSelectTestPageView.setIsModal(true);
-        DtcTestPageView.this.dtcSelectTestPageView.setShowModalMask(true);
-        DtcTestPageView.this.dtcSelectTestPageView.centerInPage();
-        DtcTestPageView.this.dtcSelectTestPageView.setDismissOnOutsideClick(true);
         for (DtcTestPageViewObserver observer : DtcTestPageView.this.dtcTestPageViewObservers) {
           observer.onClickSelectTestPageButton();
         }
-        DtcTestPageView.this.dtcSelectTestPageView.addCloseClickHandler(new CloseClickHandler() {
-          @Override
-          public void onCloseClick(CloseClickEvent event) {
 
-            DtcTestPageView.this.dtcSelectTestPageView.destroy();
-          }
-        });
-
-        DtcTestPageView.this.dtcSelectTestPageView.show();
       }
     });
   }
