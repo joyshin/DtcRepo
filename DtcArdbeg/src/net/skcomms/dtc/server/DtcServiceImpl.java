@@ -38,16 +38,20 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import net.skcomms.dtc.client.model.DtcResponse;
 import net.skcomms.dtc.client.service.DtcService;
 import net.skcomms.dtc.server.model.DtcAtp;
 import net.skcomms.dtc.server.model.DtcIni;
 import net.skcomms.dtc.server.model.DtcLog;
+import net.skcomms.dtc.server.model.DtcRequestProperty;
 import net.skcomms.dtc.server.util.DtcHelper;
 import net.skcomms.dtc.shared.DtcNodeMeta;
 import net.skcomms.dtc.shared.DtcRequest;
 import net.skcomms.dtc.shared.DtcRequestMeta;
+import net.skcomms.dtc.shared.DtcRequestParameter;
 import net.skcomms.dtc.shared.DtcServiceVerifier;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,7 +100,7 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     httpCon.setDoInput(true);
     httpCon.setRequestProperty("Content-Type", "text/html; charset="
         + dtcRequest.getCharset());
-
+    httpCon.connect();
     return httpCon.getInputStream();
   }
 
@@ -115,6 +119,41 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     } finally {
       socket.close();
     }
+  }
+
+  private DtcRequest createDtcRequestFromHttpRequest(HttpServletRequest req) throws IOException,
+      FileNotFoundException {
+    DtcRequest request = new DtcRequest();
+
+    request.setPath(req.getParameter("path"));
+    request.setEncoding(req.getParameter("charset"));
+    request.setAppName(req.getParameter("appName"));
+    request.setApiNumber(req.getParameter("apiNumber"));
+
+    List<DtcRequestParameter> daemonParams = new ArrayList<DtcRequestParameter>();
+    setUpParameters(req, daemonParams);
+    daemonParams.add(new DtcRequestParameter("IP", null, req.getParameter("IP")));
+    daemonParams.add(new DtcRequestParameter("Port", null, req.getParameter("Port")));
+    request.setRequestParameters(daemonParams);
+    return request;
+  }
+
+  private void setUpParameters(HttpServletRequest req, List<DtcRequestParameter> daemonParams)
+      throws IOException, FileNotFoundException {
+    DtcIni ini = this.getIni(req.getParameter("path"));
+    for (DtcRequestProperty prop : ini.getRequestProps()) {
+      String value = req.getParameter(prop.getKey());
+      daemonParams.add(new DtcRequestParameter(prop.getKey(), null, value));
+    }
+  }
+
+  @Override
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
+      IOException {
+    DtcRequest request = this.createDtcRequestFromHttpRequest(req);
+
+    DtcResponse response = this.getDtcResponse(request);
+    this.writeHtmlResponse(resp, response, request.getCharset());
   }
 
   private File[] getChildNodes(File file) {
@@ -176,7 +215,7 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
   @Override
   public DtcResponse getDtcResponse(DtcRequest request) throws IllegalArgumentException {
     try {
-      return getDtcResponseImpl(request);
+      return this.getDtcResponseImpl(request);
     } catch (Exception e) {
       e.printStackTrace();
       throw new IllegalArgumentException(e);
@@ -234,13 +273,30 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
   private Socket openSocket(DtcRequest request) throws UnknownHostException, IOException {
     String ip = request.getRequestParameter("IP");
     String port = request.getRequestParameter("Port");
-    return new Socket(ip, Integer.parseInt(port));
+    Socket socket = new Socket(ip, Integer.parseInt(port));
+    socket.setReuseAddress(true);
+    socket.setSoLinger(true, 0);
+    return socket;
   }
 
   @Autowired
   void setEntityManagerFactory(EntityManagerFactory emf) {
     System.out.println("setEntityManagerFactory() called.");
     this.emf = emf;
+  }
+
+  private void writeHtmlResponse(HttpServletResponse resp, DtcResponse response, String charset)
+      throws IOException {
+    resp.setCharacterEncoding(charset);
+    resp.setContentType("text/html");
+    resp.getWriter().write("<!DOCTYPE html><html><head>");
+    resp.getWriter().write(
+        "<meta http-equiv=\"content-type\" content=\"text/html; charset=" + charset + "\">");
+    resp.getWriter().write("<link type=\"text/css\" rel=\"stylesheet\" href=\"../DtcArdbeg.css\">");
+    resp.getWriter().write("</head><body>");
+    resp.getWriter().write(response.getResult());
+    resp.getWriter().write("</body></html>");
+    resp.getWriter().close();
   }
 
 }

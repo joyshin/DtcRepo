@@ -6,11 +6,14 @@ package net.skcomms.dtc.server;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -32,6 +35,40 @@ import org.xml.sax.helpers.DefaultHandler;
  * @author jujang@sk.com
  */
 public class DtcServiceImplTest {
+
+  /**
+   * @param url
+   * @return
+   * @throws IOException
+   */
+  public static byte[] getHtmlContents(String href) throws IOException {
+    URL url = new URL(href);
+    URLConnection conn = url.openConnection();
+    byte[] contents = DtcHelper.readAllBytes(conn.getInputStream());
+
+    return contents;
+  }
+
+  @Test
+  public void testAtpHttpApi() throws IOException {
+    String url = "http://dtc.skcomms.net/sccu/dtcardbeg/dtcservice?path=/kkeywords/204.ini&charset=euc-kr&appName=KKEYWORDSD&apiNumber=100&APIVersion=204&Nativequery=dkdlvhs&RevisionLevel=1&FindKeywordAlias=Y&FindKeywordAdult=Y&FindKeywordList=Y&Port=7777&IP=10.141.11.143";
+    URL conUrl = new URL(url);
+    Date start = new Date();
+    for (int i = 0; i < 1000; i++) {
+      HttpURLConnection httpCon = (HttpURLConnection) conUrl.openConnection();
+      httpCon.setDoInput(true);
+      httpCon.setRequestProperty("Content-Type", "text/html; charset=euc-kr");
+      httpCon.connect();
+      InputStreamReader inputStreamReader = new InputStreamReader(httpCon.getInputStream(),
+          "euc-kr");
+      char[] cbuf = new char[1024];
+      inputStreamReader.read(cbuf);
+      httpCon.getInputStream().close();
+      System.out.println(i);
+    }
+    Date end = new Date();
+    System.out.println("Time:" + ((end.getTime() - start.getTime()) / 1000));
+  }
 
   @Test
   public void testExtractItemsFrom() throws IOException, ParseException {
@@ -153,19 +190,6 @@ public class DtcServiceImplTest {
         }
       }
     });
-  }
-
-  /**
-   * @param url
-   * @return
-   * @throws IOException
-   */
-  public static byte[] getHtmlContents(String href) throws IOException {
-    URL url = new URL(href);
-    URLConnection conn = url.openConnection();
-    byte[] contents = DtcHelper.readAllBytes(conn.getInputStream());
-  
-    return contents;
   }
 
 }

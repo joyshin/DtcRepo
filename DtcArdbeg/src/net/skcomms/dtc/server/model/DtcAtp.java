@@ -5,11 +5,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 public class DtcAtp {
 
   private static final byte LT = 0x1E;
 
   private static final byte FT = 0x1F;
+
+  private static Logger logger = Logger.getLogger(DtcAtp.class);
 
   private String version;
 
@@ -102,6 +106,11 @@ public class DtcAtp {
     bos.write(Integer.toString(this.binary.length).getBytes());
     bos.write(DtcAtp.LT);
     bos.write(this.binary);
+
+    if (DtcAtp.logger.isDebugEnabled()) {
+      DtcAtp.logger.debug("Charaset:" + charset);
+      DtcAtp.logger.debug("bytes:" + new String(bos.toByteArray(), charset));
+    }
 
     return bos.toByteArray();
   }
