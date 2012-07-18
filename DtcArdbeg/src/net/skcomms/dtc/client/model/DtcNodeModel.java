@@ -190,6 +190,7 @@ public class DtcNodeModel {
           @Override
           public void onSuccess(DtcRequestMeta requestInfo) {
             DtcNodeModel.this.fireTestPageLoaded(requestInfo);
+            GWT.log("CND : " + requestInfo.getCndFieldName());
           }
         });
   }

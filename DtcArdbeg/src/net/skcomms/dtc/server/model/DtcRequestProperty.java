@@ -24,6 +24,10 @@ public class DtcRequestProperty {
     this.attrs = new ArrayList<String>(attrs);
   }
 
+  public List<String> getAttrs() {
+    return this.attrs;
+  }
+
   public String getComment() {
     return this.comment;
   }

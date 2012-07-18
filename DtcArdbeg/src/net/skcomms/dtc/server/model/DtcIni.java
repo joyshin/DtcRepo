@@ -42,13 +42,15 @@ public class DtcIni {
     this.errors.add(message);
   }
 
-  public DtcRequestMeta createRequestInfo() {
+  public DtcRequestMeta createRequestMeta() {
     DtcRequestMeta requestMeta = new DtcRequestMeta();
 
     this.setupParams(requestMeta);
     requestMeta.setEncoding(this.getCharacterSet());
     requestMeta.setAppName(this.getBaseProp("APP_NAME").getValue());
     requestMeta.setApiNumber(this.getBaseProp("API_NUM").getValue());
+    requestMeta.setCndQueryFieldName(this.getCndFieldName());
+    requestMeta.setQueryFieldName(this.getQueryFieldName());
     this.setupIpInfo(requestMeta);
 
     return requestMeta;
@@ -92,6 +94,15 @@ public class DtcIni {
     return this.charset;
   }
 
+  public String getCndFieldName() {
+    for (DtcRequestProperty prop : this.requestProps) {
+      if (prop.getAttrs().contains("CNDQUERY")) {
+        return prop.getKey();
+      }
+    }
+    return null;
+  }
+
   public List<String> getErrors() {
     return Collections.unmodifiableList(this.errors);
   }
@@ -107,6 +118,15 @@ public class DtcIni {
   public String getProtocol() {
     DtcBaseProperty protocol = this.getBaseProp("PROTOCOL");
     return (protocol == null) ? "ATP" : protocol.getValue();
+  }
+
+  public String getQueryFieldName() {
+    for (DtcRequestProperty prop : this.requestProps) {
+      if (prop.getAttrs().contains("QUERY")) {
+        return prop.getKey();
+      }
+    }
+    return null;
   }
 
   public DtcRequestProperty getRequestProp(String key) {

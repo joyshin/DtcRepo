@@ -64,6 +64,8 @@ public class DtcTestPageController implements DtcNodeObserver, DtcTestPageModelO
 
     request.setAppName(this.requestMeta.getAppName());
     request.setApiNumber(this.requestMeta.getApiNumber());
+    request.setCndFieldName(this.requestMeta.getCndFieldName());
+    request.setQueryFieldName(this.requestMeta.getQueryFieldName());
     request.setRequestParameters(this.testPageView.getRequestParameters());
 
     return request;

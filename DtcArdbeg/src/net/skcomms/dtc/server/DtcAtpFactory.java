@@ -28,7 +28,7 @@ public class DtcAtpFactory {
   private static void addDummyRecords(DtcAtp atp) {
     DtcAtpRecord record = new DtcAtpRecord();
     for (int i = 0; i < 4; i++) {
-      record.addField("");
+      record.addField("1");
     }
     atp.addRecord(record);
   }
@@ -47,7 +47,8 @@ public class DtcAtpFactory {
   }
 
   private static void setSignature(DtcIni ini, DtcAtp atp) {
-    String sign = "ATP/1.2 " + ini.getBaseProp("APP_NAME").getValue() + " 100";
+    String sign = "ATP/1.2 " + ini.getBaseProp("APP_NAME").getValue() + " "
+        + ini.getBaseProp("API_NUM").getValue();
     atp.setSignature(sign);
   }
 }

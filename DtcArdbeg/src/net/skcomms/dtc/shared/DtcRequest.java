@@ -11,6 +11,8 @@ public class DtcRequest implements Serializable {
   private String path;
   private String apiNumber;
   private String appName;
+  private String cndFieldName;
+  private String queryFieldName;
 
   public String getApiNumber() {
     return this.apiNumber;
@@ -26,6 +28,14 @@ public class DtcRequest implements Serializable {
 
   public String getPath() {
     return this.path;
+  }
+
+  public String getQuery() {
+    return this.getRequestParameter(this.getQueryFieldName());
+  }
+
+  private String getQueryFieldName() {
+    return this.queryFieldName;
   }
 
   public String getRequestParameter(String key) {
@@ -45,6 +55,10 @@ public class DtcRequest implements Serializable {
     this.appName = appName;
   }
 
+  public void setCndFieldName(String cndFieldName) {
+    this.cndFieldName = cndFieldName;
+  }
+
   public void setEncoding(String encoding) {
     this.encoding = encoding;
   }
@@ -53,7 +67,12 @@ public class DtcRequest implements Serializable {
     this.path = currentPath;
   }
 
+  public void setQueryFieldName(String queryFieldName) {
+    this.queryFieldName = queryFieldName;
+  }
+
   public void setRequestParameters(List<DtcRequestParameter> params) {
     this.requestParameter = params;
   }
+
 }
