@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -131,11 +132,9 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     request.setAppName(req.getParameter("appName"));
     request.setApiNumber(req.getParameter("apiNumber"));
 
-    List<DtcRequestParameter> daemonParams = new ArrayList<DtcRequestParameter>();
-    this.setUpParameters(req, daemonParams);
-    daemonParams.add(new DtcRequestParameter("IP", null, req.getParameter("IP")));
-    daemonParams.add(new DtcRequestParameter("Port", null, req.getParameter("Port")));
-    request.setRequestParameters(daemonParams);
+    @SuppressWarnings("unchecked")
+    List<DtcRequestParameter> params = this.getParametersFromParameterMap(req.getParameterMap());
+    request.setRequestParameters(params);
     return request;
   }
 
@@ -235,6 +234,21 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     return ini;
   }
 
+  private List<DtcRequestParameter> getParametersFromParameterMap(Map<String, String[]> urlParams)
+      throws IOException, FileNotFoundException {
+    DtcIni ini = this.getIni(urlParams.get("path")[0]);
+    List<DtcRequestParameter> params = new ArrayList<DtcRequestParameter>();
+
+    for (DtcRequestProperty prop : ini.getRequestProps()) {
+      String value = urlParams.get(prop.getKey())[0];
+      params.add(new DtcRequestParameter(prop.getKey(), null, value));
+    }
+    params.add(new DtcRequestParameter("IP", null, urlParams.get("IP")[0]));
+    params.add(new DtcRequestParameter("Port", null, urlParams.get("Port")[0]));
+
+    return params;
+  }
+
   private String getResponseAndConvertToHtml(DtcRequest request, DtcIni ini) throws IOException {
     String result;
     if (ini.getProtocol().equals("ATP")) {
@@ -279,15 +293,6 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
   void setEntityManagerFactory(EntityManagerFactory emf) {
     System.out.println("setEntityManagerFactory() called.");
     this.emf = emf;
-  }
-
-  private void setUpParameters(HttpServletRequest req, List<DtcRequestParameter> daemonParams)
-      throws IOException, FileNotFoundException {
-    DtcIni ini = this.getIni(req.getParameter("path"));
-    for (DtcRequestProperty prop : ini.getRequestProps()) {
-      String value = req.getParameter(prop.getKey());
-      daemonParams.add(new DtcRequestParameter(prop.getKey(), null, value));
-    }
   }
 
   private void writeHtmlResponse(HttpServletResponse resp, DtcResponse response, String charset)

@@ -22,7 +22,7 @@ import com.google.gwt.core.client.GWT;
 public class DtcTestPageController implements DtcNodeObserver, DtcTestPageModelObserver,
     DtcTestPageViewObserver {
 
-  private DtcTestPageView testPageView;
+  public DtcTestPageView testPageView;
 
   private DtcTestPageModel testPageModel;
 
@@ -55,20 +55,6 @@ public class DtcTestPageController implements DtcNodeObserver, DtcTestPageModelO
         param.setValue(this.initialRequestParameters.get(param.getKey()).get(0));
       }
     }
-  }
-
-  private DtcRequest createDtcRequest() {
-    DtcRequest request = new DtcRequest();
-    request.setPath(this.requestMeta.getPath());
-    request.setEncoding(this.requestMeta.getEncoding());
-
-    request.setAppName(this.requestMeta.getAppName());
-    request.setApiNumber(this.requestMeta.getApiNumber());
-    request.setCndFieldName(this.requestMeta.getCndFieldName());
-    request.setQueryFieldName(this.requestMeta.getQueryFieldName());
-    request.setRequestParameters(this.testPageView.getRequestParameters());
-
-    return request;
   }
 
   public void initialize(final DtcArdbeg dtcArdbeg, DtcTestPageView dtcTestPageView,
@@ -106,7 +92,8 @@ public class DtcTestPageController implements DtcNodeObserver, DtcTestPageModelO
   @Override
   public void onReadyRequestData() {
     this.onSearchStart();
-    DtcRequest request = DtcTestPageController.this.createDtcRequest();
+    DtcRequest request = this.requestMeta
+        .createDtcRequest(this.testPageView.getRequestParameters());
     DtcTestPageController.this.testPageModel.sendRequest(request);
     DtcTestPageController.this.testPageView.chronoStart();
   }

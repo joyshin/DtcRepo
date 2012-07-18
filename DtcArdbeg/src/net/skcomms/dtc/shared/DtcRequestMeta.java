@@ -28,6 +28,20 @@ public class DtcRequestMeta implements Serializable {
 
   private String queryFieldName;
 
+  public DtcRequest createDtcRequest(List<DtcRequestParameter> parameters) {
+    DtcRequest request = new DtcRequest();
+
+    request.setPath(this.path);
+    request.setEncoding(this.encoding);
+    request.setAppName(this.appName);
+    request.setApiNumber(this.apiNumber);
+    request.setCndFieldName(this.cndFieldName);
+    request.setQueryFieldName(this.queryFieldName);
+    request.setRequestParameters(parameters);
+
+    return request;
+  }
+
   public String getApiNumber() {
     return this.apiNumber;
   }
@@ -93,9 +107,6 @@ public class DtcRequestMeta implements Serializable {
     this.params = params;
   }
 
-  /**
-   * @param path
-   */
   public void setPath(String path) {
     this.path = path;
   }
