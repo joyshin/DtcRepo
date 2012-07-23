@@ -17,7 +17,6 @@ package net.skcomms.dtc.server;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -47,12 +45,12 @@ import net.skcomms.dtc.client.service.DtcService;
 import net.skcomms.dtc.server.model.DtcAtp;
 import net.skcomms.dtc.server.model.DtcIni;
 import net.skcomms.dtc.server.model.DtcLog;
-import net.skcomms.dtc.server.model.DtcRequestProperty;
 import net.skcomms.dtc.server.util.DtcHelper;
+import net.skcomms.dtc.server.util.DtcPathHelper;
+import net.skcomms.dtc.server.util.DtcRequestHttpAdapter;
 import net.skcomms.dtc.shared.DtcNodeMeta;
 import net.skcomms.dtc.shared.DtcRequest;
 import net.skcomms.dtc.shared.DtcRequestMeta;
-import net.skcomms.dtc.shared.DtcRequestParameter;
 import net.skcomms.dtc.shared.DtcServiceVerifier;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,17 +61,15 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 @SuppressWarnings("serial")
 public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
 
-  public static class DtcNodeFilter implements FileFilter {
-
-    @Override
-    public boolean accept(File file) {
-      return file.isDirectory() || (file.isFile() && file.getName().endsWith(".ini"));
-    }
-  }
-
   static String createDtcResponse(DtcRequest dtcRequest) throws IOException {
     InputStream is = DtcServiceImpl.sendHttpRequest(dtcRequest);
     return DtcServiceImpl.readHttpResponse(is, dtcRequest.getCharset());
+  }
+
+  public static DtcIni getIni(String nodePath) throws IOException, FileNotFoundException {
+    String filePath = DtcPathHelper.getFilePath(nodePath);
+    DtcIni ini = new DtcIniFactory().createFrom(filePath);
+    return ini;
   }
 
   private static String readHttpResponse(InputStream is, String encoding)
@@ -90,17 +86,16 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     return responseBuffer.toString();
   }
 
-  protected static InputStream sendHttpRequest(DtcRequest dtcRequest)
+  static InputStream sendHttpRequest(DtcRequest dtcRequest)
       throws MalformedURLException, IOException, ProtocolException {
     int TIMEOUT = 5000;
 
-    URL conUrl = new URL(DtcHelper.combineUrl(dtcRequest));
+    URL conUrl = new URL(new DtcRequestHttpAdapter(dtcRequest).combineUrl());
     HttpURLConnection httpCon = (HttpURLConnection) conUrl.openConnection();
     httpCon.setConnectTimeout(TIMEOUT);
     httpCon.setReadTimeout(TIMEOUT);
     httpCon.setDoInput(true);
-    httpCon.setRequestProperty("Content-Type", "text/html; charset="
-        + dtcRequest.getCharset());
+    httpCon.setRequestProperty("Content-Type", "text/html; charset=" + dtcRequest.getCharset());
 
     return httpCon.getInputStream();
   }
@@ -111,44 +106,31 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     Socket socket = this.openSocket(request);
     try {
 
-      DtcAtp atpRequest = DtcAtpFactory.createFrom(request, ini);
+      DtcAtp atpRequest = DtcAtpFactory.createRequest(request, ini);
       System.out.println("ATP REQUEST:" + atpRequest);
       socket.getOutputStream().write(atpRequest.getBytes(request.getCharset()));
       socket.getOutputStream().flush();
 
-      DtcAtp atpResponse = DtcAtpFactory.createFrom(socket.getInputStream(), request.getCharset());
+      DtcAtp atpResponse = DtcAtpFactory.createResponse(socket.getInputStream(),
+          request.getCharset());
       return atpResponse.toHtmlString(ini);
     } finally {
       socket.close();
     }
   }
 
-  private DtcRequest createDtcRequestFromHttpRequest(HttpServletRequest req) throws IOException,
-      FileNotFoundException {
-    DtcRequest request = new DtcRequest();
-
-    request.setPath(req.getParameter("path"));
-    request.setEncoding(req.getParameter("charset"));
-    request.setAppName(req.getParameter("appName"));
-    request.setApiNumber(req.getParameter("apiNumber"));
-
-    @SuppressWarnings("unchecked")
-    List<DtcRequestParameter> params = this.getParametersFromParameterMap(req.getParameterMap());
-    request.setRequestParameters(params);
-    return request;
-  }
-
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
       IOException {
-    DtcRequest request = this.createDtcRequestFromHttpRequest(req);
-
+    @SuppressWarnings("unchecked")
+    DtcRequest request = DtcRequestHttpAdapter.createDtcRequestFromHttpRequest(req
+        .getParameterMap());
     DtcResponse response = this.getDtcResponse(request);
     this.writeHtmlResponse(resp, response, request.getCharset());
   }
 
   private File[] getChildNodes(File file) {
-    File[] files = file.listFiles(new DtcNodeFilter());
+    File[] files = file.listFiles(new DtcHelper.DtcNodeFilter());
     Arrays.sort(files, DtcHelper.NODE_COMPARATOR);
     return files;
   }
@@ -168,14 +150,13 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
   }
 
   List<DtcNodeMeta> getDirImpl(String path) throws IOException {
-    String parentPath = DtcHelper.getRootPath() + path.substring(1);
-    String relativePath = DtcHelper.getRelativePath(parentPath);
+    String parentPath = DtcPathHelper.getFilePath(path);
     File file = new File(parentPath);
     List<DtcNodeMeta> nodes = new ArrayList<DtcNodeMeta>();
 
     File[] files = this.getChildNodes(file);
     for (File child : files) {
-      DtcNodeMeta node = DtcHelper.createDtcNodeMeta(relativePath, child);
+      DtcNodeMeta node = DtcHelper.createDtcNodeMeta(child);
       nodes.add(node);
     }
     return nodes;
@@ -195,12 +176,12 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
   }
 
   DtcRequestMeta getDtcRequestMetaImpl(String path) throws IOException {
-    DtcIni ini = this.getIni(path);
-    // FIXME DtcRequestInfoModel을 DtcIni로 대체하는 것을 검토하자.
-    DtcRequestMeta requestInfo = ini.createRequestMeta();
-    requestInfo.setPath(path);
+    DtcIni ini = DtcServiceImpl.getIni(path);
+    // FIXME DtcRequestMeta를 DtcIni로 대체하는 것을 검토하자.
+    DtcRequestMeta requestMeta = ini.createRequestMeta();
+    requestMeta.setPath(path);
 
-    return requestInfo;
+    return requestMeta;
   }
 
   @Override
@@ -219,37 +200,16 @@ public class DtcServiceImpl extends RemoteServiceServlet implements DtcService {
     this.preProcessDtcRequest(request);
     DtcResponse response = new DtcResponse();
 
-    DtcIni ini = this.getIni(request.getPath());
+    DtcIni ini = DtcServiceImpl.getIni(request.getPath());
     Date startTime = new Date();
-    String result = this.getResponseAndConvertToHtml(request, ini);
+    String result = this.getHtmlResponse(request, ini);
     response.setResponseTime(new Date().getTime() - startTime.getTime());
     response.setResult(result);
 
     return response;
   }
 
-  private DtcIni getIni(String nodePath) throws IOException, FileNotFoundException {
-    String filePath = DtcHelper.getRootPath() + nodePath.substring(1);
-    DtcIni ini = new DtcIniFactory().createFrom(filePath);
-    return ini;
-  }
-
-  private List<DtcRequestParameter> getParametersFromParameterMap(Map<String, String[]> urlParams)
-      throws IOException, FileNotFoundException {
-    DtcIni ini = this.getIni(urlParams.get("path")[0]);
-    List<DtcRequestParameter> params = new ArrayList<DtcRequestParameter>();
-
-    for (DtcRequestProperty prop : ini.getRequestProps()) {
-      String value = urlParams.get(prop.getKey())[0];
-      params.add(new DtcRequestParameter(prop.getKey(), null, value));
-    }
-    params.add(new DtcRequestParameter("IP", null, urlParams.get("IP")[0]));
-    params.add(new DtcRequestParameter("Port", null, urlParams.get("Port")[0]));
-
-    return params;
-  }
-
-  private String getResponseAndConvertToHtml(DtcRequest request, DtcIni ini) throws IOException {
+  private String getHtmlResponse(DtcRequest request, DtcIni ini) throws IOException {
     String result;
     if (ini.getProtocol().equals("ATP")) {
       result = this.createAtpResponse(request, ini);

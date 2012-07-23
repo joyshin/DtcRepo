@@ -9,7 +9,7 @@ import java.util.List;
 
 import net.skcomms.dtc.server.model.DtcAtp;
 import net.skcomms.dtc.server.model.DtcIni;
-import net.skcomms.dtc.server.util.DtcHelper;
+import net.skcomms.dtc.server.util.DtcPathHelper;
 import net.skcomms.dtc.shared.DtcRequest;
 import net.skcomms.dtc.shared.DtcRequestParameter;
 
@@ -37,15 +37,6 @@ public class DtcAtpParserTest {
 
     Assert.assertNotNull(atp);
     System.out.println(atp);
-  }
-
-  private void printByte(byte[] bytes) {
-    for (byte b : bytes) {
-      if (b == 0) {
-        // break;
-      }
-      System.out.println("byte:[" + b + "], char:[" + (char) b + "]");
-    }
   }
 
   // 10.141.10.51 | 9100 - 싸이블로그
@@ -95,10 +86,10 @@ public class DtcAtpParserTest {
     DtcRequest request = new DtcRequest();
     request.setRequestParameters(requestParameter);
 
-    String filePath = DtcHelper.getRootPath() + "kcbbs/blog.100.xml.ini";
+    String filePath = DtcPathHelper.getRootPath() + "/kcbbs/blog.100.xml.ini";
     DtcIni ini = new DtcIniFactory().createFrom(filePath);
 
-    DtcAtp dtcAtp = DtcAtpFactory.createFrom(request, ini);
+    DtcAtp dtcAtp = DtcAtpFactory.createRequest(request, ini);
     this.assertAtp(dtcAtp.getBytes(ini.getCharacterSet()));
   }
 

@@ -53,11 +53,11 @@ public class DtcNodeModel {
     this.observers.add(observer);
   }
 
-  private void categorizeNodesByVisitCount(List<DtcNodeMeta> nodeInfos) {
+  private void categorizeNodesByVisitCount(List<DtcNodeMeta> nodeMetas) {
     this.dtcNodeList.clear();
     this.favoritePairs.clear();
 
-    for (DtcNodeMeta nodeInfo : nodeInfos) {
+    for (DtcNodeMeta nodeInfo : nodeMetas) {
       System.out.println("name:" + nodeInfo.getName() + ", path:" + nodeInfo.getPath());
       Integer score = PersistenceManager.getInstance().getVisitCount(nodeInfo.getName());
       if (score > 0) {

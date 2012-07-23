@@ -7,6 +7,7 @@ import java.util.List;
 import net.skcomms.dtc.server.model.DtcAtp;
 import net.skcomms.dtc.server.model.DtcAtpRecord;
 import net.skcomms.dtc.server.model.DtcIni;
+import net.skcomms.dtc.server.util.DtcHelper;
 import net.skcomms.dtc.shared.DtcRequest;
 import net.skcomms.dtc.shared.DtcRequestParameter;
 
@@ -20,7 +21,7 @@ public class DtcAtpFactory {
       }
 
       DtcAtpRecord record = new DtcAtpRecord();
-      record.addField(param.getValue() == null ? "" : param.getValue());
+      record.addField(DtcHelper.getOrElse(param.getValue(), ""));
       atp.addRecord(record);
     }
   }
@@ -33,7 +34,7 @@ public class DtcAtpFactory {
     atp.addRecord(record);
   }
 
-  public static DtcAtp createFrom(DtcRequest request, DtcIni ini) {
+  public static DtcAtp createRequest(DtcRequest request, DtcIni ini) {
     DtcAtp atp = new DtcAtp();
     DtcAtpFactory.setSignature(ini, atp);
     DtcAtpFactory.addDummyRecords(atp);
@@ -42,7 +43,7 @@ public class DtcAtpFactory {
     return atp;
   }
 
-  public static DtcAtp createFrom(InputStream is, String charset) throws IOException {
+  public static DtcAtp createResponse(InputStream is, String charset) throws IOException {
     return DtcAtpParser.parse(is, charset);
   }
 

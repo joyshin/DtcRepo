@@ -10,8 +10,7 @@ import org.junit.Test;
 
 public class DtcSearchHistoryTest {
 
-  @Test
-  public void test() {
+  private static void staticTest() {
     String path = "path";
     List<DtcRequestParameter> params = new ArrayList<DtcRequestParameter>();
     params.add(new DtcRequestParameter("key1", null, "value1"));
@@ -26,6 +25,11 @@ public class DtcSearchHistoryTest {
     System.out.println(result2);
 
     Assert.assertEquals(result, result2);
+  }
+
+  @Test
+  public void test() {
+    DtcSearchHistoryTest.staticTest();
   }
 
 }

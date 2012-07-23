@@ -18,6 +18,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import net.skcomms.dtc.server.util.DtcHelper;
+import net.skcomms.dtc.server.util.DtcPathHelper;
 import net.skcomms.dtc.shared.DtcNodeMeta;
 import net.skcomms.dtc.shared.DtcRequestMeta;
 import net.skcomms.dtc.shared.DtcServiceVerifier;
@@ -33,56 +34,52 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class DtcServiceImplTest {
 
+  private static void checkValidation(DtcNodeMeta item) throws ParseException {
+    Assert.assertNotNull(item.getName());
+    Assert.assertNotNull(item.getDescription());
+    Assert.assertNotNull(item.getUpdateTime());
+    Assert.assertNotNull(item.getPath());
+
+    if (item.isLeaf()) {
+      Assert.assertTrue(item.getPath().endsWith(".ini"));
+      Assert.assertFalse(DtcServiceVerifier.isValidDirectoryPath(item.getPath()));
+    } else {
+      Assert.assertEquals("디렉토리", item.getDescription());
+      Assert.assertTrue(DtcServiceVerifier.isValidDirectoryPath(item.getPath()));
+    }
+
+    new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").parse(item.getUpdateTime());
+    System.out.println("[" + item.getName() + ":" + item.getDescription() + ":"
+        + item.getUpdateTime() + ":" + item.getPath() + "]");
+  }
+
+  /**
+   * @param url
+   * @return
+   * @throws IOException
+   */
+  public static byte[] getHtmlContents(String href) throws IOException {
+    URL url = new URL(href);
+    URLConnection conn = url.openConnection();
+    byte[] contents = DtcHelper.readAllBytes(conn.getInputStream());
+
+    return contents;
+  }
+
   @Test
   public void testExtractItemsFrom() throws IOException, ParseException {
     List<DtcNodeMeta> items = new DtcServiceImpl().getDirImpl("/");
     for (DtcNodeMeta item : items) {
-      Assert.assertNotNull(item.getName());
-      Assert.assertNotNull(item.getDescription());
-      Assert.assertNotNull(item.getUpdateTime());
-      Assert.assertNotNull(item.getPath());
-
-      if (item.isLeaf()) {
-        Assert.assertTrue(item.getPath().endsWith(".ini"));
-        Assert.assertFalse(DtcServiceVerifier.isValidDirectoryPath(item.getPath()));
-      } else {
-        Assert.assertEquals("디렉토리", item.getDescription());
-        Assert.assertTrue(DtcServiceVerifier.isValidDirectoryPath(item.getPath()));
-      }
-
-      new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").parse(item.getUpdateTime());
-
-      System.out.println("[" + item.getName() + ":" + item.getDescription() + ":"
-          + item.getUpdateTime() + ":" + item.getPath() + "]");
+      DtcServiceImplTest.checkValidation(item);
     }
-
     Assert.assertEquals(176, items.size());
-
     Assert.assertFalse(items.isEmpty());
 
     items = new DtcServiceImpl().getDirImpl("/kshop2s/");
     for (DtcNodeMeta item : items) {
-      Assert.assertNotNull(item.getName());
-      Assert.assertNotNull(item.getDescription());
-      Assert.assertNotNull(item.getUpdateTime());
-      Assert.assertNotNull(item.getPath());
-
-      if (item.isLeaf()) {
-        Assert.assertTrue(item.getPath().endsWith(".ini"));
-
-        Assert.assertFalse(DtcServiceVerifier.isValidDirectoryPath(item.getPath()));
-      } else {
-        Assert.assertEquals("디렉토리", item.getDescription());
-        Assert.assertTrue(DtcServiceVerifier.isValidDirectoryPath(item.getPath()));
-      }
-
-      new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").parse(item.getUpdateTime());
-
-      System.out.println("[" + item.getName() + ":" + item.getDescription() + ":"
-          + item.getUpdateTime() + ":" + item.getPath() + "]");
+      DtcServiceImplTest.checkValidation(item);
     }
     Assert.assertEquals(6, items.size());
-
     Assert.assertFalse(items.isEmpty());
   }
 
@@ -96,11 +93,11 @@ public class DtcServiceImplTest {
 
   @Test
   public void testGetRootPath() throws IOException {
-    Assert.assertEquals("sample/dtc/", DtcHelper.getRootPath());
-    String absolutePath = DtcHelper.getRootPath() + "/";
+    Assert.assertEquals("sample/dtc", DtcPathHelper.getRootPath());
+    String absolutePath = DtcPathHelper.getRootPath();
     File file = new File(absolutePath);
 
-    for (File item : file.listFiles(new DtcServiceImpl.DtcNodeFilter())) {
+    for (File item : file.listFiles(new DtcHelper.DtcNodeFilter())) {
       System.out.println(item.getName());
     }
   }
@@ -153,19 +150,6 @@ public class DtcServiceImplTest {
         }
       }
     });
-  }
-
-  /**
-   * @param url
-   * @return
-   * @throws IOException
-   */
-  public static byte[] getHtmlContents(String href) throws IOException {
-    URL url = new URL(href);
-    URLConnection conn = url.openConnection();
-    byte[] contents = DtcHelper.readAllBytes(conn.getInputStream());
-  
-    return contents;
   }
 
 }
