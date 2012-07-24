@@ -36,7 +36,6 @@ import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
 
 public class DtcTestPageView {
-
   static class RequestGridRecord extends ListGridRecord {
 
     public RequestGridRecord() {
@@ -105,7 +104,9 @@ public class DtcTestPageView {
 
   private Button modalButton;
 
-  private VLayout vLayoutLeftBottom;
+//private VLayout vLayoutLeftBottom;
+  
+  private DtcSearchHistoryGrid searchHistoryGrid;
 
   private HLayout hLayoutRight;
 
@@ -401,15 +402,27 @@ public class DtcTestPageView {
     this.valueField.setCanReorder(false);
     this.valueField.setCanGroupBy(false);
   }
-
+/*
   private void setupVLayoutBottom() {
     this.vLayoutLeftBottom = new VLayout();
-    this.vLayoutLeftBottom.setShowEdges(true);
+    this.vLayoutLeftBottom.setShowEdges(false);
     this.vLayoutLeftBottom.setWidth(300);
     this.vLayoutLeftBottom.setHeight100();
 
     this.vLayoutLeftBottom.setMembersMargin(5);
     this.vLayoutLeftBottom.setLayoutMargin(0);
+  }
+*/
+  private void setupSearchHistoryGrid() {
+	  this.searchHistoryGrid = new DtcSearchHistoryGrid();
+	  this.searchHistoryGrid.setWidth(300);
+	  this.searchHistoryGrid.setShowAllRecords(true);
+	  this.searchHistoryGrid.setCanEdit(false);
+	  this.searchHistoryGrid.setHeight(20);
+	  this.searchHistoryGrid.setBodyOverflow(Overflow.VISIBLE);
+	  this.searchHistoryGrid.setLeaveScrollbarGap(false);
+	  this.searchHistoryGrid.setCanAutoFitFields(false);
+	  this.searchHistoryGrid.setCanCollapseGroup(false);
   }
 
   private void setupVLayoutLeft() {
@@ -417,7 +430,8 @@ public class DtcTestPageView {
     this.setupRequestFormGrid();
     this.setupSearchButton();
     this.setupModalButton();
-    this.setupVLayoutBottom();
+    this.setupSearchHistoryGrid();
+//  this.setupVLayoutBottom();
 
     this.vLayoutLeft = new VLayout();
     this.vLayoutLeft.setShowEdges(true);
@@ -473,6 +487,7 @@ public class DtcTestPageView {
     this.vLayoutLeft.addMember(this.requestFormGrid);
     this.vLayoutLeft.addMember(this.searchButton);
     this.vLayoutLeft.addMember(this.modalButton);
-    this.vLayoutLeft.addMember(this.vLayoutLeftBottom);
+    this.vLayoutLeft.addMember(this.searchHistoryGrid);
+//  this.vLayoutLeft.addMember(this.vLayoutLeftBottom);
   }
 }
