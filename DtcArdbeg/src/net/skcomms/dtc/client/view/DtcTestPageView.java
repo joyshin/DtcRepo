@@ -416,14 +416,15 @@ public class DtcTestPageView {
 */
   private void setupSearchHistoryGrid() {
 	  this.searchHistoryGrid = new DtcSearchHistoryGrid();
+	  this.searchHistoryGrid.setHeight(250);
 	  this.searchHistoryGrid.setWidth(300);
 	  this.searchHistoryGrid.setShowAllRecords(true);
 	  this.searchHistoryGrid.setCanEdit(false);
-	  this.searchHistoryGrid.setHeight(20);
 	  this.searchHistoryGrid.setBodyOverflow(Overflow.VISIBLE);
 	  this.searchHistoryGrid.setLeaveScrollbarGap(false);
 	  this.searchHistoryGrid.setCanAutoFitFields(false);
 	  this.searchHistoryGrid.setCanCollapseGroup(false);
+	  this.searchHistoryGrid.setFields(this.searchHistoryGrid.setupNameField());
   }
 
   private void setupVLayoutLeft() {
