@@ -7,6 +7,7 @@ import net.skcomms.dtc.client.model.DtcResponse;
 import net.skcomms.dtc.client.model.DtcSearchHistory;
 import net.skcomms.dtc.client.model.DtcSearchHistoryDao;
 import net.skcomms.dtc.client.model.DtcTestPageModel;
+import net.skcomms.dtc.client.view.DtcTestPageView;
 import net.skcomms.dtc.shared.DtcRequestParameter;
 
 import com.google.gwt.core.client.GWT;
@@ -14,10 +15,12 @@ import com.google.gwt.core.client.GWT;
 public class DtcSearchHistoryController implements DtcTestPageModelObserver {
 
   private DtcSearchHistoryDao searchHistoryDao;
+  private DtcTestPageView testPageView;
 
-  public void initialize(DtcSearchHistoryDao searchHistoryDao, DtcTestPageModel testPageModel) {
+  public void initialize(DtcSearchHistoryDao searchHistoryDao, DtcTestPageModel testPageModel, DtcTestPageView testPageView) {
     this.searchHistoryDao = searchHistoryDao;
     testPageModel.addObserver(this);
+    this.testPageView = testPageView;
   }
 
   @Override
@@ -42,7 +45,7 @@ public class DtcSearchHistoryController implements DtcTestPageModelObserver {
   private void redrawSearchHistoryView(String path) {
     List<DtcSearchHistory> searchHistories = this.searchHistoryDao.getSearchHistroies(path);
 
-    // TODO view 를 다시 그린다.
+    testPageView.updateSearchHistory(searchHistories);
 
     for (DtcSearchHistory history : searchHistories) {
       System.out.println(history.getFormattedString("Query", "IP"));

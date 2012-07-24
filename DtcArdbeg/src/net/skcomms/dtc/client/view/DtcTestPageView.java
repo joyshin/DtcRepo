@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.skcomms.dtc.client.DtcTestPageViewObserver;
+import net.skcomms.dtc.client.model.DtcSearchHistory;
 import net.skcomms.dtc.shared.DtcRequestMeta;
 import net.skcomms.dtc.shared.DtcRequestParameter;
 
@@ -489,5 +490,10 @@ public class DtcTestPageView {
     this.vLayoutLeft.addMember(this.modalButton);
     this.vLayoutLeft.addMember(this.searchHistoryGrid);
 //  this.vLayoutLeft.addMember(this.vLayoutLeftBottom);
+  }
+
+  public void updateSearchHistory(List<DtcSearchHistory> searchHistories) {
+	  this.searchHistoryGrid.recordUpdate(searchHistories);
+	  this.vLayoutLeft.redraw();
   }
 }

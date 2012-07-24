@@ -234,7 +234,7 @@ public class DtcArdbeg implements EntryPoint, DtcNodeObserver {
     DtcSearchHistoryDao searchHistoryDao = new DtcSearchHistoryDao();
     DtcSearchHistoryController searchHistoryController = new DtcSearchHistoryController();
     DtcTestPageModel testPageModel = new DtcTestPageModel();
-    searchHistoryController.initialize(searchHistoryDao, testPageModel);
+    searchHistoryController.initialize(searchHistoryDao, testPageModel, this.dtcTestPageView);
 
     DtcTestPageController dtcTestPageController = new DtcTestPageController();
     dtcTestPageController.initialize(this, this.dtcTestPageView,

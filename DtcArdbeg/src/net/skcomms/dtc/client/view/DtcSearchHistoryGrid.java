@@ -3,8 +3,10 @@ package net.skcomms.dtc.client.view;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
+import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
@@ -62,12 +64,13 @@ public class DtcSearchHistoryGrid extends ListGrid{
 	}
 	
 	private void setupNameField() {
-	    this.nameField = new ListGridField("key", "Name", 120);
+	    this.nameField = new ListGridField("key", "History", 300);
 	    this.nameField.setCanEdit(false);
 	    this.nameField.setCanFilter(false);
 	    this.nameField.setCanSort(false);
 	    this.nameField.setCanReorder(false);
 	    this.nameField.setCanGroupBy(false);
+	    this.nameField.setAlign(Alignment.CENTER);
 	}
 	
 	public void recordUpdate(List<DtcSearchHistory> params) {
@@ -77,12 +80,13 @@ public class DtcSearchHistoryGrid extends ListGrid{
 	    int index = 0;
 	    String formattedTime = new String();
 	    for (DtcSearchHistory param : params) {
+	    	GWT.log("SearchHistoryGrid : " + param.getFormattedString(param.serialize()));
 	    	formattedTime = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_MEDIUM).format(param.getSearchTime());
-	    	records
-	          .add(new HistoryGridRecord(index++, formattedTime));
+	    	records.add(new HistoryGridRecord(index++, formattedTime));
 	    }
 
-	    this.setData(records.toArray(new RequestGridRecord[0]));
+	    this.setData(records.toArray(new HistoryGridRecord[0]));
+//	    this.redraw();
 	}
 	
 }
